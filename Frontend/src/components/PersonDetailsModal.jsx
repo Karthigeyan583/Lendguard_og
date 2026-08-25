@@ -88,6 +88,7 @@ export const PersonDetailsModal = ({
   const singleBorrowerCurr = distinctCurrencies[0] || 'INR';
   const singleBorrowerStats = personTotalsByCurrency[singleBorrowerCurr] || { lent: 0, repaid: 0, outstanding: 0, overdue: 0, recovery: 0 };
   const hasMultipleCurrencies = distinctCurrencies.length > 1;
+  const isMultiCurrency = hasMultipleCurrencies;
 
   // Collect all repayments across this person's loans
   const allRepayments = [];
@@ -663,7 +664,7 @@ export const PersonDetailsModal = ({
               style={{ fontSize: '0.825rem', padding: '0.5rem 1.1rem', gap: '0.4rem' }}
             >
               <Plus size={15} />
-              <span>Lend Money to {person.name.split(' ')[0]}</span>
+              <span>Lend Money to {(person.name || 'Contact').split(' ')[0]}</span>
             </button>
           </div>
         </div>
