@@ -42,6 +42,8 @@ function LendGuardApp() {
   const [isStatementOpen, setIsStatementOpen] = useState(false);
   const [selectedStatement, setSelectedStatement] = useState(null);
   const [selectedLoanForStatement, setSelectedLoanForStatement] = useState(null);
+  const [isPersonDetailsOpen, setIsPersonDetailsOpen] = useState(false);
+  const [selectedPersonForDetails, setSelectedPersonForDetails] = useState(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   // Sync data strictly from Backend
