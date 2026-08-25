@@ -41,7 +41,6 @@ export const Navbar = ({
     { id: 'loans', label: 'Lending Ledger', icon: BookOpen },
     { id: 'aging', label: 'Overdue Aging', icon: FileText },
     { id: 'calculator', label: 'Tools / EMI', icon: Calculator },
-    { id: 'api-explorer', label: 'API & Swagger', icon: Terminal },
   ];
 
   return (
