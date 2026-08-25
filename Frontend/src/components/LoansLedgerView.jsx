@@ -34,10 +34,15 @@ export const LoansLedgerView = ({
   onWriteOffLoan 
 }) => {
   const [activeTab, setActiveTab] = useState('all');
+  const [directionFilter, setDirectionFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [expandedLoanId, setExpandedLoanId] = useState(null);
 
   const filtered = loans.filter((l) => {
+    const isBorrowing = (l.direction === 'borrowed');
+    if (directionFilter === 'lent' && isBorrowing) return false;
+    if (directionFilter === 'borrowed' && !isBorrowing) return false;
+
     const matchesSearch = 
       l.loan_reference?.toLowerCase().includes(search.toLowerCase()) ||
       l.person_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -86,34 +91,86 @@ export const LoansLedgerView = ({
       <div className="glass-panel" style={{ padding: '1.5rem 1.75rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
           <div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Lending Ledger (Source of Truth)</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Financial Ledger (Authoritative Records)</h2>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Complete record of all money lent, repayment history, due dates, and settlement status
+              Complete record of all money lent (receivables) and money borrowed (payables), repayment installments, due dates, and settlement status
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <div style={{ position: 'relative', minWidth: 280 }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            {/* Direction Tabs */}
+            <div style={{ display: 'flex', gap: '0.3rem', background: 'var(--inner-card-bg)', padding: '0.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+              <button
+                type="button"
+                onClick={() => setDirectionFilter('all')}
+                style={{
+                  padding: '0.35rem 0.75rem',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  borderRadius: 'var(--radius-sm)',
+                  border: 'none',
+                  background: directionFilter === 'all' ? 'var(--bg-surface)' : 'transparent',
+                  color: directionFilter === 'all' ? 'var(--text-primary)' : 'var(--text-muted)',
+                  cursor: 'pointer'
+                }}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                onClick={() => setDirectionFilter('lent')}
+                style={{
+                  padding: '0.35rem 0.75rem',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  borderRadius: 'var(--radius-sm)',
+                  border: 'none',
+                  background: directionFilter === 'lent' ? 'var(--accent-emerald)' : 'transparent',
+                  color: directionFilter === 'lent' ? '#fff' : 'var(--text-muted)',
+                  cursor: 'pointer'
+                }}
+              >
+                🤝 Money Lent
+              </button>
+              <button
+                type="button"
+                onClick={() => setDirectionFilter('borrowed')}
+                style={{
+                  padding: '0.35rem 0.75rem',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  borderRadius: 'var(--radius-sm)',
+                  border: 'none',
+                  background: directionFilter === 'borrowed' ? 'var(--accent-indigo)' : 'transparent',
+                  color: directionFilter === 'borrowed' ? '#fff' : 'var(--text-muted)',
+                  cursor: 'pointer'
+                }}
+              >
+                📥 Money Borrowed
+              </button>
+            </div>
+
+            <div style={{ position: 'relative', minWidth: 260 }}>
               <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="text"
-                placeholder="Search reference, borrower, purpose..."
-                className="form-input"
-                style={{ paddingLeft: '2.25rem', fontSize: '0.85rem' }}
+                placeholder="Search reference, contact, purpose..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                className="form-input"
+                style={{ paddingLeft: '2.25rem', fontSize: '0.85rem' }}
               />
             </div>
 
-            <button className="btn btn-primary" onClick={onOpenNewLoan} style={{ fontSize: '0.825rem' }}>
+            <button className="btn btn-primary" onClick={onOpenNewLoan} style={{ whiteSpace: 'nowrap' }}>
               <Plus size={16} />
-              <span>Record Loan Lent</span>
+              <span>Record Transaction</span>
             </button>
           </div>
         </div>
 
         {/* Status Tabs */}
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.4rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '1rem', overflowX: 'auto' }}>
           {STATUS_TABS.map((t) => (
             <button
               key={t.id}
