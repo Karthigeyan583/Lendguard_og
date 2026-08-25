@@ -156,10 +156,11 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
               <label className="form-label">Principal Amount</label>
               <input
                 type="number"
-                step="100"
-                min="1"
+                step="any"
+                min="0.01"
                 required
                 className="form-input"
+                placeholder="Enter loan amount (e.g. 25000)"
                 value={formData.principal_amount}
                 onChange={(e) => setFormData({ ...formData, principal_amount: e.target.value })}
               />
