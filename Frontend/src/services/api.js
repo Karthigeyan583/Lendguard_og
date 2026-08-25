@@ -83,8 +83,8 @@ export const api = {
     }),
 
   // Dashboard & Reports (Bible v2.0)
-  getDashboardSummary: () => request('/dashboard/summary/'),
-  getAgingReport: () => request('/reports/aging/'),
+  getDashboardSummary: (params = '') => request(`/dashboard/summary/${params ? `?${params}` : ''}`),
+  getAgingReport: (params = '') => request(`/reports/aging/${params ? `?${params}` : ''}`),
 
   // People / Contacts
   getPeople: (params = '') => request(`/people/${params ? `?${params}` : ''}`),
