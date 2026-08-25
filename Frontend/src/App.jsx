@@ -19,6 +19,7 @@ import { DigitalStatementModal } from './components/DigitalStatementModal';
 import { PersonDetailsModal } from './components/PersonDetailsModal';
 import { KpiDrilldownModal } from './components/KpiDrilldownModal';
 import { AuthModal } from './components/AuthModal';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 import { api } from './services/api';
 import { ShieldCheck } from 'lucide-react';
@@ -311,68 +312,70 @@ function LendGuardApp() {
         />
 
         <main className="content-area">
-          {activeTab === 'dashboard' && (
-            <DashboardView
-              summary={summary}
-              loans={loans}
-              people={people}
-              onRecordPaymentForLoan={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
-              onGenerateStatement={handleGenerateStatement}
-              onOpenNewLoan={() => { setNewLoanPrefill(null); setIsNewLoanOpen(true); }}
-              onOpenAddPerson={() => setIsAddPersonOpen(true)}
-              onOpenPersonDetails={(p) => { setSelectedPersonForDetails(p); setIsPersonDetailsOpen(true); }}
-              onOpenDrilldown={(type) => { setDrilldownType(type); setIsDrilldownOpen(true); }}
-            />
-          )}
-
-          {activeTab === 'people' && (
-            <PeopleView
-              people={people}
-              onOpenAddPerson={() => setIsAddPersonOpen(true)}
-              onLendToPerson={(p) => { setNewLoanPrefill({ person: p.id }); setIsNewLoanOpen(true); }}
-              onArchivePerson={handleArchivePerson}
-              onOpenPersonDetails={(p) => { setSelectedPersonForDetails(p); setIsPersonDetailsOpen(true); }}
-            />
-          )}
-
-          {activeTab === 'loans' && (
-            <LoansLedgerView
-              loans={loans}
-              onOpenNewLoan={() => { setNewLoanPrefill(null); setIsNewLoanOpen(true); }}
-              onRecordPayment={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
-              onGenerateStatement={handleGenerateStatement}
-              onCancelLoan={handleCancelLoan}
-              onWriteOffLoan={handleWriteOffLoan}
-            />
-          )}
-
-          {activeTab === 'aging' && (
-            <ReportsAgingView
-              agingData={agingData}
-              loans={loans}
-              onRecordPayment={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
-              onGenerateStatement={handleGenerateStatement}
-            />
-          )}
-
-          {activeTab === 'calculator' && (
-            <div style={{ maxWidth: 940, margin: '0 auto' }}>
-              <LoanCalculatorView
-                onLendWithTerms={(terms) => {
-                  setNewLoanPrefill(terms);
-                  setIsNewLoanOpen(true);
-                }}
+          <ErrorBoundary key={activeTab} onReset={refreshData}>
+            {activeTab === 'dashboard' && (
+              <DashboardView
+                summary={summary}
+                loans={loans}
+                people={people}
+                onRecordPaymentForLoan={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
+                onGenerateStatement={handleGenerateStatement}
+                onOpenNewLoan={() => { setNewLoanPrefill(null); setIsNewLoanOpen(true); }}
+                onOpenAddPerson={() => setIsAddPersonOpen(true)}
+                onOpenPersonDetails={(p) => { setSelectedPersonForDetails(p); setIsPersonDetailsOpen(true); }}
+                onOpenDrilldown={(type) => { setDrilldownType(type); setIsDrilldownOpen(true); }}
               />
-            </div>
-          )}
+            )}
 
-          {activeTab === 'api-explorer' && (
-            <ApiExplorer />
-          )}
+            {activeTab === 'people' && (
+              <PeopleView
+                people={people}
+                onOpenAddPerson={() => setIsAddPersonOpen(true)}
+                onLendToPerson={(p) => { setNewLoanPrefill({ person: p.id }); setIsNewLoanOpen(true); }}
+                onArchivePerson={handleArchivePerson}
+                onOpenPersonDetails={(p) => { setSelectedPersonForDetails(p); setIsPersonDetailsOpen(true); }}
+              />
+            )}
 
-          {activeTab === 'settings' && (
-            <SettingsView onDataPurged={refreshData} />
-          )}
+            {activeTab === 'loans' && (
+              <LoansLedgerView
+                loans={loans}
+                onOpenNewLoan={() => { setNewLoanPrefill(null); setIsNewLoanOpen(true); }}
+                onRecordPayment={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
+                onGenerateStatement={handleGenerateStatement}
+                onCancelLoan={handleCancelLoan}
+                onWriteOffLoan={handleWriteOffLoan}
+              />
+            )}
+
+            {activeTab === 'aging' && (
+              <ReportsAgingView
+                agingData={agingData}
+                loans={loans}
+                onRecordPayment={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
+                onGenerateStatement={handleGenerateStatement}
+              />
+            )}
+
+            {activeTab === 'calculator' && (
+              <div style={{ maxWidth: 940, margin: '0 auto' }}>
+                <LoanCalculatorView
+                  onLendWithTerms={(terms) => {
+                    setNewLoanPrefill(terms);
+                    setIsNewLoanOpen(true);
+                  }}
+                />
+              </div>
+            )}
+
+            {activeTab === 'api-explorer' && (
+              <ApiExplorer />
+            )}
+
+            {activeTab === 'settings' && (
+              <SettingsView onDataPurged={refreshData} />
+            )}
+          </ErrorBoundary>
         </main>
       </div>
 
