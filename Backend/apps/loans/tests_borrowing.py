@@ -262,7 +262,7 @@ class BorrowingExtensionTestSuite(TestCase):
             purpose='Borrowed INR'
         )
 
-        res = self.client.get('/api/v1/dashboard/')
+        res = self.client.get('/api/v1/dashboard/summary/')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         cb = res.data['currency_breakdown']
         self.assertIn('EUR', cb)
@@ -337,7 +337,7 @@ class BorrowingExtensionTestSuite(TestCase):
         self.assertEqual(calculate_loan_balance(loan)['outstanding'], Decimal('15000.00'))
 
         # Void payment via API
-        void_res = self.client.post(f'/api/v1/payments/{payment.id}/void_payment/', {
+        void_res = self.client.post(f'/api/v1/payments/{payment.id}/void/', {
             'void_reason': 'Accidental duplicate payment entry'
         }, format='json')
 
@@ -346,4 +346,5 @@ class BorrowingExtensionTestSuite(TestCase):
         balance = calculate_loan_balance(loan)
         self.assertEqual(balance['outstanding'], Decimal('20000.00'))
         self.assertEqual(balance['total_repaid'], Decimal('0.00'))
+        payment.refresh_from_db()
         self.assertTrue(payment.is_voided)
