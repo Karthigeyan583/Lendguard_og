@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LoginPage } from './components/LoginPage';
-import { Navbar } from './components/Navbar';
+import { Sidebar } from './components/Sidebar';
+import { TopHeader } from './components/TopHeader';
 import { DashboardView } from './components/DashboardView';
 import { PeopleView } from './components/PeopleView';
 import { LoansLedgerView } from './components/LoansLedgerView';
@@ -332,76 +333,88 @@ function LendGuardApp() {
     }
   };
 
+  const overdueTotalCount = summary?.overdue_count || loans.filter(l => l.time_status === 'OVERDUE' || l.days_overdue > 0).length;
+
   return (
-    <div className="app-container">
-      <Navbar
+    <div className="saas-layout">
+      {/* 1. Left SaaS Sidebar */}
+      <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenNewLoan={() => { setNewLoanPrefill(null); setIsNewLoanOpen(true); }}
         onOpenAddPerson={() => setIsAddPersonOpen(true)}
-        onOpenAuth={() => setIsAuthOpen(true)}
-        notifications={notifications}
-        onMarkNotificationRead={(id) => setNotifications(notifications.map(n => n.id === id ? { ...n, is_read: true } : n))}
-        onMarkAllNotificationsRead={() => setNotifications(notifications.map(n => ({ ...n, is_read: true })))}
+        overdueCount={overdueTotalCount}
       />
 
-      <main className="main-content">
-        {activeTab === 'dashboard' && (
-          <DashboardView
-            summary={summary}
-            loans={loans}
-            people={people}
-            onRecordPaymentForLoan={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
-            onGenerateStatement={handleGenerateStatement}
-            onOpenNewLoan={() => { setNewLoanPrefill(null); setIsNewLoanOpen(true); }}
-            onOpenAddPerson={() => setIsAddPersonOpen(true)}
-          />
-        )}
+      {/* 2. Main Viewport */}
+      <div className="main-viewport">
+        <TopHeader
+          activeTab={activeTab}
+          onOpenNewLoan={() => { setNewLoanPrefill(null); setIsNewLoanOpen(true); }}
+          onOpenAddPerson={() => setIsAddPersonOpen(true)}
+          notifications={notifications}
+          onMarkNotificationRead={(id) => setNotifications(notifications.map(n => n.id === id ? { ...n, is_read: true } : n))}
+          onMarkAllNotificationsRead={() => setNotifications(notifications.map(n => ({ ...n, is_read: true })))}
+        />
 
-        {activeTab === 'people' && (
-          <PeopleView
-            people={people}
-            onOpenAddPerson={() => setIsAddPersonOpen(true)}
-            onLendToPerson={(p) => { setNewLoanPrefill({ person: p.id }); setIsNewLoanOpen(true); }}
-            onArchivePerson={handleArchivePerson}
-          />
-        )}
-
-        {activeTab === 'loans' && (
-          <LoansLedgerView
-            loans={loans}
-            onOpenNewLoan={() => { setNewLoanPrefill(null); setIsNewLoanOpen(true); }}
-            onRecordPayment={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
-            onGenerateStatement={handleGenerateStatement}
-            onCancelLoan={handleCancelLoan}
-            onWriteOffLoan={handleWriteOffLoan}
-          />
-        )}
-
-        {activeTab === 'aging' && (
-          <ReportsAgingView
-            agingData={agingData}
-            loans={loans}
-            onRecordPayment={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
-            onGenerateStatement={handleGenerateStatement}
-          />
-        )}
-
-        {activeTab === 'calculator' && (
-          <div style={{ maxWidth: 940, margin: '0 auto' }}>
-            <LoanCalculatorView
-              onLendWithTerms={(terms) => {
-                setNewLoanPrefill(terms);
-                setIsNewLoanOpen(true);
-              }}
+        <main className="content-area">
+          {activeTab === 'dashboard' && (
+            <DashboardView
+              summary={summary}
+              loans={loans}
+              people={people}
+              onRecordPaymentForLoan={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
+              onGenerateStatement={handleGenerateStatement}
+              onOpenNewLoan={() => { setNewLoanPrefill(null); setIsNewLoanOpen(true); }}
+              onOpenAddPerson={() => setIsAddPersonOpen(true)}
             />
-          </div>
-        )}
+          )}
 
-        {activeTab === 'api-explorer' && (
-          <ApiExplorer />
-        )}
-      </main>
+          {activeTab === 'people' && (
+            <PeopleView
+              people={people}
+              onOpenAddPerson={() => setIsAddPersonOpen(true)}
+              onLendToPerson={(p) => { setNewLoanPrefill({ person: p.id }); setIsNewLoanOpen(true); }}
+              onArchivePerson={handleArchivePerson}
+            />
+          )}
+
+          {activeTab === 'loans' && (
+            <LoansLedgerView
+              loans={loans}
+              onOpenNewLoan={() => { setNewLoanPrefill(null); setIsNewLoanOpen(true); }}
+              onRecordPayment={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
+              onGenerateStatement={handleGenerateStatement}
+              onCancelLoan={handleCancelLoan}
+              onWriteOffLoan={handleWriteOffLoan}
+            />
+          )}
+
+          {activeTab === 'aging' && (
+            <ReportsAgingView
+              agingData={agingData}
+              loans={loans}
+              onRecordPayment={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
+              onGenerateStatement={handleGenerateStatement}
+            />
+          )}
+
+          {activeTab === 'calculator' && (
+            <div style={{ maxWidth: 940, margin: '0 auto' }}>
+              <LoanCalculatorView
+                onLendWithTerms={(terms) => {
+                  setNewLoanPrefill(terms);
+                  setIsNewLoanOpen(true);
+                }}
+              />
+            </div>
+          )}
+
+          {activeTab === 'api-explorer' && (
+            <ApiExplorer />
+          )}
+        </main>
+      </div>
 
       {/* Modals */}
       <NewLoanModal
