@@ -190,3 +190,132 @@ class ReportsAgingView(APIView):
             'total_overdue': float(total_aging_overdue),
             'buckets': buckets
         })
+
+
+class DataExportView(APIView):
+    """
+    Data Management & Full Ledger Backup (Bible Section 26, Screen P27):
+    Exports all people, loans, repayments, and metadata with SHA-256 integrity hash.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = None
+
+    @extend_schema(
+        summary="Export Complete Ledger Data",
+        description="Generates canonical export of all contacts, loans, payments with cryptographic checksum.",
+        tags=["Data Management"]
+    )
+    def get(self, request):
+        import hashlib
+        import json
+        user = request.user
+        
+        people_qs = Person.objects.filter(created_by=user).order_by('name')
+        loans_qs = Loan.objects.filter(created_by=user).order_by('-date_given')
+        payments_qs = Payment.objects.filter(created_by=user).order_by('-payment_date')
+
+        people_data = [{
+            'id': p.id,
+            'name': p.name,
+            'relationship': p.relationship,
+            'mobile': p.mobile,
+            'email': p.email,
+            'tags': p.tags,
+            'notes': p.notes,
+            'is_archived': p.is_archived,
+            'created_at': str(p.created_at)
+        } for p in people_qs]
+
+        loans_data = []
+        for l in loans_qs:
+            bal = calculate_loan_balance(l)
+            status_info = evaluate_loan_status(l)
+            loans_data.append({
+                'id': l.id,
+                'loan_reference': l.loan_reference,
+                'borrower_name': l.person.name,
+                'borrower_mobile': l.person.mobile,
+                'principal_amount': float(l.principal_amount),
+                'currency': l.currency,
+                'date_given': str(l.date_given),
+                'due_date': str(l.due_date) if l.due_date else None,
+                'purpose': l.purpose,
+                'status': l.status,
+                'time_status': status_info['time_status'],
+                'days_overdue': status_info['days_overdue'],
+                'total_repaid': float(bal['total_repaid']),
+                'outstanding': float(bal['outstanding']),
+                'is_fully_paid': bal['is_fully_paid'],
+                'created_at': str(l.created_at)
+            })
+
+        payments_data = [{
+            'id': p.id,
+            'loan_reference': p.loan.loan_reference,
+            'borrower_name': p.loan.person.name,
+            'amount': float(p.amount),
+            'currency': p.loan.currency,
+            'payment_date': str(p.payment_date),
+            'payment_method': p.payment_method,
+            'reference_number': p.reference_number,
+            'notes': p.notes,
+            'is_voided': p.is_voided,
+            'created_at': str(p.created_at)
+        } for p in payments_qs]
+
+        export_payload = {
+            'metadata': {
+                'platform': 'LendGuard Personal Lending Ledger',
+                'version': '2.0.0',
+                'export_timestamp': timezone.now().isoformat(),
+                'user': {
+                    'username': user.username,
+                    'email': user.email,
+                    'full_name': f"{user.first_name} {user.last_name}".strip() or user.username
+                },
+                'counts': {
+                    'people_count': len(people_data),
+                    'loans_count': len(loans_data),
+                    'payments_count': len(payments_data)
+                }
+            },
+            'people': people_data,
+            'loans': loans_data,
+            'payments': payments_data
+        }
+
+        # Calculate canonical SHA-256 seal
+        canonical_str = json.dumps(export_payload, sort_keys=True)
+        sha256_hash = hashlib.sha256(canonical_str.encode('utf-8')).hexdigest()
+        export_payload['sha256_checksum'] = sha256_hash
+
+        return Response(export_payload, status=status.HTTP_200_OK)
+
+
+class DataPurgeView(APIView):
+    """
+    Data Purge / Reset Tool (Bible Section 26, Screen P27):
+    Safely resets ledger records for the authenticated user without deleting the account.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = None
+
+    @extend_schema(
+        summary="Purge / Reset User Ledger Data",
+        description="Deletes all loans, payments, and contacts for the current user.",
+        tags=["Data Management"]
+    )
+    def post(self, request):
+        user = request.user
+        
+        loans_count = Loan.objects.filter(created_by=user).count()
+        people_count = Person.objects.filter(created_by=user).count()
+
+        # Cascade delete loans, reminders, and payments
+        Loan.objects.filter(created_by=user).delete()
+        Person.objects.filter(created_by=user).delete()
+        
+        return Response({
+            "message": f"Successfully reset ledger. Cleared {loans_count} loans and {people_count} contacts.",
+            "status": "cleared"
+        }, status=status.HTTP_200_OK)
