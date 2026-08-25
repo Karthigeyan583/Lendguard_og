@@ -14,11 +14,31 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
+    phone_number = serializers.CharField(source='profile.phone_number', required=False, allow_blank=True)
+    role = serializers.CharField(source='profile.role', read_only=True)
+    is_kyc_verified = serializers.BooleanField(source='profile.is_kyc_verified', read_only=True)
     profile = UserProfileSerializer(read_only=True)
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'profile')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'phone_number', 'role', 'is_kyc_verified', 'profile')
+        read_only_fields = ('id', 'username')
+
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop('profile', {})
+        phone_number = profile_data.get('phone_number')
+        
+        instance.first_name = validated_data.get('first_name', instance.first_name).strip()
+        instance.last_name = validated_data.get('last_name', instance.last_name).strip()
+        if 'email' in validated_data:
+            instance.email = validated_data['email'].strip().lower()
+        instance.save()
+
+        if phone_number is not None and hasattr(instance, 'profile'):
+            instance.profile.phone_number = phone_number.strip()
+            instance.profile.save(update_fields=['phone_number'])
+
+        return instance
 
 
 class RegisterSerializer(serializers.ModelSerializer):
