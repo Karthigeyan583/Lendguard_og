@@ -165,7 +165,9 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
           {/* Amount & Currency */}
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
             <div className="form-group">
-              <label className="form-label">Principal Amount</label>
+              <label className="form-label">
+                Principal Amount <span style={{ color: 'var(--accent-rose)' }}>*</span>
+              </label>
               <input
                 type="number"
                 step="any"
@@ -179,9 +181,12 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
             </div>
 
             <div className="form-group">
-              <label className="form-label">Currency</label>
+              <label className="form-label">
+                Currency <span style={{ color: 'var(--accent-rose)' }}>*</span>
+              </label>
               <select
                 className="form-select"
+                required
                 value={formData.currency}
                 onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
               >
@@ -196,13 +201,23 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
           {/* Date Given & Due Date */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="form-group">
-              <label className="form-label">Date Given (Transfer Date)</label>
+              <label className="form-label">
+                Date Given (Transfer Date) <span style={{ color: 'var(--accent-rose)' }}>*</span>
+              </label>
               <input
                 type="date"
                 required
                 className="form-input"
                 value={formData.date_given}
-                onChange={(e) => setFormData({ ...formData, date_given: e.target.value })}
+                onChange={(e) => {
+                  const newDateGiven = e.target.value;
+                  setFormData(prev => ({
+                    ...prev,
+                    date_given: newDateGiven,
+                    // If existing due date is before the newly selected date given, clear or update it
+                    due_date: prev.due_date && prev.due_date < newDateGiven ? newDateGiven : prev.due_date
+                  }));
+                }}
               />
             </div>
 
@@ -210,6 +225,7 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
               <label className="form-label">Agreed Due Date (Optional)</label>
               <input
                 type="date"
+                min={formData.date_given || new Date().toISOString().split('T')[0]}
                 className="form-input"
                 value={formData.due_date}
                 onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
@@ -219,9 +235,12 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
 
           {/* Purpose / Remarks */}
           <div className="form-group">
-            <label className="form-label">Purpose / Lending Context</label>
+            <label className="form-label">
+              Purpose / Lending Context <span style={{ color: 'var(--accent-rose)' }}>*</span>
+            </label>
             <input
               type="text"
+              required
               placeholder="e.g. Emergency home repair, education fees, laptop purchase..."
               className="form-input"
               value={formData.purpose}
