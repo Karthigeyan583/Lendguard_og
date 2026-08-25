@@ -167,16 +167,16 @@ export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArc
                 }}>
                   <div>
                     <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Total Lent</span>
-                    <strong style={{ fontSize: '0.85rem' }}>₹{Number(person.total_lent || 0).toLocaleString()}</strong>
+                    <strong style={{ fontSize: '0.85rem' }}>{defSymbol}{Number(person.total_lent || 0).toLocaleString()}</strong>
                   </div>
                   <div>
                     <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Repaid</span>
-                    <strong style={{ fontSize: '0.85rem', color: 'var(--accent-emerald)' }}>₹{Number(person.total_repaid || 0).toLocaleString()}</strong>
+                    <strong style={{ fontSize: '0.85rem', color: 'var(--accent-emerald)' }}>{defSymbol}{Number(person.total_repaid || 0).toLocaleString()}</strong>
                   </div>
                   <div>
                     <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Owed Balance</span>
                     <strong style={{ fontSize: '0.85rem', color: person.outstanding_balance > 0 ? 'var(--accent-cyan)' : 'var(--text-muted)' }}>
-                      ₹{Number(person.outstanding_balance || 0).toLocaleString()}
+                      {defSymbol}{Number(person.outstanding_balance || 0).toLocaleString()}
                     </strong>
                   </div>
                 </div>
