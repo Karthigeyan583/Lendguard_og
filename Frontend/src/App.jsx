@@ -317,6 +317,7 @@ function LendGuardApp() {
               onGenerateStatement={handleGenerateStatement}
               onOpenNewLoan={() => { setNewLoanPrefill(null); setIsNewLoanOpen(true); }}
               onOpenAddPerson={() => setIsAddPersonOpen(true)}
+              onOpenPersonDetails={(p) => { setSelectedPersonForDetails(p); setIsPersonDetailsOpen(true); }}
             />
           )}
 
@@ -326,6 +327,7 @@ function LendGuardApp() {
               onOpenAddPerson={() => setIsAddPersonOpen(true)}
               onLendToPerson={(p) => { setNewLoanPrefill({ person: p.id }); setIsNewLoanOpen(true); }}
               onArchivePerson={handleArchivePerson}
+              onOpenPersonDetails={(p) => { setSelectedPersonForDetails(p); setIsPersonDetailsOpen(true); }}
             />
           )}
 
@@ -398,6 +400,22 @@ function LendGuardApp() {
         onClose={() => { setIsStatementOpen(false); setSelectedStatement(null); }}
         statement={selectedStatement}
         loan={selectedLoanForStatement}
+      />
+
+      <PersonDetailsModal
+        isOpen={isPersonDetailsOpen}
+        onClose={() => { setIsPersonDetailsOpen(false); setSelectedPersonForDetails(null); }}
+        person={selectedPersonForDetails}
+        loans={loans}
+        onOpenNewLoanForPerson={(p) => {
+          setNewLoanPrefill({ person: p.id });
+          setIsNewLoanOpen(true);
+        }}
+        onRecordPaymentForLoan={(loan) => {
+          setSelectedLoanForPayment(loan);
+          setIsPaymentOpen(true);
+        }}
+        onGenerateStatementForLoan={handleGenerateStatement}
       />
 
       <AuthModal
