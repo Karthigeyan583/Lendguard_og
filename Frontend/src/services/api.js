@@ -152,4 +152,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ loan_id: loanId }),
     }),
+
+  // Data Management, Backup & Export (Screen P27)
+  exportData: () => request('/data/export/'),
+  purgeData: () =>
+    request('/data/purge/', {
+      method: 'POST',
+    }),
 };
