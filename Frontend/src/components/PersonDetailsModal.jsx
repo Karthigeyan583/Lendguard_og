@@ -510,12 +510,60 @@ export const PersonDetailsModal = ({
             </div>
           )}
 
-          {/* 3. Lending Records Table */}
+          {/* 3. Transaction Agreements Section with Filter Tabs */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>
-                Lending Records ({personLoans.length})
-              </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.3rem', background: 'var(--bg-surface)', padding: '0.25rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                <button
+                  type="button"
+                  onClick={() => setPersonTabFilter('all')}
+                  style={{
+                    padding: '0.3rem 0.65rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    borderRadius: 'var(--radius-sm)',
+                    border: 'none',
+                    background: personTabFilter === 'all' ? 'var(--bg-card)' : 'transparent',
+                    color: personTabFilter === 'all' ? 'var(--text-primary)' : 'var(--text-muted)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  All ({personLoans.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPersonTabFilter('lent')}
+                  style={{
+                    padding: '0.3rem 0.65rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    borderRadius: 'var(--radius-sm)',
+                    border: 'none',
+                    background: personTabFilter === 'lent' ? 'var(--accent-emerald)' : 'transparent',
+                    color: personTabFilter === 'lent' ? '#fff' : 'var(--text-muted)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  🤝 Lent ({lentLoans.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPersonTabFilter('borrowed')}
+                  style={{
+                    padding: '0.3rem 0.65rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    borderRadius: 'var(--radius-sm)',
+                    border: 'none',
+                    background: personTabFilter === 'borrowed' ? 'var(--accent-indigo)' : 'transparent',
+                    color: personTabFilter === 'borrowed' ? '#fff' : 'var(--text-muted)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  📥 Borrowed ({borrowedLoans.length})
+                </button>
+              </div>
+
               <button
                 className="btn btn-primary"
                 style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', gap: '0.35rem' }}
@@ -525,11 +573,11 @@ export const PersonDetailsModal = ({
                 }}
               >
                 <Plus size={14} />
-                <span>Lend Money</span>
+                <span>New Transaction</span>
               </button>
             </div>
 
-            {personLoans.length === 0 ? (
+            {displayedLoans.length === 0 ? (
               <div style={{
                 padding: '2rem',
                 textAlign: 'center',
@@ -539,14 +587,15 @@ export const PersonDetailsModal = ({
                 color: 'var(--text-muted)',
                 fontSize: '0.825rem'
               }}>
-                No loan records found for {person.name}. Click "Lend Money" above to record a loan.
+                No transaction records found matching the filter.
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                {personLoans.map((loan) => {
+                {displayedLoans.map((loan) => {
                   const loanOutstanding = Number(loan.balance?.outstanding ?? loan.principal_amount ?? 0);
                   const isPaid = loan.status === 'PAID' || loanOutstanding === 0;
                   const isOverdue = (loan.days_overdue > 0 || loan.time_status === 'OVERDUE') && !isPaid;
+                  const isBorrowing = (loan.direction === 'borrowed');
 
                   return (
                     <div
@@ -564,9 +613,20 @@ export const PersonDetailsModal = ({
                       }}
                     >
                       <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                          <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-indigo)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem', flexWrap: 'wrap' }}>
+                          <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '0.85rem', color: isBorrowing ? 'var(--accent-indigo)' : 'var(--accent-emerald)' }}>
                             #{loan.loan_reference}
+                          </span>
+                          <span
+                            className="badge"
+                            style={{
+                              fontSize: '0.65rem',
+                              background: isBorrowing ? 'rgba(99, 102, 241, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                              color: isBorrowing ? 'var(--accent-indigo)' : 'var(--accent-emerald)',
+                              borderColor: isBorrowing ? 'rgba(99, 102, 241, 0.3)' : 'rgba(16, 185, 129, 0.3)'
+                            }}
+                          >
+                            {isBorrowing ? '📥 Borrowed' : '🤝 Lent'}
                           </span>
                           <span
                             className="badge"
@@ -577,12 +637,12 @@ export const PersonDetailsModal = ({
                               borderColor: isPaid ? 'rgba(16, 185, 129, 0.3)' : isOverdue ? 'rgba(244, 63, 94, 0.3)' : 'rgba(99, 102, 241, 0.3)'
                             }}
                           >
-                            {isPaid ? 'PAID' : isOverdue ? `OVERDUE (${loan.days_overdue}d)` : loan.status}
+                            {isPaid ? 'SETTLED' : isOverdue ? `OVERDUE (${loan.days_overdue}d)` : loan.status}
                           </span>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          <span>Given: {loan.date_given}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', fontSize: '0.75rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
+                          <span>{isBorrowing ? 'Borrowed:' : 'Given:'} {loan.date_given}</span>
                           {loan.due_date && (
                             <span style={{ color: isOverdue ? 'var(--accent-rose)' : 'var(--text-muted)' }}>
                               Due: {loan.due_date}
@@ -598,7 +658,7 @@ export const PersonDetailsModal = ({
                             {getCurrencySymbol(loan.currency)}{Number(loan.principal_amount || 0).toLocaleString()} <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{loan.currency || 'INR'}</span>
                           </div>
                           <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                            {isPaid ? 'Fully settled' : `${getCurrencySymbol(loan.currency)}${loanOutstanding.toLocaleString()} remaining`}
+                            {isPaid ? 'Fully settled' : `${getCurrencySymbol(loan.currency)}${loanOutstanding.toLocaleString()} ${isBorrowing ? 'payable' : 'receivable'}`}
                             {(!isPaid && (loan.currency || 'INR') !== reportingCurrency) && (
                               <span style={{ color: 'var(--accent-indigo)', marginLeft: 4 }}>
                                 (≈ {reportingSymbol}{convertCurrency(loanOutstanding, loan.currency, reportingCurrency, loan.exchange_rate).toLocaleString()})
@@ -611,15 +671,15 @@ export const PersonDetailsModal = ({
                           {!isPaid && onRecordPaymentForLoan && (
                             <button
                               className="btn btn-secondary"
-                              style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', gap: '0.3rem', color: 'var(--accent-emerald)' }}
+                              style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', gap: '0.3rem', color: isBorrowing ? 'var(--accent-indigo)' : 'var(--accent-emerald)' }}
                               onClick={() => {
                                 onClose();
                                 onRecordPaymentForLoan(loan);
                               }}
-                              title="Record repayment for this loan"
+                              title={isBorrowing ? "Record repayment made to lender" : "Record repayment received from borrower"}
                             >
                               <ArrowDownLeft size={13} />
-                              <span>Repay</span>
+                              <span>{isBorrowing ? 'Pay' : 'Repay'}</span>
                             </button>
                           )}
 
@@ -631,7 +691,7 @@ export const PersonDetailsModal = ({
                                 onClose();
                                 onGenerateStatementForLoan(loan);
                               }}
-                              title="Generate Digital Statement & IOU"
+                              title="Generate Official Digital Statement"
                             >
                               <FileText size={13} />
                               <span>Statement</span>
