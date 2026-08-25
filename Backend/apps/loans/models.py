@@ -34,7 +34,13 @@ class Loan(models.Model):
     loan_reference = models.CharField(max_length=50, unique=True, help_text="Unique reference code (e.g. LG-2026-0001)")
     direction = models.CharField(max_length=20, choices=DIRECTION_CHOICES, default='lent')
     principal_amount = models.DecimalField(max_digits=14, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
-    currency = models.CharField(max_length=10, default='USD')
+    currency = models.CharField(max_length=10, default='INR', help_text="Original transaction currency")
+    
+    # Multi-Currency & Reporting Currency Engine (Bible v2.0)
+    reporting_currency = models.CharField(max_length=10, default='INR', help_text="Base/Reporting currency at origination")
+    exchange_rate = models.DecimalField(max_digits=18, decimal_places=6, default=Decimal('1.000000'), help_text="FX rate: 1 original_currency = X reporting_currency")
+    fx_rate_date = models.DateTimeField(null=True, blank=True, help_text="Timestamp when exchange rate was applied")
+    reporting_principal_amount = models.DecimalField(max_digits=16, decimal_places=2, default=Decimal('0.00'), help_text="Principal amount converted to reporting_currency")
     
     date_given = models.DateField(help_text="Date money was handed over/transferred")
     due_date = models.DateField(null=True, blank=True, help_text="Agreed repayment target date")
