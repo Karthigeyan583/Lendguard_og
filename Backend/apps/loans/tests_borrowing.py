@@ -224,7 +224,7 @@ class BorrowingExtensionTestSuite(TestCase):
         )
 
         # Check Person details API
-        res = self.client.get(f'/api/people/{self.person.id}/')
+        res = self.client.get(f'/api/v1/people/{self.person.id}/')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         data = res.data
 
@@ -262,7 +262,7 @@ class BorrowingExtensionTestSuite(TestCase):
             purpose='Borrowed INR'
         )
 
-        res = self.client.get('/api/core/dashboard/')
+        res = self.client.get('/api/v1/dashboard/')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         cb = res.data['currency_breakdown']
         self.assertIn('EUR', cb)
@@ -307,7 +307,7 @@ class BorrowingExtensionTestSuite(TestCase):
             purpose='Private borrowing'
         )
 
-        res = self.client.get(f'/api/loans/{other_loan.id}/')
+        res = self.client.get(f'/api/v1/loans/{other_loan.id}/')
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_bor_010_borrowing_payment_void(self):
@@ -337,7 +337,7 @@ class BorrowingExtensionTestSuite(TestCase):
         self.assertEqual(calculate_loan_balance(loan)['outstanding'], Decimal('15000.00'))
 
         # Void payment via API
-        void_res = self.client.post(f'/api/payments/{payment.id}/void_payment/', {
+        void_res = self.client.post(f'/api/v1/payments/{payment.id}/void_payment/', {
             'void_reason': 'Accidental duplicate payment entry'
         }, format='json')
 
