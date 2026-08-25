@@ -2,6 +2,7 @@ import datetime
 from decimal import Decimal
 from typing import Dict, List, Any
 from django.utils import timezone
+from django.db.models import Q
 
 from apps.loans.models import Loan
 from apps.payments.models import Payment
@@ -24,7 +25,7 @@ class CashFlowEngine:
         # 1. Historical Realized Cashflow (Last 6 Months)
         six_months_ago = (today.replace(day=1) - datetime.timedelta(days=150)).replace(day=1)
         payments = Payment.objects.filter(
-            created_by=user,
+            Q(created_by=user) | Q(loan__created_by=user),
             is_voided=False,
             payment_date__gte=six_months_ago
         ).select_related('loan')
