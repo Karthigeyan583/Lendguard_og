@@ -260,9 +260,9 @@ export const DashboardView = ({
             >
               <span style={{ color: 'var(--accent-emerald)' }}>●</span>
               <span>
-                {activeCurrencyFilter === 'ALL'
-                  ? 'All Currencies (Split Breakdown)'
-                  : `${activeCurrencyFilter} (${getCurrencySymbol(activeCurrencyFilter)})`}
+                {isConsolidated
+                  ? `Consolidated Portfolio (${reportingCurrency} ${getCurrencySymbol(reportingCurrency)})`
+                  : `Native Filter: ${activeCurrencyFilter} (${activeDisplaySymbol})`}
               </span>
               <ChevronDown size={14} color="var(--text-muted)" />
             </button>
@@ -272,7 +272,7 @@ export const DashboardView = ({
                 position: 'absolute',
                 right: 0,
                 top: '120%',
-                minWidth: 220,
+                minWidth: 260,
                 background: 'var(--bg-card)',
                 border: '1px solid var(--border-subtle)',
                 borderRadius: 'var(--radius-md)',
@@ -284,7 +284,7 @@ export const DashboardView = ({
                 gap: '0.2rem'
               }}>
                 <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', padding: '0.3rem 0.55rem', textTransform: 'uppercase' }}>
-                  Filter Portfolio Currency
+                  Filter Portfolio Currency Mode
                 </div>
                 <button
                   type="button"
@@ -309,7 +309,7 @@ export const DashboardView = ({
                     transition: 'background 0.15s ease'
                   }}
                 >
-                  <span>All Currencies (Split Breakdown)</span>
+                  <span>🌐 Consolidated Portfolio (All in {reportingCurrency})</span>
                   {activeCurrencyFilter === 'ALL' && <Check size={14} color="var(--accent-emerald)" />}
                 </button>
 
@@ -338,7 +338,7 @@ export const DashboardView = ({
                       transition: 'background 0.15s ease'
                     }}
                   >
-                    <span>{curr} ({getCurrencySymbol(curr)})</span>
+                    <span>💱 Native {curr} ({getCurrencySymbol(curr)}) records only</span>
                     {activeCurrencyFilter === curr && <Check size={14} color="var(--accent-emerald)" />}
                   </button>
                 ))}
@@ -362,29 +362,29 @@ export const DashboardView = ({
         {/* Left: Net Position Summary */}
         <div>
           <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Authoritative Financial Position
+            Authoritative Financial Position {isConsolidated ? `(Consolidated in ${reportingCurrency})` : `(${activeDisplayCurrency})`}
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginTop: '0.2rem', flexWrap: 'wrap' }}>
             <span style={{
               fontSize: '1.5rem',
               fontWeight: 900,
-              color: singleStats.netOutstanding > 0 ? 'var(--accent-emerald)' : singleStats.netOutstanding < 0 ? 'var(--accent-rose)' : 'var(--text-primary)'
+              color: displayStats.netOutstanding > 0 ? 'var(--accent-emerald)' : displayStats.netOutstanding < 0 ? 'var(--accent-rose)' : 'var(--text-primary)'
             }}>
               {isMasked 
-                ? `${getCurrencySymbol(singleCurr)}••••••` 
-                : `${singleStats.netOutstanding >= 0 ? '+' : ''}${getCurrencySymbol(singleCurr)}${Number(singleStats.netOutstanding).toLocaleString()}`} <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{singleCurr}</span>
+                ? `${activeDisplaySymbol}••••••` 
+                : `${displayStats.netOutstanding >= 0 ? '+' : ''}${activeDisplaySymbol}${Number(Math.abs(displayStats.netOutstanding)).toLocaleString()}`} <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{activeDisplayCurrency}</span>
             </span>
             <span className="badge" style={{
-              background: singleStats.netOutstanding > 0 ? 'rgba(16, 185, 129, 0.15)' : singleStats.netOutstanding < 0 ? 'rgba(244, 63, 94, 0.15)' : 'rgba(148, 163, 184, 0.15)',
-              color: singleStats.netOutstanding > 0 ? 'var(--accent-emerald)' : singleStats.netOutstanding < 0 ? 'var(--accent-rose)' : 'var(--text-muted)',
+              background: displayStats.netOutstanding > 0 ? 'rgba(16, 185, 129, 0.15)' : displayStats.netOutstanding < 0 ? 'rgba(244, 63, 94, 0.15)' : 'rgba(148, 163, 184, 0.15)',
+              color: displayStats.netOutstanding > 0 ? 'var(--accent-emerald)' : displayStats.netOutstanding < 0 ? 'var(--accent-rose)' : 'var(--text-muted)',
               fontSize: '0.75rem',
               fontWeight: 700
             }}>
-              {singleStats.netOutstanding > 0 ? 'Net Receivable (You are owed money)' : singleStats.netOutstanding < 0 ? 'Net Payable (You owe money)' : 'Even / Settled Net Position'}
+              {displayStats.netOutstanding > 0 ? 'Net Receivable (You are owed money)' : displayStats.netOutstanding < 0 ? 'Net Payable (You owe money)' : 'Even / Settled Net Position'}
             </span>
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-            Receivables: <strong>{getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.lentOutstanding).toLocaleString()}</strong> • Payables: <strong>{getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.borrowedOutstanding).toLocaleString()}</strong>
+            Receivables: <strong>{activeDisplaySymbol}{isMasked ? '••••••' : Number(displayStats.lentOutstanding).toLocaleString()}</strong> • Payables: <strong>{activeDisplaySymbol}{isMasked ? '••••••' : Number(displayStats.borrowedOutstanding).toLocaleString()}</strong>
           </div>
         </div>
 
@@ -472,25 +472,12 @@ export const DashboardView = ({
                 </div>
               </div>
 
-              {isSplitView ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.35rem' }}>
-                  {availableCurrencies.map(curr => (
-                    <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
-                        {getCurrencySymbol(curr)}{isMasked ? '••••••' : Number(totalsByCurrency[curr].lent).toLocaleString()}
-                      </span>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-blue)' }}>{curr}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-                  {getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.lent).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>{singleCurr}</span>
-                </div>
-              )}
+              <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
+                {activeDisplaySymbol}{isMasked ? '••••••' : Number(displayStats.lent).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>{activeDisplayCurrency}</span>
+              </div>
 
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Across {singleStats.lentCount || lentLoans.length} lending records
+                Across {displayStats.lentCount} lending records
               </div>
             </div>
 
@@ -508,27 +495,12 @@ export const DashboardView = ({
                 </div>
               </div>
 
-              {isSplitView ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.35rem' }}>
-                  {availableCurrencies.map(curr => (
-                    <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, color: 'var(--accent-emerald)', letterSpacing: '-0.02em' }}>
-                        {getCurrencySymbol(curr)}{isMasked ? '••••••' : Number(totalsByCurrency[curr].lentRepaid).toLocaleString()}
-                      </span>
-                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-emerald)' }}>
-                        {curr} ({totalsByCurrency[curr].lentRecovery}%)
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-                  {getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.lentRepaid).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-emerald)' }}>{singleCurr}</span>
-                </div>
-              )}
+              <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
+                {activeDisplaySymbol}{isMasked ? '••••••' : Number(displayStats.lentRepaid).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-emerald)' }}>{activeDisplayCurrency}</span>
+              </div>
 
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                {isSplitView ? 'Recovery rate indicated per currency' : `Recovery Rate: ${singleStats.lentRecovery}%`}
+                Recovery Rate: {displayStats.lentRecovery}%
               </div>
             </div>
 
@@ -546,22 +518,9 @@ export const DashboardView = ({
                 </div>
               </div>
 
-              {isSplitView ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.35rem' }}>
-                  {availableCurrencies.map(curr => (
-                    <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, color: 'var(--accent-cyan)', letterSpacing: '-0.02em' }}>
-                        {getCurrencySymbol(curr)}{isMasked ? '••••••' : Number(totalsByCurrency[curr].lentOutstanding).toLocaleString()}
-                      </span>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>{curr}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-cyan)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-                  {getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.lentOutstanding).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-cyan)' }}>{singleCurr}</span>
-                </div>
-              )}
+              <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-cyan)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
+                {activeDisplaySymbol}{isMasked ? '••••••' : Number(displayStats.lentOutstanding).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-cyan)' }}>{activeDisplayCurrency}</span>
+              </div>
 
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 {activeDebtorsCount > 0 
@@ -584,34 +543,13 @@ export const DashboardView = ({
                 </div>
               </div>
 
-              {isSplitView ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.35rem' }}>
-                  {availableCurrencies.filter(c => totalsByCurrency[c].lentOverdue > 0).length > 0 ? (
-                    availableCurrencies.filter(c => totalsByCurrency[c].lentOverdue > 0).map(curr => (
-                      <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, color: 'var(--accent-rose)', letterSpacing: '-0.02em' }}>
-                          {getCurrencySymbol(curr)}{isMasked ? '••••••' : Number(totalsByCurrency[curr].lentOverdue).toLocaleString()}
-                        </span>
-                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-rose)' }}>
-                          {curr} ({totalsByCurrency[curr].lentOverdueCount} overdue)
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>
-                      0.00 <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>All up to date</span>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div style={{ fontSize: '1.85rem', fontWeight: 800, color: singleStats.lentOverdue > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-                  {getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.lentOverdue).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{singleCurr}</span>
-                </div>
-              )}
+              <div style={{ fontSize: '1.85rem', fontWeight: 800, color: displayStats.lentOverdue > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
+                {activeDisplaySymbol}{isMasked ? '••••••' : Number(displayStats.lentOverdue).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{activeDisplayCurrency}</span>
+              </div>
 
-              {singleStats.lentOverdueCount > 0 ? (
+              {displayStats.lentOverdueCount > 0 ? (
                 <div style={{ fontSize: '0.75rem', color: 'var(--accent-rose)' }}>
-                  {singleStats.lentOverdueCount} {singleStats.lentOverdueCount === 1 ? 'loan requires' : 'loans require'} attention
+                  {displayStats.lentOverdueCount} {displayStats.lentOverdueCount === 1 ? 'loan requires' : 'loans require'} attention
                 </div>
               ) : (
                 <div style={{ fontSize: '0.75rem', color: 'var(--accent-emerald)' }}>
@@ -646,10 +584,10 @@ export const DashboardView = ({
                 </div>
               </div>
               <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
-                {getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.borrowed).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>{singleCurr}</span>
+                {activeDisplaySymbol}{isMasked ? '••••••' : Number(displayStats.borrowed).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>{activeDisplayCurrency}</span>
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Across {singleStats.borrowedCount || borrowedLoans.length} borrowing obligations
+                Across {displayStats.borrowedCount} borrowing obligations
               </div>
             </div>
 
@@ -667,10 +605,10 @@ export const DashboardView = ({
                 </div>
               </div>
               <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem', color: 'var(--accent-emerald)' }}>
-                {getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.borrowedRepaid).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-emerald)' }}>{singleCurr}</span>
+                {activeDisplaySymbol}{isMasked ? '••••••' : Number(displayStats.borrowedRepaid).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-emerald)' }}>{activeDisplayCurrency}</span>
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Repayment Completion: {singleStats.borrowedRepaymentRate}%
+                Repayment Completion: {displayStats.borrowedRepaymentRate}%
               </div>
             </div>
 
@@ -687,11 +625,11 @@ export const DashboardView = ({
                   <Clock size={19} color="var(--accent-amber)" />
                 </div>
               </div>
-              <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem', color: singleStats.borrowedOutstanding > 0 ? 'var(--accent-amber)' : 'var(--accent-emerald)' }}>
-                {getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.borrowedOutstanding).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{singleCurr}</span>
+              <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem', color: displayStats.borrowedOutstanding > 0 ? 'var(--accent-amber)' : 'var(--accent-emerald)' }}>
+                {activeDisplaySymbol}{isMasked ? '••••••' : Number(displayStats.borrowedOutstanding).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{activeDisplayCurrency}</span>
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                {singleStats.borrowedOutstanding > 0 ? `Remaining debt obligation` : `No outstanding borrowing liabilities`}
+                {displayStats.borrowedOutstanding > 0 ? `Remaining debt obligation` : `No outstanding borrowing liabilities`}
               </div>
             </div>
 
@@ -708,12 +646,18 @@ export const DashboardView = ({
                   <AlertTriangle size={19} color="var(--accent-rose)" />
                 </div>
               </div>
-              <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem', color: singleStats.borrowedOverdue > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)' }}>
-                {getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.borrowedOverdue).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{singleCurr}</span>
+              <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem', color: displayStats.borrowedOverdue > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)' }}>
+                {activeDisplaySymbol}{isMasked ? '••••••' : Number(displayStats.borrowedOverdue).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{activeDisplayCurrency}</span>
               </div>
-              <div style={{ fontSize: '0.75rem', color: singleStats.borrowedOverdue > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)' }}>
-                {singleStats.borrowedOverdue > 0 ? `${singleStats.borrowedOverdueCount} overdue payment(s) to settle` : `✓ All your debts are current`}
-              </div>
+              {displayStats.borrowedOverdueCount > 0 ? (
+                <div style={{ fontSize: '0.75rem', color: 'var(--accent-rose)' }}>
+                  {displayStats.borrowedOverdueCount} {displayStats.borrowedOverdueCount === 1 ? 'obligation requires' : 'obligations require'} settlement
+                </div>
+              ) : (
+                <div style={{ fontSize: '0.75rem', color: 'var(--accent-emerald)' }}>
+                  ✓ Zero overdue liabilities
+                </div>
+              )}
             </div>
           </div>
         </div>
