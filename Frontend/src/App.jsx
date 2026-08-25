@@ -161,6 +161,7 @@ function LendGuardApp() {
       const newL = {
         id: Date.now(),
         loan_reference: `LG-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+        direction: loanData.direction || 'lent',
         person: loanData.person,
         person_name: personObj?.name || 'Contact',
         person_mobile: personObj?.mobile || '',
