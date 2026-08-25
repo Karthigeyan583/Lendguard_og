@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Users, Search, Plus, Phone, Mail, Tag, ArrowUpRight, Archive, CheckCircle2 } from 'lucide-react';
 import { getDefaultCurrency, getCurrencySymbol } from '../utils/currency';
 
-export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArchivePerson, onOpenPersonDetails }) => {
+export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArchivePerson, onOpenPersonDetails, isMasked = false }) => {
   const [search, setSearch] = useState('');
   const [filterRel, setFilterRel] = useState('all');
   const defSymbol = getCurrencySymbol(getDefaultCurrency());
@@ -43,80 +43,59 @@ export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArc
             </div>
 
             <button className="btn btn-primary" onClick={onOpenAddPerson} style={{ fontSize: '0.825rem' }}>
-              <Plus size={16} />
-              <span>Add Person</span>
+              <Plus size={15} />
+              <span>Add Contact</span>
             </button>
           </div>
         </div>
 
         {/* Relationship Filter Tabs */}
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          {[
-            { id: 'all', label: 'All Contacts' },
-            { id: 'friend', label: 'Friends' },
-            { id: 'family', label: 'Family' },
-            { id: 'colleague', label: 'Colleagues' },
-            { id: 'business', label: 'Business / Clients' },
-          ].map((tab) => (
+          {['all', 'friend', 'family', 'colleague', 'business', 'client', 'other'].map((rel) => (
             <button
-              key={tab.id}
-              onClick={() => setFilterRel(tab.id)}
-              style={{
-                padding: '0.4rem 0.85rem',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                borderRadius: 'var(--radius-sm)',
-                background: filterRel === tab.id ? 'var(--bg-surface)' : 'transparent',
-                color: filterRel === tab.id ? 'var(--accent-emerald)' : 'var(--text-secondary)',
-                border: filterRel === tab.id ? '1px solid var(--border-subtle)' : '1px solid transparent',
-                cursor: 'pointer'
-              }}
+              key={rel}
+              onClick={() => setFilterRel(rel)}
+              className={`filter-chip ${filterRel === rel ? 'active' : ''}`}
+              style={{ textTransform: 'capitalize', fontSize: '0.78rem', padding: '0.35rem 0.85rem' }}
             >
-              {tab.label}
+              {rel}
             </button>
           ))}
         </div>
       </div>
 
-      {/* People Grid */}
+      {/* Grid of Contacts */}
       {filtered.length === 0 ? (
-        <div className="glass-panel" style={{ padding: '3.5rem', textAlign: 'center' }}>
-          <Users size={44} color="var(--text-muted)" style={{ marginBottom: '1rem', opacity: 0.5 }} />
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.35rem' }}>No Contacts Found</h3>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: 400, margin: '0 auto 1.25rem' }}>
-            Add people you lend money to so you can record lending records, payment history, and auto-reminders.
-          </p>
-          <button className="btn btn-primary" onClick={onOpenAddPerson}>
-            <Plus size={16} />
-            <span>Add Your First Contact</span>
-          </button>
+        <div className="glass-panel" style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+          <Users size={36} style={{ marginBottom: '0.75rem', opacity: 0.4 }} />
+          <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-secondary)' }}>No contacts found</h3>
+          <p style={{ fontSize: '0.825rem', marginTop: '0.25rem' }}>Try refining your search or add a new person.</p>
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
           {filtered.map((person) => (
-            <div key={person.id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div
+              key={person.id}
+              className="glass-panel person-card"
+              style={{ padding: '1.35rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+            >
               <div>
-                {/* Top Row: Name & Role Badge */}
-                <div
-                  style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '0.75rem', cursor: 'pointer' }}
-                  onClick={() => onOpenPersonDetails && onOpenPersonDetails(person)}
-                  title={`View full details & loan history for ${person.name}`}
-                >
+                {/* Person Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.85rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <div style={{
                       width: 42,
                       height: 42,
-                      borderRadius: '12px',
-                      background: 'linear-gradient(135deg, #1e293b, #0f172a)',
-                      border: '1px solid var(--border-subtle)',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan))',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontWeight: 800,
-                      fontSize: '1.1rem',
-                      color: 'var(--accent-emerald)'
+                      fontSize: '1rem',
+                      color: '#ffffff'
                     }}>
-                      {person.name[0]?.toUpperCase()}
+                      {person.name ? person.name.charAt(0).toUpperCase() : 'P'}
                     </div>
                     <div>
                       <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>{person.name}</h4>
@@ -153,7 +132,7 @@ export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArc
                   )}
                 </div>
 
-                {/* Financial Exposure Card (Dual Lending & Borrowing with Net Position) */}
+                {/* Financial Exposure Card */}
                 <div style={{
                   background: 'var(--inner-card-bg)',
                   border: '1px solid var(--border-subtle)',
@@ -171,7 +150,7 @@ export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArc
                       fontWeight: 800,
                       color: (person.net_exposure || 0) > 0 ? 'var(--accent-emerald)' : (person.net_exposure || 0) < 0 ? 'var(--accent-rose)' : 'var(--text-muted)'
                     }}>
-                      {(person.net_exposure || 0) >= 0 ? '+' : ''}{defSymbol}{Number(person.net_exposure || 0).toLocaleString()}
+                      {isMasked ? `${defSymbol}••••••` : `${(person.net_exposure || 0) >= 0 ? '+' : ''}${defSymbol}${Number(person.net_exposure || 0).toLocaleString()}`}
                       <span style={{ fontSize: '0.68rem', fontWeight: 600, marginLeft: 4 }}>
                         ({(person.net_exposure || 0) > 0 ? 'Owes You' : (person.net_exposure || 0) < 0 ? 'You Owe' : 'Even'})
                       </span>
@@ -183,7 +162,7 @@ export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArc
                     <div style={{ padding: '0.35rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)' }}>
                       <span style={{ fontSize: '0.65rem', color: 'var(--accent-emerald)', display: 'block', fontWeight: 700 }}>🤝 Money Lent</span>
                       <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
-                        {defSymbol}{Number(person.lent?.outstanding || person.outstanding_balance || 0).toLocaleString()}
+                        {isMasked ? '••••••' : `${defSymbol}${Number(person.lent?.outstanding || person.outstanding_balance || 0).toLocaleString()}`}
                       </strong>
                       <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>owed to you</span>
                     </div>
@@ -191,7 +170,7 @@ export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArc
                     <div style={{ padding: '0.35rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)' }}>
                       <span style={{ fontSize: '0.65rem', color: 'var(--accent-indigo)', display: 'block', fontWeight: 700 }}>📥 Money Borrowed</span>
                       <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
-                        {defSymbol}{Number(person.borrowed?.outstanding || 0).toLocaleString()}
+                        {isMasked ? '••••••' : `${defSymbol}${Number(person.borrowed?.outstanding || 0).toLocaleString()}`}
                       </strong>
                       <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>you owe them</span>
                     </div>
