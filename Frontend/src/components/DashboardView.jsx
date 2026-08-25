@@ -12,6 +12,9 @@ import {
   FileText,
   Share2,
   ChevronRight,
+  ChevronLeft,
+  Sparkles,
+  Activity,
   Layers,
   Filter
 } from 'lucide-react';
@@ -78,6 +81,25 @@ export const DashboardView = ({
   const dueSoonCount = dueSoonLoans.length;
   const activeDebtorsCount = people.filter(p => Number(p.outstanding_balance || 0) > 0).length;
   const recoveryRate = singleStats.recovery || 0;
+
+  // Samsung Now Bar state & scrolling
+  const [activeNowBarIndex, setActiveNowBarIndex] = useState(0);
+  const nowBarTrackRef = React.useRef(null);
+
+  const scrollNowBar = (direction) => {
+    if (!nowBarTrackRef.current) return;
+    const track = nowBarTrackRef.current;
+    const scrollAmount = 280;
+    track.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+  };
+
+  const handleNowBarScroll = () => {
+    if (!nowBarTrackRef.current) return;
+    const track = nowBarTrackRef.current;
+    const cardWidth = 280;
+    const newIdx = Math.round(track.scrollLeft / cardWidth);
+    setActiveNowBarIndex(Math.max(0, Math.min(newIdx, people.length - 1)));
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -494,56 +516,236 @@ export const DashboardView = ({
             </div>
           </div>
 
-          {/* Top Borrower Exposure */}
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Borrower Exposure Snapshot</h3>
-            {people.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                No contacts yet. Add your first contact above!
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {[...people]
-                  .sort((a, b) => Number(b.outstanding_balance || 0) - Number(a.outstanding_balance || 0))
-                  .slice(0, 5)
-                  .map((p) => (
-                  <div
-                    key={p.id}
-                    className="dashboard-row-item"
-                    onClick={() => onOpenPersonDetails && onOpenPersonDetails(p)}
-                    style={{
+          {/* Samsung Now Bar: Borrower Exposure Interactive Carousel */}
+          <div className="samsung-now-bar-panel" style={{ padding: '1.25rem' }}>
+            {/* Now Bar Header Capsule */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '1rem',
+              paddingBottom: '0.75rem',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.06)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <div style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #10b981, #06b6d4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 0 12px rgba(16, 185, 129, 0.4)'
+                }}>
+                  <Sparkles size={14} color="#ffffff" />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <h3 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0, letterSpacing: '-0.01em' }}>
+                      Borrower Exposure
+                    </h3>
+                    <span style={{
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      padding: '0.15rem 0.45rem',
+                      borderRadius: 'var(--radius-full)',
+                      background: 'rgba(16, 185, 129, 0.15)',
+                      color: 'var(--accent-emerald)',
+                      border: '1px solid rgba(16, 185, 129, 0.3)',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '0.75rem 0.95rem',
-                      background: 'var(--inner-card-bg)',
-                      borderRadius: 'var(--radius-sm)',
-                      border: '1px solid var(--border-subtle)',
-                      fontSize: '0.825rem',
-                      cursor: 'pointer',
-                      transition: 'all 0.18s ease'
-                    }}
-                    title={`Click to view full dossier & loan records for ${p.name}`}
-                  >
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <span>{p.name}</span>
-                        <ChevronRight size={13} color="var(--text-muted)" style={{ opacity: 0.6 }} />
-                      </div>
-                      <span className="badge-role" style={{ fontSize: '0.65rem', textTransform: 'capitalize', marginTop: '0.2rem', display: 'inline-block' }}>
-                        {p.relationship}
-                      </span>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 800, fontSize: '0.95rem', color: Number(p.outstanding_balance || 0) > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)' }}>
-                        {currSymbol}{Number(p.outstanding_balance || 0).toLocaleString()}
-                      </div>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                        Owed balance
-                      </div>
-                    </div>
+                      gap: '0.25rem'
+                    }}>
+                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent-emerald)', animation: 'pulse-green 1.5s infinite' }} />
+                      NOW BAR
+                    </span>
                   </div>
-                ))}
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                    Swipe / scroll horizontally across borrowers
+                  </span>
+                </div>
+              </div>
+
+              {people.length > 1 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <button
+                    className="now-bar-nav-btn"
+                    onClick={() => scrollNowBar('left')}
+                    title="Previous borrower"
+                  >
+                    <ChevronLeft size={15} />
+                  </button>
+                  <button
+                    className="now-bar-nav-btn"
+                    onClick={() => scrollNowBar('right')}
+                    title="Next borrower"
+                  >
+                    <ChevronRight size={15} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Now Bar Horizontal Scroll Track */}
+            {people.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                No contacts yet. Click "Add Borrower" above to get started!
+              </div>
+            ) : (
+              <div>
+                <div
+                  className="now-bar-scroll-track"
+                  ref={nowBarTrackRef}
+                  onScroll={handleNowBarScroll}
+                >
+                  {people.map((p, idx) => {
+                    const pLoans = loans.filter((l) => {
+                      if (l.person === p.id) return true;
+                      if (typeof l.person === 'object' && l.person?.id === p.id) return true;
+                      if (l.person_name && p.name && l.person_name.toLowerCase() === p.name.toLowerCase()) return true;
+                      return false;
+                    });
+                    const pCurrs = Array.from(new Set(pLoans.map(l => l.currency || 'INR')));
+                    const pLent = pLoans.reduce((acc, l) => l.status !== 'CANCELLED' ? acc + Number(l.principal_amount || 0) : acc, 0);
+                    const pRepaid = pLoans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
+                    const pOut = pLoans.reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + Number(l.balance?.outstanding || 0) : acc, 0);
+                    const pRecRate = pLent > 0 ? Math.min(100, Math.round((pRepaid / pLent) * 100)) : 100;
+                    const isOverdue = pLoans.some(l => (l.days_overdue > 0 || l.time_status === 'OVERDUE') && l.status !== 'PAID');
+
+                    return (
+                      <div
+                        key={p.id}
+                        className="now-bar-card"
+                        onClick={() => onOpenPersonDetails && onOpenPersonDetails(p)}
+                        title={`Click to view full dossier for ${p.name}`}
+                      >
+                        {/* Top: Avatar, Name & Status */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                            <div style={{
+                              width: 38,
+                              height: 38,
+                              borderRadius: '50%',
+                              background: 'linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan))',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontWeight: 800,
+                              fontSize: '0.95rem',
+                              color: '#fff',
+                              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.35)',
+                              flexShrink: 0
+                            }}>
+                              {p.name ? p.name.charAt(0).toUpperCase() : 'B'}
+                            </div>
+                            <div>
+                              <strong style={{ fontSize: '0.95rem', display: 'block', letterSpacing: '-0.01em' }}>
+                                {p.name}
+                              </strong>
+                              <span className="badge-role" style={{ fontSize: '0.65rem', padding: '0.15rem 0.45rem', marginTop: '0.15rem', display: 'inline-block' }}>
+                                {p.relationship || 'Contact'}
+                              </span>
+                            </div>
+                          </div>
+
+                          <span
+                            className="badge"
+                            style={{
+                              fontSize: '0.62rem',
+                              padding: '0.2rem 0.5rem',
+                              background: isOverdue ? 'rgba(244, 63, 94, 0.15)' : pOut === 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(6, 182, 212, 0.15)',
+                              color: isOverdue ? 'var(--accent-rose)' : pOut === 0 ? 'var(--accent-emerald)' : 'var(--accent-cyan)',
+                              borderColor: isOverdue ? 'rgba(244, 63, 94, 0.3)' : pOut === 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(6, 182, 212, 0.3)'
+                            }}
+                          >
+                            {isOverdue ? 'OVERDUE' : pOut === 0 ? 'SETTLED' : 'ACTIVE'}
+                          </span>
+                        </div>
+
+                        {/* Middle: Owed Balance in Real Currency */}
+                        <div style={{
+                          background: 'rgba(255, 255, 255, 0.03)',
+                          border: '1px solid rgba(255, 255, 255, 0.05)',
+                          borderRadius: '12px',
+                          padding: '0.75rem 0.9rem',
+                          marginBottom: '0.75rem'
+                        }}>
+                          <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block' }}>
+                            Owed Capital Balance
+                          </span>
+
+                          {pCurrs.length > 1 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginTop: '0.25rem' }}>
+                              {pCurrs.map(curr => {
+                                const cLoans = pLoans.filter(l => (l.currency || 'INR') === curr);
+                                const cOut = cLoans.reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + Number(l.balance?.outstanding || 0) : acc, 0);
+                                return (
+                                  <div key={curr} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                    <span style={{ fontSize: '1.05rem', fontWeight: 800, color: cOut > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)' }}>
+                                      {getCurrencySymbol(curr)}{cOut.toLocaleString()}
+                                    </span>
+                                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-secondary)' }}>{curr}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: pOut > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)', marginTop: '0.2rem' }}>
+                              {getCurrencySymbol(pCurrs[0] || 'INR')}{pOut.toLocaleString()} <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>{pCurrs[0] || 'INR'}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Recovery Rate Mini Bar */}
+                        <div style={{ marginBottom: '0.75rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '0.25rem' }}>
+                            <span style={{ color: 'var(--text-muted)' }}>Recovery Progress</span>
+                            <strong style={{ color: 'var(--accent-emerald)' }}>{pRecRate}% Settled</strong>
+                          </div>
+                          <div style={{ height: 4, background: 'rgba(255, 255, 255, 0.08)', borderRadius: 2, overflow: 'hidden' }}>
+                            <div style={{ width: `${pRecRate}%`, height: '100%', background: 'linear-gradient(90deg, #10b981, #06b6d4)', transition: 'width 0.4s ease' }} />
+                          </div>
+                        </div>
+
+                        {/* Bottom Action Prompt */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          paddingTop: '0.5rem',
+                          borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          color: 'var(--accent-indigo)'
+                        }}>
+                          <span>{pLoans.length} {pLoans.length === 1 ? 'Loan Record' : 'Loan Records'}</span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                            Dossier <ChevronRight size={13} />
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Now Bar Pagination Indicator Dots */}
+                {people.length > 1 && (
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', marginTop: '0.5rem' }}>
+                    {people.map((p, idx) => (
+                      <div
+                        key={p.id}
+                        className={`now-bar-dot ${activeNowBarIndex === idx ? 'active' : 'inactive'}`}
+                        onClick={() => {
+                          if (nowBarTrackRef.current) {
+                            nowBarTrackRef.current.scrollTo({ left: idx * 280, behavior: 'smooth' });
+                          }
+                        }}
+                        title={`Jump to ${p.name}`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
