@@ -61,6 +61,9 @@ export const PersonDetailsModal = ({
   const activeLoans = personLoans.filter(l => l.status === 'OPEN' || l.status === 'PARTIALLY_PAID');
   const overdueLoans = activeLoans.filter(l => l.days_overdue > 0 || l.time_status === 'OVERDUE');
 
+  // Identify distinct currencies used by this borrower
+  const distinctCurrencies = Array.from(new Set(personLoans.map(l => l.currency || 'INR')));
+
   // Calculate unmixed totals per currency directly from transaction records
   const personTotalsByCurrency = {};
   distinctCurrencies.forEach((curr) => {
