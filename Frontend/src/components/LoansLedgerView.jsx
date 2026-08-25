@@ -282,15 +282,15 @@ export const LoansLedgerView = ({
                         {loan.direction === 'borrowed' ? 'Outstanding Payable:' : 'Outstanding Receivable:'}
                       </span>
                       <strong style={{ color: outstanding > 0 ? (loan.direction === 'borrowed' ? 'var(--accent-indigo)' : 'var(--accent-cyan)') : 'var(--accent-emerald)', fontSize: '0.95rem' }}>
-                        {getCurrencySymbol(loan.currency)}{outstanding.toLocaleString()} <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{loan.currency || 'INR'}</span>
+                        {isMasked ? `${getCurrencySymbol(loan.currency)}••••••` : `${getCurrencySymbol(loan.currency)}${outstanding.toLocaleString()}`} <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{loan.currency || 'INR'}</span>
                       </strong>
                     </div>
                     <div style={{ height: 6, background: 'var(--bg-surface)', borderRadius: 3, overflow: 'hidden', display: 'flex' }}>
                       <div style={{ width: `${progressPercent}%`, background: loan.direction === 'borrowed' ? 'var(--accent-indigo)' : 'var(--accent-emerald)' }} />
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                      <span>{loan.direction === 'borrowed' ? 'Repaid:' : 'Recovered:'} {getCurrencySymbol(loan.currency)}{repaid.toLocaleString()} ({progressPercent}%)</span>
-                      <span>Principal: {getCurrencySymbol(loan.currency)}{principal.toLocaleString()}</span>
+                      <span>{loan.direction === 'borrowed' ? 'Repaid:' : 'Recovered:'} {isMasked ? '••••••' : `${getCurrencySymbol(loan.currency)}${repaid.toLocaleString()}`} ({progressPercent}%)</span>
+                      <span>Principal: {isMasked ? '••••••' : `${getCurrencySymbol(loan.currency)}${principal.toLocaleString()}`}</span>
                     </div>
                   </div>
 
@@ -308,18 +308,17 @@ export const LoansLedgerView = ({
                         onClick={() => onRecordPayment(loan)}
                       >
                         <ArrowDownLeft size={14} />
-                        <span>{loan.direction === 'borrowed' ? 'Record Repayment' : 'Record Payment'}</span>
+                        <span>{loan.direction === 'borrowed' ? 'Record Repayment' : 'Record Collection'}</span>
                       </button>
                     )}
 
                     <button
                       className="btn btn-secondary"
-                      title="Generate Digital IOU & Statement"
-                      style={{ padding: '0.4rem 0.75rem', fontSize: '0.78rem' }}
+                      style={{ padding: '0.4rem 0.6rem' }}
+                      title="Digital Statement"
                       onClick={() => onGenerateStatement(loan)}
                     >
                       <FileText size={14} />
-                      <span>Digital IOU</span>
                     </button>
 
                     <button
@@ -335,50 +334,30 @@ export const LoansLedgerView = ({
                   </div>
                 </div>
 
-                {/* Expanded Repayment History & Ledger Drawer */}
+                {/* Expanded Repayments Audit View */}
                 {isExpanded && (
                   <div style={{
-                    marginTop: '1.25rem',
-                    paddingTop: '1.25rem',
-                    borderTop: '1px solid var(--border-subtle)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1rem'
+                    padding: '1rem 1.25rem',
+                    background: 'rgba(0,0,0,0.15)',
+                    borderTop: '1px solid var(--border-subtle)'
                   }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <h4 style={{ fontSize: '0.9rem', fontWeight: 700 }}>Repayment Transaction History</h4>
-                      {loan.status !== 'CANCELLED' && loan.status !== 'PAID' && (
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <button
-                            className="btn btn-secondary"
-                            style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem' }}
-                            onClick={() => onCancelLoan(loan.id)}
-                          >
-                            Void / Cancel Loan
-                          </button>
-                          <button
-                            className="btn btn-secondary"
-                            style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', color: 'var(--accent-rose)' }}
-                            onClick={() => onWriteOffLoan(loan.id)}
-                          >
-                            Write Off (Default)
-                          </button>
-                        </div>
-                      )}
+                    <div style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Clock size={14} />
+                      <span>{loan.direction === 'borrowed' ? 'Payment History to Lender' : 'Repayment Audit Ledger'}</span>
                     </div>
 
                     {(() => {
-                      const paymentsList = loan.repayments || loan.recent_payments || [];
-                      if (paymentsList.length === 0) {
+                      const reps = loan.repayments || loan.recent_payments || [];
+                      if (reps.length === 0) {
                         return (
-                          <div style={{ padding: '1rem', background: 'var(--inner-card-bg)', borderRadius: 'var(--radius-sm)', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                            No repayments recorded yet for this loan.
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontStyle: 'italic', padding: '0.5rem 0' }}>
+                            {loan.direction === 'borrowed' ? 'No debt repayments have been made for this borrowing obligation yet.' : 'No repayments recorded for this loan yet.'}
                           </div>
                         );
                       }
                       return (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                          {paymentsList.map((p) => (
+                          {reps.map((p) => (
                             <div key={p.id} style={{
                               display: 'flex',
                               alignItems: 'center',
@@ -390,7 +369,9 @@ export const LoansLedgerView = ({
                               fontSize: '0.825rem'
                             }}>
                               <div>
-                                <strong style={{ color: 'var(--accent-emerald)' }}>+ {getCurrencySymbol(p.currency || loan.currency)}{Number(p.amount).toLocaleString()} {p.currency || loan.currency}</strong>
+                                <strong style={{ color: 'var(--accent-emerald)' }}>
+                                  + {isMasked ? '••••••' : `${getCurrencySymbol(p.currency || loan.currency)}${Number(p.amount).toLocaleString()} ${p.currency || loan.currency}`}
+                                </strong>
                                 <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem', fontSize: '0.75rem' }}>
                                   via {p.payment_method?.replace('_', ' ')}
                                 </span>
