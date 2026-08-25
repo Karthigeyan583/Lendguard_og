@@ -8,6 +8,7 @@ import { DashboardView } from './components/DashboardView';
 import { PeopleView } from './components/PeopleView';
 import { LoansLedgerView } from './components/LoansLedgerView';
 import { ReportsAgingView } from './components/ReportsAgingView';
+import { AnalyticsView } from './components/AnalyticsView/AnalyticsView';
 import { LoanCalculatorView } from './components/LoanCalculatorView';
 import { ApiExplorer } from './components/ApiExplorer';
 import { SettingsView } from './components/SettingsView';
