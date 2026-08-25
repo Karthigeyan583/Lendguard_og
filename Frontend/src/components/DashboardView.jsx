@@ -36,13 +36,13 @@ export const DashboardView = ({
          l.status !== 'PAID' && l.status !== 'CANCELLED' && l.status !== 'WRITTEN_OFF'
   );
 
-  const preferredCurrency = loans.length > 0 ? (loans[0].currency || 'INR') : getDefaultCurrency();
-  const currSymbol = getCurrencySymbol(preferredCurrency);
+  const reportingCurrency = summary?.reporting_currency || (loans.length > 0 && loans[0].reporting_currency) || getDefaultCurrency();
+  const currSymbol = getCurrencySymbol(reportingCurrency);
 
-  const totalLent = summary?.total_lent ?? loans.reduce((acc, l) => acc + (l.status !== 'CANCELLED' ? Number(l.principal_amount || 0) : 0), 0);
-  const totalRepaid = summary?.total_repaid ?? loans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
-  const totalOutstanding = summary?.total_outstanding ?? loans.reduce((acc, l) => acc + (l.status !== 'CANCELLED' && l.status !== 'PAID' ? Number(l.balance?.outstanding || 0) : 0), 0);
-  const totalOverdue = summary?.total_overdue ?? overdueLoans.reduce((acc, l) => acc + Number(l.balance?.outstanding || 0), 0);
+  const totalLent = summary?.total_lent ?? loans.reduce((acc, l) => l.status !== 'CANCELLED' ? acc + convertCurrency(l.principal_amount, l.currency, reportingCurrency, l.exchange_rate) : acc, 0);
+  const totalRepaid = summary?.total_repaid ?? loans.reduce((acc, l) => acc + convertCurrency(l.balance?.total_repaid || 0, l.currency, reportingCurrency, l.exchange_rate), 0);
+  const totalOutstanding = summary?.total_outstanding ?? loans.reduce((acc, l) => (l.status !== 'CANCELLED' && l.status !== 'PAID') ? acc + convertCurrency(l.balance?.outstanding || 0, l.currency, reportingCurrency, l.exchange_rate) : acc, 0);
+  const totalOverdue = summary?.total_overdue ?? overdueLoans.reduce((acc, l) => acc + convertCurrency(l.balance?.outstanding || 0, l.currency, reportingCurrency, l.exchange_rate), 0);
   const recoveryRate = summary?.recovery_rate ?? (totalLent > 0 ? Number(((totalRepaid / totalLent) * 100).toFixed(1)) : 0);
   const overdueCount = summary?.overdue_count ?? overdueLoans.length;
   const dueSoonCount = summary?.due_soon_count ?? dueSoonLoans.length;
