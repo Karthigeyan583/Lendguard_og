@@ -53,7 +53,12 @@ export const DashboardView = ({
       {/* 4 Main KPI Cards */}
       <div className="stats-grid">
         {/* Total Lent */}
-        <div className="glass-panel kpi-card kpi-lent" style={{ padding: '1.5rem' }}>
+        <div
+          className="glass-panel kpi-card kpi-lent"
+          style={{ padding: '1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
+          onClick={() => onOpenDrilldown && onOpenDrilldown('lent')}
+          title="Click to view full breakdown of capital lent"
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>TOTAL CAPITAL LENT</span>
             <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(59, 130, 246, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -69,7 +74,12 @@ export const DashboardView = ({
         </div>
 
         {/* Total Repaid */}
-        <div className="glass-panel kpi-card kpi-repaid" style={{ padding: '1.5rem' }}>
+        <div
+          className="glass-panel kpi-card kpi-repaid"
+          style={{ padding: '1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
+          onClick={() => onOpenDrilldown && onOpenDrilldown('repaid')}
+          title="Click to view total repayments and collection ledger"
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>TOTAL REPAID</span>
             <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -85,7 +95,12 @@ export const DashboardView = ({
         </div>
 
         {/* Net Outstanding */}
-        <div className="glass-panel kpi-card kpi-outstanding" style={{ padding: '1.5rem' }}>
+        <div
+          className="glass-panel kpi-card kpi-outstanding"
+          style={{ padding: '1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
+          onClick={() => onOpenDrilldown && onOpenDrilldown('outstanding')}
+          title="Click to view net outstanding loans and debtors"
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>NET OUTSTANDING BALANCE</span>
             <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(6, 182, 212, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -103,7 +118,12 @@ export const DashboardView = ({
         </div>
 
         {/* Total Overdue */}
-        <div className="glass-panel kpi-card kpi-overdue" style={{ padding: '1.5rem' }}>
+        <div
+          className="glass-panel kpi-card kpi-overdue"
+          style={{ padding: '1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
+          onClick={() => onOpenDrilldown && onOpenDrilldown('overdue')}
+          title="Click to view detailed overdue loans report"
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>OVERDUE AMOUNT</span>
             <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(244, 63, 94, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -126,7 +146,12 @@ export const DashboardView = ({
       </div>
 
       {/* Recovery Progress Bar Strip */}
-      <div className="glass-panel dashboard-item-card" style={{ padding: '1.25rem 1.5rem' }}>
+      <div
+        className="glass-panel dashboard-item-card"
+        style={{ padding: '1.25rem 1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
+        onClick={() => onOpenDrilldown && onOpenDrilldown('repaid')}
+        title="Click to view repayment ledger"
+      >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
           <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Overall Portfolio Recovery Progress</span>
           <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>{recoveryRate}% Settled</span>
