@@ -2,6 +2,7 @@ import datetime
 from decimal import Decimal
 from typing import Dict, List, Any, Optional
 from django.utils import timezone
+from django.db.models import Q
 
 from apps.loans.models import Loan
 from apps.payments.models import Payment
