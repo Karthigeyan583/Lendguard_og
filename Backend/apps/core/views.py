@@ -270,9 +270,13 @@ class ReportsAgingView(APIView):
             elif d_lower in ['lent', 'lending']:
                 loans = loans.filter(direction='lent')
 
-        reporting_currency = 'INR'
-        if hasattr(user, 'profile') and user.profile.base_currency:
+        req_curr = request.query_params.get('reporting_currency') or request.query_params.get('currency')
+        if req_curr and req_curr.upper() != 'REPORTING':
+            reporting_currency = req_curr.upper().strip()
+        elif hasattr(user, 'profile') and user.profile.base_currency:
             reporting_currency = user.profile.base_currency
+        else:
+            reporting_currency = 'INR'
 
         buckets = {
             'tier_0_to_7_days': {'count': 0, 'amount': 0.0, 'loans': []},
