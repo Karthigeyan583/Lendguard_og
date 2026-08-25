@@ -323,7 +323,6 @@ export const PersonDetailsModal = ({
               </div>
             </div>
           )}
-          </div>
 
           {/* Recovery Progress Bar */}
           <div>
