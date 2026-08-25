@@ -321,6 +321,7 @@ function LendGuardApp() {
               onOpenNewLoan={() => { setNewLoanPrefill(null); setIsNewLoanOpen(true); }}
               onOpenAddPerson={() => setIsAddPersonOpen(true)}
               onOpenPersonDetails={(p) => { setSelectedPersonForDetails(p); setIsPersonDetailsOpen(true); }}
+              onOpenDrilldown={(type) => { setDrilldownType(type); setIsDrilldownOpen(true); }}
             />
           )}
 
