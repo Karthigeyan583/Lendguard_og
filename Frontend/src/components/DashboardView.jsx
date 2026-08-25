@@ -18,7 +18,8 @@ import {
   Sparkles,
   Activity,
   Layers,
-  Filter
+  Filter,
+  Check
 } from 'lucide-react';
 import { getCurrencySymbol, getDefaultCurrency } from '../utils/currency';
 
@@ -34,6 +35,7 @@ export const DashboardView = ({
   onOpenDrilldown
 }) => {
   const [activeCurrencyFilter, setActiveCurrencyFilter] = useState('ALL');
+  const [showCurrencySplitDropdown, setShowCurrencySplitDropdown] = useState(false);
 
   // Identify distinct currencies used across loans
   const availableCurrencies = Array.from(new Set(loans.map(l => l.currency || 'INR')));
@@ -145,29 +147,118 @@ export const DashboardView = ({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <Layers size={16} color="var(--accent-indigo)" />
-            <span style={{ fontSize: '0.825rem', fontWeight: 700 }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
               Currency Split View:
             </span>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+          {/* Currency Dropdown Selector */}
+          <div style={{ position: 'relative' }}>
             <button
-              className={`btn ${activeCurrencyFilter === 'ALL' ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem', borderRadius: 'var(--radius-full)' }}
-              onClick={() => setActiveCurrencyFilter('ALL')}
+              type="button"
+              className="btn btn-secondary"
+              style={{
+                padding: '0.45rem 0.95rem',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                borderRadius: 'var(--radius-sm)',
+                background: 'var(--bg-card)',
+                border: '1.5px solid var(--accent-emerald)',
+                color: 'var(--text-primary)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(16, 185, 129, 0.15)'
+              }}
+              onClick={() => setShowCurrencySplitDropdown(!showCurrencySplitDropdown)}
             >
-              All Currencies (Split Breakdown)
+              <span style={{ color: 'var(--accent-emerald)' }}>●</span>
+              <span>
+                {activeCurrencyFilter === 'ALL'
+                  ? 'All Currencies (Split Breakdown)'
+                  : `${activeCurrencyFilter} (${getCurrencySymbol(activeCurrencyFilter)})`}
+              </span>
+              <ChevronDown size={14} color="var(--text-muted)" />
             </button>
-            {availableCurrencies.map(curr => (
-              <button
-                key={curr}
-                className={`btn ${activeCurrencyFilter === curr ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem', borderRadius: 'var(--radius-full)' }}
-                onClick={() => setActiveCurrencyFilter(curr)}
-              >
-                {curr} ({getCurrencySymbol(curr)})
-              </button>
-            ))}
+
+            {showCurrencySplitDropdown && (
+              <div style={{
+                position: 'absolute',
+                right: 0,
+                top: '120%',
+                minWidth: 220,
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+                boxShadow: 'var(--shadow-lg)',
+                zIndex: 100,
+                padding: '0.4rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.2rem'
+              }}>
+                <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', padding: '0.3rem 0.55rem', textTransform: 'uppercase' }}>
+                  Filter Portfolio Currency
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveCurrencyFilter('ALL');
+                    setShowCurrencySplitDropdown(false);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.45rem 0.65rem',
+                    borderRadius: 'var(--radius-sm)',
+                    border: 'none',
+                    background: activeCurrencyFilter === 'ALL' ? 'rgba(16, 185, 129, 0.15)' : 'transparent',
+                    color: activeCurrencyFilter === 'ALL' ? 'var(--accent-emerald)' : 'var(--text-primary)',
+                    fontWeight: activeCurrencyFilter === 'ALL' ? 700 : 500,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    width: '100%',
+                    transition: 'background 0.15s ease'
+                  }}
+                >
+                  <span>All Currencies (Split Breakdown)</span>
+                  {activeCurrencyFilter === 'ALL' && <Check size={14} color="var(--accent-emerald)" />}
+                </button>
+
+                {availableCurrencies.map(curr => (
+                  <button
+                    key={curr}
+                    type="button"
+                    onClick={() => {
+                      setActiveCurrencyFilter(curr);
+                      setShowCurrencySplitDropdown(false);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.45rem 0.65rem',
+                      borderRadius: 'var(--radius-sm)',
+                      border: 'none',
+                      background: activeCurrencyFilter === curr ? 'rgba(16, 185, 129, 0.15)' : 'transparent',
+                      color: activeCurrencyFilter === curr ? 'var(--accent-emerald)' : 'var(--text-primary)',
+                      fontWeight: activeCurrencyFilter === curr ? 700 : 500,
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      width: '100%',
+                      transition: 'background 0.15s ease'
+                    }}
+                  >
+                    <span>{curr} ({getCurrencySymbol(curr)})</span>
+                    {activeCurrencyFilter === curr && <Check size={14} color="var(--accent-emerald)" />}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
