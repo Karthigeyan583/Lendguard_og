@@ -13,6 +13,7 @@ import {
   Share2,
   ChevronRight
 } from 'lucide-react';
+import { getCurrencySymbol, getDefaultCurrency } from '../utils/currency';
 
 export const DashboardView = ({ 
   summary, 
@@ -33,6 +34,9 @@ export const DashboardView = ({
     l => (l.time_status === 'DUE_SOON' || l.time_status === 'DUE_TODAY') &&
          l.status !== 'PAID' && l.status !== 'CANCELLED' && l.status !== 'WRITTEN_OFF'
   );
+
+  const preferredCurrency = loans.length > 0 ? (loans[0].currency || 'INR') : getDefaultCurrency();
+  const currSymbol = getCurrencySymbol(preferredCurrency);
 
   const totalLent = summary?.total_lent ?? loans.reduce((acc, l) => acc + (l.status !== 'CANCELLED' ? Number(l.principal_amount || 0) : 0), 0);
   const totalRepaid = summary?.total_repaid ?? loans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
