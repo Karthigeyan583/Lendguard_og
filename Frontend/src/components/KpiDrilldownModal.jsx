@@ -12,7 +12,7 @@ import {
   ExternalLink,
   Plus
 } from 'lucide-react';
-import { getCurrencySymbol, formatMoney, getDefaultCurrency } from '../utils/currency';
+import { getCurrencySymbol, formatMoney, getDefaultCurrency, convertCurrency } from '../utils/currency';
 
 export const KpiDrilldownModal = ({
   isOpen,
@@ -30,8 +30,8 @@ export const KpiDrilldownModal = ({
 
   if (!isOpen) return null;
 
-  const preferredCurrency = loans.length > 0 ? (loans[0].currency || 'INR') : getDefaultCurrency();
-  const currSymbol = getCurrencySymbol(preferredCurrency);
+  const reportingCurrency = summary?.reporting_currency || (loans.length > 0 && loans[0].reporting_currency) || getDefaultCurrency();
+  const currSymbol = getCurrencySymbol(reportingCurrency);
 
   // Extract all repayments across all loans
   const allRepayments = [];
@@ -43,7 +43,8 @@ export const KpiDrilldownModal = ({
           loan_id: l.id,
           loan_reference: l.loan_reference,
           person_name: l.person_name,
-          currency: l.currency || preferredCurrency
+          currency: l.currency || reportingCurrency,
+          exchange_rate: l.exchange_rate
         });
       });
     }
@@ -66,33 +67,33 @@ export const KpiDrilldownModal = ({
 
   if (type === 'lent') {
     title = 'Total Capital Lent Breakdown';
-    subtitle = 'Comprehensive register of all capital disbursements in your authoritative lending ledger';
+    subtitle = `Authoritative lending register normalized into ${reportingCurrency} Base Reporting Currency`;
     icon = <ArrowUpRight size={22} color="var(--accent-blue)" />;
     accentColor = 'var(--accent-blue)';
-    totalAmount = summary?.total_lent ?? loans.reduce((acc, l) => acc + (l.status !== 'CANCELLED' ? Number(l.principal_amount || 0) : 0), 0);
-    subMetricText = `${activeLoans.length} total active lending records`;
+    totalAmount = summary?.total_lent ?? loans.reduce((acc, l) => acc + (l.status !== 'CANCELLED' ? convertCurrency(l.principal_amount, l.currency, reportingCurrency, l.exchange_rate) : 0), 0);
+    subMetricText = `${activeLoans.length} total active lending records (${reportingCurrency} Base)`;
   } else if (type === 'repaid') {
     title = 'Total Repayments & Recoveries';
-    subtitle = 'Itemized transaction audit ledger of all funds collected from borrowers';
+    subtitle = `Itemized transaction audit ledger of all funds collected from borrowers (${reportingCurrency} Base)`;
     icon = <CheckCircle2 size={22} color="var(--accent-emerald)" />;
     accentColor = 'var(--accent-emerald)';
-    totalAmount = summary?.total_repaid ?? loans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
-    const recoveryRate = summary?.recovery_rate ?? (loans.length > 0 ? ((totalAmount / (summary?.total_lent || 1)) * 100).toFixed(1) : 0);
+    totalAmount = summary?.total_repaid ?? loans.reduce((acc, l) => acc + convertCurrency(l.balance?.total_repaid || 0, l.currency, reportingCurrency, l.exchange_rate), 0);
+    const recoveryRate = summary?.recovery_rate ?? (totalAmount > 0 ? ((totalAmount / (summary?.total_lent || 1)) * 100).toFixed(1) : 0);
     subMetricText = `Portfolio Recovery Rate: ${recoveryRate}% across ${allRepayments.length} transactions`;
   } else if (type === 'outstanding') {
     title = 'Net Outstanding Portfolio';
-    subtitle = 'Real-time overview of uncollected capital currently owed across active borrowers';
+    subtitle = `Real-time overview of uncollected capital currently owed across active borrowers (${reportingCurrency} Base)`;
     icon = <Clock size={22} color="var(--accent-cyan)" />;
     accentColor = 'var(--accent-cyan)';
-    totalAmount = summary?.total_outstanding ?? openLoans.reduce((acc, l) => acc + Number(l.balance?.outstanding || 0), 0);
+    totalAmount = summary?.total_outstanding ?? openLoans.reduce((acc, l) => acc + convertCurrency(l.balance?.outstanding || 0, l.currency, reportingCurrency, l.exchange_rate), 0);
     const debtorCount = people.filter(p => Number(p.outstanding_balance || 0) > 0).length;
     subMetricText = `Owed across ${debtorCount} active borrowers in ${openLoans.length} active loans`;
   } else if (type === 'overdue') {
     title = 'Overdue Loans & Delinquency Report';
-    subtitle = 'High-priority loans that have passed their agreed maturity due date without full settlement';
+    subtitle = `High-priority loans that have passed their agreed maturity due date without full settlement (${reportingCurrency} Base)`;
     icon = <AlertTriangle size={22} color="var(--accent-rose)" />;
     accentColor = 'var(--accent-rose)';
-    totalAmount = summary?.total_overdue ?? overdueLoans.reduce((acc, l) => acc + Number(l.balance?.outstanding || 0), 0);
+    totalAmount = summary?.total_overdue ?? overdueLoans.reduce((acc, l) => acc + convertCurrency(l.balance?.outstanding || 0, l.currency, reportingCurrency, l.exchange_rate), 0);
     subMetricText = `${overdueLoans.length} ${overdueLoans.length === 1 ? 'loan requires' : 'loans require'} immediate collection action`;
   }
 
