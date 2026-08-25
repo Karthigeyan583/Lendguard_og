@@ -16,6 +16,7 @@ import { NewLoanModal } from './components/NewLoanModal';
 import { AddPersonModal } from './components/AddPersonModal';
 import { RecordPaymentModal } from './components/RecordPaymentModal';
 import { DigitalStatementModal } from './components/DigitalStatementModal';
+import { PersonDetailsModal } from './components/PersonDetailsModal';
 import { AuthModal } from './components/AuthModal';
 
 import { api } from './services/api';
