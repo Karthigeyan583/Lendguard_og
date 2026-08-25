@@ -303,11 +303,11 @@ export const AnalyticsView = ({
 
   useEffect(() => {
     const local = computeLocalAnalytics();
-    setOverviewData(prev => prev || local.overview);
-    setLendingData(prev => prev || local.lending);
-    setBorrowingData(prev => prev || local.borrowing);
-    setPaymentsData(prev => prev || local.payments);
-    setCashflowData(prev => prev || local.cashflow);
+    setOverviewData(local.overview);
+    setLendingData(local.lending);
+    setBorrowingData(local.borrowing);
+    setPaymentsData(local.payments);
+    setCashflowData(local.cashflow);
     fetchAnalytics();
   }, [reportingCurrency, dateRange, comparisonMode, loans, people]);
 
