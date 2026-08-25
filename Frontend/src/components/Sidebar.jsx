@@ -31,9 +31,10 @@ export const Sidebar = ({
   const { theme, toggleTheme, isDark } = useTheme();
 
   const mainNavItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: BarChart3, description: 'Overview & Urgency' },
-    { id: 'people', label: 'People & Contacts', icon: Users, description: 'Borrower directory' },
-    { id: 'loans', label: 'Lending Ledger', icon: BookOpen, description: 'Source of Truth' },
+    { id: 'dashboard', label: 'Dashboard', icon: BarChart3, description: 'Overview & Position' },
+    { id: 'people', label: 'People & Contacts', icon: Users, description: 'Borrowers & Lenders' },
+    { id: 'loans', label: 'Lending Ledger', icon: BookOpen, description: 'Money Lent (Receivables)' },
+    { id: 'borrowing', label: 'Borrowing Ledger', icon: TrendingUp, description: 'Money Borrowed (Payables)' },
     { id: 'aging', label: 'Overdue Aging', icon: FileText, description: 'Recovery buckets', badge: overdueCount > 0 ? `${overdueCount}` : null, badgeColor: 'var(--accent-rose)' },
   ];
 
@@ -75,7 +76,7 @@ export const Sidebar = ({
               }}>v2.0</span>
             </div>
             <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
-              Personal Lending Ledger
+              Lending & Borrowing Ledger
             </div>
           </div>
         </div>
@@ -112,14 +113,14 @@ export const Sidebar = ({
           onClick={onOpenNewLoan}
         >
           <Plus size={16} strokeWidth={2.5} />
-          <span>Record Money Lent</span>
+          <span>Record Loan / Borrow</span>
         </button>
       </div>
 
       {/* 3. Navigation Sections */}
       <div className="sidebar-nav-container">
         {/* Main Section */}
-        <div className="sidebar-section-title">LENDING & LEDGER</div>
+        <div className="sidebar-section-title">LENDING & BORROWING</div>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginBottom: '1.25rem' }}>
           {mainNavItems.map((item) => {
             const Icon = item.icon;
