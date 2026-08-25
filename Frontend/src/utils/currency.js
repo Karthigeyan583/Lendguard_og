@@ -1,4 +1,4 @@
-// Currency Formatting Utilities for LendGuard v2.0
+// Currency Formatting & Conversion Utilities for LendGuard v2.0
 
 export const CURRENCY_MAP = {
   INR: { symbol: '₹', name: 'Indian Rupee', label: 'INR (₹)' },
@@ -11,8 +11,26 @@ export const CURRENCY_MAP = {
   SGD: { symbol: 'S$', name: 'Singapore Dollar', label: 'SGD (S$)' }
 };
 
+// Canonical Parity Reference (Base: INR per unit of currency)
+export const INR_PER_UNIT = {
+  INR: 1.0,
+  USD: 90.0,
+  EUR: 98.0,
+  GBP: 115.0,
+  CAD: 65.0,
+  AUD: 58.0,
+  AED: 24.5,
+  SGD: 68.0
+};
+
 export const getDefaultCurrency = () => {
   return localStorage.getItem('lendguard_currency') || 'INR';
+};
+
+export const setDefaultCurrency = (code) => {
+  if (code) {
+    localStorage.setItem('lendguard_currency', String(code).toUpperCase());
+  }
 };
 
 export const getCurrencySymbol = (currencyCode) => {
@@ -24,8 +42,35 @@ export const getCurrencySymbol = (currencyCode) => {
   return CURRENCY_MAP[code]?.symbol || `${code} `;
 };
 
+export const getExchangeRate = (fromCurrency, toCurrency) => {
+  const src = String(fromCurrency || 'INR').toUpperCase().trim();
+  const dst = String(toCurrency || 'INR').toUpperCase().trim();
+
+  if (src === dst) return 1.0;
+
+  const srcInr = INR_PER_UNIT[src] || 1.0;
+  const dstInr = INR_PER_UNIT[dst] || 1.0;
+
+  if (dstInr === 0) return 1.0;
+  return Number((srcInr / dstInr).toFixed(6));
+};
+
+export const convertCurrency = (amount, fromCurrency, toCurrency, customRate = null) => {
+  const num = Number(amount || 0);
+  const src = String(fromCurrency || 'INR').toUpperCase().trim();
+  const dst = String(toCurrency || 'INR').toUpperCase().trim();
+
+  if (src === dst) return num;
+
+  const rate = customRate != null && Number(customRate) > 0
+    ? Number(customRate)
+    : getExchangeRate(src, dst);
+
+  return Number((num * rate).toFixed(2));
+};
+
 export const formatMoney = (amount, currencyCode) => {
   const num = Number(amount || 0);
   const symbol = getCurrencySymbol(currencyCode);
-  return `${symbol}${num.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+  return `${symbol}${num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 };
