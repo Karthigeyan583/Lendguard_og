@@ -75,6 +75,7 @@ export const DashboardView = ({
   const overdueCount = activeCurrencyFilter === 'ALL' ? overdueLoans.length : (totalsByCurrency[singleCurr]?.overdueCount || 0);
   const dueSoonCount = dueSoonLoans.length;
   const activeDebtorsCount = people.filter(p => Number(p.outstanding_balance || 0) > 0).length;
+  const recoveryRate = singleStats.recovery || 0;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -343,7 +344,12 @@ export const DashboardView = ({
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
           <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Overall Portfolio Recovery Progress</span>
-          <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>{recoveryRate}% Settled</span>
+          <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>
+            {isSplitView
+              ? availableCurrencies.map(c => `${c}: ${totalsByCurrency[c]?.recovery || 0}%`).join(' • ')
+              : `${recoveryRate}% Settled`
+            }
+          </span>
         </div>
         <div style={{ height: 10, background: 'var(--bg-surface)', borderRadius: 5, overflow: 'hidden', display: 'flex' }}>
           <div style={{ width: `${Math.min(100, Math.max(0, recoveryRate))}%`, background: 'linear-gradient(90deg, #10b981, #06b6d4)', transition: 'width 0.4s ease' }} />
