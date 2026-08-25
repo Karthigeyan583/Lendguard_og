@@ -156,6 +156,14 @@ class LoanCreateSerializer(serializers.ModelSerializer):
         date_given = data.get('date_given')
         due_date = data.get('due_date')
         purpose = data.get('purpose', '')
+        direction = data.get('direction', 'lent')
+
+        if isinstance(direction, str):
+            d_lower = direction.strip().lower()
+            if d_lower in ['borrowed', 'borrowing']:
+                data['direction'] = 'borrowed'
+            else:
+                data['direction'] = 'lent'
 
         if not purpose or not purpose.strip():
             raise serializers.ValidationError({"purpose": "Purpose / lending context is required."})
