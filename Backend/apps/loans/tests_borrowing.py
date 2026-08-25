@@ -53,7 +53,7 @@ class BorrowingExtensionTestSuite(TestCase):
         BOR-001: Create borrowing record via API.
         Expected: direction='borrowed', status='OPEN', outstanding=principal.
         """
-        response = self.client.post('/api/loans/', {
+        response = self.client.post('/api/v1/loans/', {
             'person': self.person.id,
             'direction': 'BORROWING',
             'principal_amount': '20000.00',
@@ -88,7 +88,7 @@ class BorrowingExtensionTestSuite(TestCase):
         )
 
         # Make payment of 5000
-        pay_res = self.client.post('/api/payments/', {
+        pay_res = self.client.post('/api/v1/payments/', {
             'loan': loan.id,
             'amount': '5000.00',
             'payment_date': str(timezone.localdate()),
@@ -120,7 +120,7 @@ class BorrowingExtensionTestSuite(TestCase):
             purpose='Test Full Payment'
         )
 
-        pay_res = self.client.post('/api/payments/', {
+        pay_res = self.client.post('/api/v1/payments/', {
             'loan': loan.id,
             'amount': '20000.00',
             'payment_date': str(timezone.localdate()),
