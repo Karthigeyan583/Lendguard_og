@@ -447,10 +447,15 @@ export const PersonDetailsModal = ({
                       <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                         <div style={{ textAlign: 'right' }}>
                           <div style={{ fontWeight: 800, fontSize: '0.95rem', color: isPaid ? 'var(--accent-emerald)' : 'var(--text-primary)' }}>
-                            {getCurrencySymbol(loan.currency)}{Number(loan.principal_amount || 0).toLocaleString()}
+                            {getCurrencySymbol(loan.currency)}{Number(loan.principal_amount || 0).toLocaleString()} <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{loan.currency || 'INR'}</span>
                           </div>
                           <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                             {isPaid ? 'Fully settled' : `${getCurrencySymbol(loan.currency)}${loanOutstanding.toLocaleString()} remaining`}
+                            {(!isPaid && (loan.currency || 'INR') !== reportingCurrency) && (
+                              <span style={{ color: 'var(--accent-indigo)', marginLeft: 4 }}>
+                                (≈ {reportingSymbol}{convertCurrency(loanOutstanding, loan.currency, reportingCurrency, loan.exchange_rate).toLocaleString()})
+                              </span>
+                            )}
                           </div>
                         </div>
 
