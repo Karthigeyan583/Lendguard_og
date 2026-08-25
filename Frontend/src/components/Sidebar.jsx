@@ -39,7 +39,6 @@ export const Sidebar = ({
 
   const toolsNavItems = [
     { id: 'calculator', label: 'Tools / EMI', icon: Calculator, description: 'Repayment calculator' },
-    { id: 'api-explorer', label: 'API & Swagger', icon: Terminal, description: 'OpenAPI 3.0 docs' },
     { id: 'settings', label: 'Settings & Security', icon: Settings, description: 'P24-P30 Admin Hub' },
   ];
 
