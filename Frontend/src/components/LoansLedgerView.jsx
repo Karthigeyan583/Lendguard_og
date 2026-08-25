@@ -14,7 +14,7 @@ import {
   Calendar,
   DollarSign
 } from 'lucide-react';
-import { getCurrencySymbol, formatMoney } from '../utils/currency';
+import { getCurrencySymbol, formatMoney, convertCurrency, getDefaultCurrency } from '../utils/currency';
 
 const STATUS_TABS = [
   { id: 'all', label: 'All Records' },
@@ -208,11 +208,11 @@ export const LoansLedgerView = ({
                   </div>
 
                   {/* Middle: Financial Balance & Progress Bar */}
-                  <div style={{ minWidth: 220 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.3rem' }}>
+                  <div style={{ minWidth: 230 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontSize: '0.8rem', marginBottom: '0.3rem' }}>
                       <span style={{ color: 'var(--text-muted)' }}>Outstanding:</span>
                       <strong style={{ color: outstanding > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)', fontSize: '0.95rem' }}>
-                        {getCurrencySymbol(loan.currency)}{outstanding.toLocaleString()}
+                        {getCurrencySymbol(loan.currency)}{outstanding.toLocaleString()} <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{loan.currency || 'INR'}</span>
                       </strong>
                     </div>
                     <div style={{ height: 6, background: 'var(--bg-surface)', borderRadius: 3, overflow: 'hidden', display: 'flex' }}>
