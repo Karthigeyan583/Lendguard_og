@@ -16,9 +16,10 @@ import {
   ArrowDownLeft,
   Clock,
   CreditCard,
-  ChevronRight
+  ChevronRight,
+  Layers
 } from 'lucide-react';
-import { getCurrencySymbol, formatMoney } from '../utils/currency';
+import { getCurrencySymbol, formatMoney, convertCurrency, getDefaultCurrency } from '../utils/currency';
 
 export const PersonDetailsModal = ({
   isOpen,
@@ -31,6 +32,10 @@ export const PersonDetailsModal = ({
 }) => {
   if (!isOpen || !person) return null;
 
+  // Active reporting currency
+  const reportingCurrency = person.reporting_currency || (loans.length > 0 && loans[0].reporting_currency) || getDefaultCurrency();
+  const reportingSymbol = getCurrencySymbol(reportingCurrency);
+
   // Filter loans belonging to this person
   const personLoans = loans.filter((l) => {
     if (l.person === person.id) return true;
@@ -39,24 +44,26 @@ export const PersonDetailsModal = ({
     return false;
   });
 
-  // Calculate live aggregations from real loans or fallback to person fields
-  const totalLent = personLoans.length > 0
-    ? personLoans.reduce((acc, l) => l.status !== 'CANCELLED' ? acc + Number(l.principal_amount || 0) : acc, 0)
-    : Number(person.total_lent || 0);
+  // Calculate normalized reporting currency aggregations (never direct sum of different currencies)
+  const totalLent = person.total_lent !== undefined
+    ? Number(person.total_lent)
+    : personLoans.reduce((acc, l) => l.status !== 'CANCELLED' ? acc + convertCurrency(l.principal_amount, l.currency, reportingCurrency, l.exchange_rate) : acc, 0);
 
-  const totalRepaid = personLoans.length > 0
-    ? personLoans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0)
-    : Number(person.total_repaid || 0);
+  const totalRepaid = person.total_repaid !== undefined
+    ? Number(person.total_repaid)
+    : personLoans.reduce((acc, l) => acc + convertCurrency(l.balance?.total_repaid || 0, l.currency, reportingCurrency, l.exchange_rate), 0);
 
-  const outstanding = personLoans.length > 0
-    ? personLoans.reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + Number(l.balance?.outstanding || 0) : acc, 0)
-    : Number(person.outstanding_balance || 0);
+  const outstanding = person.outstanding_balance !== undefined
+    ? Number(person.outstanding_balance)
+    : personLoans.reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + convertCurrency(l.balance?.outstanding || 0, l.currency, reportingCurrency, l.exchange_rate) : acc, 0);
 
   const recoveryRate = totalLent > 0 ? Math.min(100, Math.round((totalRepaid / totalLent) * 100)) : 100;
   const activeLoans = personLoans.filter(l => l.status === 'OPEN' || l.status === 'PARTIALLY_PAID');
   const overdueLoans = activeLoans.filter(l => l.days_overdue > 0 || l.time_status === 'OVERDUE');
-  const borrowerCurrency = personLoans[0]?.currency || 'INR';
-  const borrowerSymbol = getCurrencySymbol(borrowerCurrency);
+
+  // Identify distinct currencies used by this borrower
+  const distinctCurrencies = Array.from(new Set(personLoans.map(l => l.currency || 'INR')));
+  const isMultiCurrency = distinctCurrencies.length > 1 || (distinctCurrencies.length === 1 && distinctCurrencies[0] !== reportingCurrency);
 
   // Collect all repayments across this person's loans
   const allRepayments = [];
