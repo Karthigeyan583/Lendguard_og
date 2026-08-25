@@ -56,9 +56,13 @@ class DashboardSummaryView(APIView):
         loans = Loan.objects.filter(created_by=user, is_archived=False)
         today = timezone.localdate()
 
-        reporting_currency = 'INR'
-        if hasattr(user, 'profile') and user.profile.base_currency:
+        req_curr = request.query_params.get('reporting_currency') or request.query_params.get('currency')
+        if req_curr and req_curr.upper() != 'REPORTING':
+            reporting_currency = req_curr.upper().strip()
+        elif hasattr(user, 'profile') and user.profile.base_currency:
             reporting_currency = user.profile.base_currency
+        else:
+            reporting_currency = 'INR'
 
         # Lending (Receivables)
         lending_lent = Decimal('0.00')
