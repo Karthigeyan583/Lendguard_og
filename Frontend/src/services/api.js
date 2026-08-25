@@ -70,6 +70,12 @@ export const api = {
 
   getProfile: () => request('/auth/profile/'),
 
+  updateProfile: (profileData) =>
+    request('/auth/profile/', {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    }),
+
   changePassword: (oldPassword, newPassword) =>
     request('/auth/change-password/', {
       method: 'POST',
