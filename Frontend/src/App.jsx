@@ -360,6 +360,10 @@ function LendGuardApp() {
           {activeTab === 'api-explorer' && (
             <ApiExplorer />
           )}
+
+          {activeTab === 'settings' && (
+            <SettingsView onDataPurged={refreshData} />
+          )}
         </main>
       </div>
 
