@@ -23,6 +23,8 @@ class LoanSerializer(serializers.ModelSerializer):
     recent_payments = serializers.SerializerMethodField()
     repayments = serializers.SerializerMethodField()
 
+    direction_label = serializers.SerializerMethodField()
+
     class Meta:
         model = Loan
         fields = [
@@ -36,6 +38,7 @@ class LoanSerializer(serializers.ModelSerializer):
             'person_relationship',
             'loan_reference',
             'direction',
+            'direction_label',
             'principal_amount',
             'currency',
             'reporting_currency',
@@ -71,6 +74,11 @@ class LoanSerializer(serializers.ModelSerializer):
             'created_at', 
             'updated_at'
         ]
+
+    def get_direction_label(self, obj) -> str:
+        if obj.direction == 'borrowed':
+            return 'Money Borrowed (Payable)'
+        return 'Money Lent (Receivable)'
 
     def get_balance(self, obj) -> dict:
         b = calculate_loan_balance(obj)
