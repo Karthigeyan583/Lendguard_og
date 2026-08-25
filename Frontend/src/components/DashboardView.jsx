@@ -33,6 +33,8 @@ export const DashboardView = ({
   // Identify distinct currencies used across loans
   const availableCurrencies = Array.from(new Set(loans.map(l => l.currency || 'INR')));
   const isMulti = availableCurrencies.length > 1;
+  const reportingCurrency = summary?.reporting_currency || (loans.length > 0 && loans[0].reporting_currency) || getDefaultCurrency();
+  const currSymbol = getCurrencySymbol(reportingCurrency);
 
   // Filter urgent active loans
   const overdueLoans = loans.filter(
