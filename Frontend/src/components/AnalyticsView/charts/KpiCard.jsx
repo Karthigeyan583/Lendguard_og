@@ -21,7 +21,11 @@ export const KpiCard = ({
   const symbol = getCurrencySymbol(currency);
 
   const renderValue = () => {
-    if (isMasked) return maskValue(value);
+    if (isMasked) {
+      if (isPercentage) return '•••%';
+      if (isCurrency) return `${symbol}••••••`;
+      return '••••••';
+    }
     if (isPercentage) return `${Number(value || 0).toFixed(1)}%`;
     if (isCurrency) return `${symbol}${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
     return Number(value || 0).toLocaleString();
