@@ -586,7 +586,12 @@ export const DashboardView = ({
           )}
           <div className="stats-grid">
             {/* Total Borrowed */}
-            <div className="glass-panel kpi-card" style={{ padding: '1.5rem', borderLeft: '3px solid var(--accent-indigo)' }}>
+            <div
+              className="glass-panel kpi-card"
+              style={{ padding: '1.5rem', borderLeft: '3px solid var(--accent-indigo)', cursor: 'pointer', transition: 'all 0.18s ease' }}
+              onClick={() => onOpenDrilldown && onOpenDrilldown('borrowed')}
+              title="Click to view breakdown of capital borrowed"
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>TOTAL CAPITAL BORROWED</span>
                 <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(99, 102, 241, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -594,7 +599,7 @@ export const DashboardView = ({
                 </div>
               </div>
               <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
-                {getCurrencySymbol(singleCurr)}{Number(singleStats.borrowed).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>{singleCurr}</span>
+                {getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.borrowed).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>{singleCurr}</span>
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 Across {singleStats.borrowedCount || borrowedLoans.length} borrowing obligations
@@ -602,7 +607,12 @@ export const DashboardView = ({
             </div>
 
             {/* Total Repaid to Lenders */}
-            <div className="glass-panel kpi-card" style={{ padding: '1.5rem', borderLeft: '3px solid var(--accent-emerald)' }}>
+            <div
+              className="glass-panel kpi-card"
+              style={{ padding: '1.5rem', borderLeft: '3px solid var(--accent-emerald)', cursor: 'pointer', transition: 'all 0.18s ease' }}
+              onClick={() => onOpenDrilldown && onOpenDrilldown('borrowed_repaid')}
+              title="Click to view repayments made to lenders"
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>TOTAL REPAID TO LENDERS</span>
                 <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -610,7 +620,7 @@ export const DashboardView = ({
                 </div>
               </div>
               <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem', color: 'var(--accent-emerald)' }}>
-                {getCurrencySymbol(singleCurr)}{Number(singleStats.borrowedRepaid).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-emerald)' }}>{singleCurr}</span>
+                {getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.borrowedRepaid).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-emerald)' }}>{singleCurr}</span>
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 Repayment Completion: {singleStats.borrowedRepaymentRate}%
@@ -618,7 +628,12 @@ export const DashboardView = ({
             </div>
 
             {/* Outstanding Payable */}
-            <div className="glass-panel kpi-card" style={{ padding: '1.5rem', borderLeft: '3px solid var(--accent-amber)' }}>
+            <div
+              className="glass-panel kpi-card"
+              style={{ padding: '1.5rem', borderLeft: '3px solid var(--accent-amber)', cursor: 'pointer', transition: 'all 0.18s ease' }}
+              onClick={() => onOpenDrilldown && onOpenDrilldown('borrowed_outstanding')}
+              title="Click to view outstanding payable debt liabilities"
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>OUTSTANDING PAYABLE (YOU OWE)</span>
                 <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -626,7 +641,7 @@ export const DashboardView = ({
                 </div>
               </div>
               <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem', color: singleStats.borrowedOutstanding > 0 ? 'var(--accent-amber)' : 'var(--accent-emerald)' }}>
-                {getCurrencySymbol(singleCurr)}{Number(singleStats.borrowedOutstanding).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{singleCurr}</span>
+                {getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.borrowedOutstanding).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{singleCurr}</span>
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 {singleStats.borrowedOutstanding > 0 ? `Remaining debt obligation` : `No outstanding borrowing liabilities`}
@@ -634,7 +649,12 @@ export const DashboardView = ({
             </div>
 
             {/* Overdue Payables */}
-            <div className="glass-panel kpi-card" style={{ padding: '1.5rem', borderLeft: '3px solid var(--accent-rose)' }}>
+            <div
+              className="glass-panel kpi-card"
+              style={{ padding: '1.5rem', borderLeft: '3px solid var(--accent-rose)', cursor: 'pointer', transition: 'all 0.18s ease' }}
+              onClick={() => onOpenDrilldown && onOpenDrilldown('borrowed_overdue')}
+              title="Click to view overdue debt obligations"
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>OVERDUE PAYABLES</span>
                 <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(244, 63, 94, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -642,7 +662,7 @@ export const DashboardView = ({
                 </div>
               </div>
               <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem', color: singleStats.borrowedOverdue > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)' }}>
-                {getCurrencySymbol(singleCurr)}{Number(singleStats.borrowedOverdue).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{singleCurr}</span>
+                {getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.borrowedOverdue).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{singleCurr}</span>
               </div>
               <div style={{ fontSize: '0.75rem', color: singleStats.borrowedOverdue > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)' }}>
                 {singleStats.borrowedOverdue > 0 ? `${singleStats.borrowedOverdueCount} overdue payment(s) to settle` : `✓ All your debts are current`}
