@@ -80,7 +80,7 @@ export const LendingAnalyticsView = ({
           currency={reportingCurrency}
           isMasked={isMasked}
           accentColor="#a855f7"
-          subtitle={`Largest: ${symbol}${Number(summary.largest_loan).toLocaleString()}`}
+          subtitle={isMasked ? 'Largest: ••••••' : `Largest: ${symbol}${Number(summary.largest_loan).toLocaleString()}`}
         />
         <KpiCard
           title="Active Agreements"
