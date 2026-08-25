@@ -127,10 +127,11 @@ export const RecordPaymentModal = ({ isOpen, onClose, loan, onPaymentRecorded })
               <label className="form-label">Repayment Amount (₹)</label>
               <input
                 type="number"
-                step="0.01"
+                step="any"
                 min="0.01"
                 required
                 className="form-input"
+                placeholder="Enter repayment amount"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
               />
