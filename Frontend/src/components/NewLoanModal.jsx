@@ -6,7 +6,7 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
     person: '',
     direction: 'lent',
     principal_amount: '25000',
-    currency: 'INR',
+    currency: localStorage.getItem('lendguard_currency') || 'INR',
     date_given: new Date().toISOString().split('T')[0],
     due_date: '',
     interest_model: 'none',
@@ -32,7 +32,8 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
         ...initialData,
         person: initialData.person ? String(initialData.person) : prev.person,
         principal_amount: String(initialData.principal_amount || initialData.amount || prev.principal_amount),
-        due_date: initialData.due_date || prev.due_date
+        due_date: initialData.due_date || prev.due_date,
+        currency: initialData.currency || prev.currency || localStorage.getItem('lendguard_currency') || 'INR'
       }));
     }
   }, [initialData]);
@@ -54,12 +55,23 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
       return;
     }
 
+    if (!formData.purpose || !formData.purpose.trim()) {
+      setError('Purpose / Lending context is mandatory.');
+      return;
+    }
+
+    if (formData.due_date && formData.date_given && formData.due_date < formData.date_given) {
+      setError('Agreed due date cannot be earlier than the date the money was given.');
+      return;
+    }
+
     setSubmitting(true);
     try {
       await onLoanCreated({
         ...formData,
         person: parseInt(formData.person),
         principal_amount: principal,
+        purpose: formData.purpose.trim(),
         interest_rate: parseFloat(formData.interest_rate || 0),
         fixed_fee_amount: parseFloat(formData.fixed_fee_amount || 0),
         due_date: formData.due_date || null
