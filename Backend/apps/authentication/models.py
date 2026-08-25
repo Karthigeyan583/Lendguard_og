@@ -15,6 +15,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='borrower')
     phone_number = models.CharField(max_length=20, blank=True, null=True)
+    base_currency = models.CharField(max_length=10, default='INR', help_text="Configurable reporting/base currency")
     is_kyc_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
