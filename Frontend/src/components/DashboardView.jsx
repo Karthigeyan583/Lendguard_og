@@ -10,7 +10,8 @@ import {
   ArrowDownLeft, 
   Plus, 
   FileText,
-  Share2
+  Share2,
+  ChevronRight
 } from 'lucide-react';
 
 export const DashboardView = ({ 
@@ -20,7 +21,8 @@ export const DashboardView = ({
   onRecordPaymentForLoan, 
   onGenerateStatement, 
   onOpenNewLoan,
-  onOpenAddPerson 
+  onOpenAddPerson,
+  onOpenPersonDetails
 }) => {
   // Filter urgent active loans
   const overdueLoans = loans.filter(
