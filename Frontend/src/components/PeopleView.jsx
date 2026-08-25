@@ -95,7 +95,11 @@ export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArc
             <div key={person.id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
                 {/* Top Row: Name & Role Badge */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                <div
+                  style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '0.75rem', cursor: 'pointer' }}
+                  onClick={() => onOpenPersonDetails && onOpenPersonDetails(person)}
+                  title={`View full details & loan history for ${person.name}`}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <div style={{
                       width: 42,
@@ -113,8 +117,8 @@ export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArc
                       {person.name[0]?.toUpperCase()}
                     </div>
                     <div>
-                      <h4 style={{ fontSize: '1.05rem', fontWeight: 700 }}>{person.name}</h4>
-                      <span className="badge-role" style={{ fontSize: '0.68rem', textTransform: 'capitalize' }}>
+                      <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>{person.name}</h4>
+                      <span className="badge-role" style={{ fontSize: '0.68rem', textTransform: 'capitalize', marginTop: '0.2rem', display: 'inline-block' }}>
                         {person.relationship}
                       </span>
                     </div>
