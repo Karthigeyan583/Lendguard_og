@@ -195,17 +195,18 @@ export const LoginPage = () => {
             </p>
           </div>
 
-          {/* Hero Visual Artwork Card */}
+          {/* Hero Visual Artwork Card (Theme-Adaptive for Day & Night Modes) */}
           <div style={{
             position: 'relative',
             borderRadius: '18px',
             overflow: 'hidden',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            boxShadow: '0 16px 36px rgba(0, 0, 0, 0.35)',
-            background: 'var(--inner-card-bg)'
+            border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(0, 0, 0, 0.08)',
+            boxShadow: isDark ? '0 16px 36px rgba(0, 0, 0, 0.35)' : '0 16px 36px rgba(16, 185, 129, 0.12)',
+            background: isDark ? 'var(--inner-card-bg)' : '#ffffff',
+            transition: 'all 0.3s ease'
           }}>
             <img
-              src="/assets/lendguard_hero.jpg"
+              src={isDark ? '/assets/lendguard_hero_dark.jpg' : '/assets/lendguard_hero_light.jpg'}
               alt="LendGuard Secure Multi-Currency Lending & Digital Trust Vault"
               style={{
                 width: '100%',
@@ -213,13 +214,16 @@ export const LoginPage = () => {
                 display: 'block',
                 objectFit: 'cover',
                 maxHeight: '235px',
-                filter: 'brightness(1.02) contrast(1.04)'
+                filter: isDark ? 'brightness(1.02) contrast(1.04)' : 'brightness(1.01) contrast(1.02)',
+                transition: 'opacity 0.3s ease'
               }}
             />
             <div style={{
               position: 'absolute',
               inset: 0,
-              background: 'linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(6, 9, 19, 0.92) 100%)',
+              background: isDark 
+                ? 'linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(6, 9, 19, 0.92) 100%)' 
+                : 'linear-gradient(180deg, rgba(255,255,255,0) 40%, rgba(248, 250, 252, 0.95) 100%)',
               display: 'flex',
               alignItems: 'flex-end',
               padding: '0.75rem 1rem'
@@ -230,9 +234,9 @@ export const LoginPage = () => {
                   fontWeight: 700,
                   padding: '0.2rem 0.6rem',
                   borderRadius: 'var(--radius-full)',
-                  background: 'rgba(16, 185, 129, 0.25)',
-                  color: '#34d399',
-                  border: '1px solid rgba(16, 185, 129, 0.4)',
+                  background: isDark ? 'rgba(16, 185, 129, 0.25)' : 'rgba(16, 185, 129, 0.18)',
+                  color: isDark ? '#34d399' : '#059669',
+                  border: isDark ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(16, 185, 129, 0.35)',
                   backdropFilter: 'blur(8px)'
                 }}>
                   ● Verified Credit Agreement
@@ -242,9 +246,9 @@ export const LoginPage = () => {
                   fontWeight: 700,
                   padding: '0.2rem 0.6rem',
                   borderRadius: 'var(--radius-full)',
-                  background: 'rgba(99, 102, 241, 0.25)',
-                  color: '#a5b4fc',
-                  border: '1px solid rgba(99, 102, 241, 0.4)',
+                  background: isDark ? 'rgba(99, 102, 241, 0.25)' : 'rgba(99, 102, 241, 0.18)',
+                  color: isDark ? '#a5b4fc' : '#4338ca',
+                  border: isDark ? '1px solid rgba(99, 102, 241, 0.4)' : '1px solid rgba(99, 102, 241, 0.35)',
                   backdropFilter: 'blur(8px)'
                 }}>
                   Digital Trust Vault (€ • ₹ • $)
