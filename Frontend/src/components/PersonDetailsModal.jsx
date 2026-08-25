@@ -61,9 +61,30 @@ export const PersonDetailsModal = ({
   const activeLoans = personLoans.filter(l => l.status === 'OPEN' || l.status === 'PARTIALLY_PAID');
   const overdueLoans = activeLoans.filter(l => l.days_overdue > 0 || l.time_status === 'OVERDUE');
 
-  // Identify distinct currencies used by this borrower
-  const distinctCurrencies = Array.from(new Set(personLoans.map(l => l.currency || 'INR')));
-  const isMultiCurrency = distinctCurrencies.length > 1 || (distinctCurrencies.length === 1 && distinctCurrencies[0] !== reportingCurrency);
+  // Calculate unmixed totals per currency directly from transaction records
+  const personTotalsByCurrency = {};
+  distinctCurrencies.forEach((curr) => {
+    const currLoans = personLoans.filter(l => (l.currency || 'INR') === curr && l.status !== 'CANCELLED');
+    const currOverdue = currLoans.filter(l => (l.time_status === 'OVERDUE' || l.days_overdue > 0) && l.status !== 'PAID');
+    const lent = currLoans.reduce((acc, l) => acc + Number(l.principal_amount || 0), 0);
+    const repaid = currLoans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
+    const out = currLoans.reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + Number(l.balance?.outstanding || 0), 0);
+    const overdue = currOverdue.reduce((acc, l) => acc + Number(l.balance?.outstanding || 0), 0);
+    const rec = lent > 0 ? Number(((repaid / lent) * 100).toFixed(1)) : 0;
+    personTotalsByCurrency[curr] = {
+      lent,
+      repaid,
+      outstanding: out,
+      overdue,
+      recovery: rec,
+      loansCount: currLoans.length,
+      overdueCount: currOverdue.length
+    };
+  });
+
+  const singleBorrowerCurr = distinctCurrencies[0] || 'INR';
+  const singleBorrowerStats = personTotalsByCurrency[singleBorrowerCurr] || { lent: 0, repaid: 0, outstanding: 0, overdue: 0, recovery: 0 };
+  const hasMultipleCurrencies = distinctCurrencies.length > 1;
 
   // Collect all repayments across this person's loans
   const allRepayments = [];
