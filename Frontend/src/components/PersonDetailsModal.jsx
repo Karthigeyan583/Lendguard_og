@@ -395,10 +395,10 @@ export const PersonDetailsModal = ({
                       <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                         <div style={{ textAlign: 'right' }}>
                           <div style={{ fontWeight: 800, fontSize: '0.95rem', color: isPaid ? 'var(--accent-emerald)' : 'var(--text-primary)' }}>
-                            ₹{Number(loan.principal_amount || 0).toLocaleString()}
+                            {getCurrencySymbol(loan.currency)}{Number(loan.principal_amount || 0).toLocaleString()}
                           </div>
                           <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                            {isPaid ? 'Fully settled' : `₹${loanOutstanding.toLocaleString()} remaining`}
+                            {isPaid ? 'Fully settled' : `${getCurrencySymbol(loan.currency)}${loanOutstanding.toLocaleString()} remaining`}
                           </div>
                         </div>
 
