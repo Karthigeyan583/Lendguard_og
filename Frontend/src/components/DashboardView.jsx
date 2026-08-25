@@ -313,7 +313,7 @@ export const DashboardView = ({
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontWeight: 800, fontSize: '0.95rem', color: Number(p.outstanding_balance || 0) > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)' }}>
-                        ₹{Number(p.outstanding_balance || 0).toLocaleString()}
+                        {currSymbol}{Number(p.outstanding_balance || 0).toLocaleString()}
                       </div>
                       <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                         Owed balance
