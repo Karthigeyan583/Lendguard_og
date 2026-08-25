@@ -18,6 +18,7 @@ import {
   CreditCard,
   ChevronRight
 } from 'lucide-react';
+import { getCurrencySymbol, formatMoney } from '../utils/currency';
 
 export const PersonDetailsModal = ({
   isOpen,
