@@ -9,24 +9,26 @@ from apps.workspaces.models import Workspace, WorkspaceMember
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ('role', 'phone_number', 'is_kyc_verified', 'created_at')
+        fields = ('role', 'phone_number', 'base_currency', 'is_kyc_verified', 'created_at')
         read_only_fields = ('is_kyc_verified', 'created_at')
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
     phone_number = serializers.CharField(source='profile.phone_number', required=False, allow_blank=True)
+    base_currency = serializers.CharField(source='profile.base_currency', required=False, default='INR')
     role = serializers.CharField(source='profile.role', read_only=True)
     is_kyc_verified = serializers.BooleanField(source='profile.is_kyc_verified', read_only=True)
     profile = UserProfileSerializer(read_only=True)
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'phone_number', 'role', 'is_kyc_verified', 'profile')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'phone_number', 'base_currency', 'role', 'is_kyc_verified', 'profile')
         read_only_fields = ('id', 'username')
 
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('profile', {})
         phone_number = profile_data.get('phone_number')
+        base_currency = profile_data.get('base_currency')
         
         instance.first_name = validated_data.get('first_name', instance.first_name).strip()
         instance.last_name = validated_data.get('last_name', instance.last_name).strip()
@@ -34,9 +36,16 @@ class UserDetailSerializer(serializers.ModelSerializer):
             instance.email = validated_data['email'].strip().lower()
         instance.save()
 
-        if phone_number is not None and hasattr(instance, 'profile'):
-            instance.profile.phone_number = phone_number.strip()
-            instance.profile.save(update_fields=['phone_number'])
+        if hasattr(instance, 'profile'):
+            update_fields = []
+            if phone_number is not None:
+                instance.profile.phone_number = phone_number.strip()
+                update_fields.append('phone_number')
+            if base_currency is not None:
+                instance.profile.base_currency = base_currency.strip().upper()
+                update_fields.append('base_currency')
+            if update_fields:
+                instance.profile.save(update_fields=update_fields)
 
         return instance
 
