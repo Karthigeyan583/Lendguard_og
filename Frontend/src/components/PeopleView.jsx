@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Users, Search, Plus, Phone, Mail, Tag, ArrowUpRight, Archive, CheckCircle2 } from 'lucide-react';
+import { getDefaultCurrency, getCurrencySymbol } from '../utils/currency';
 
 export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArchivePerson, onOpenPersonDetails }) => {
   const [search, setSearch] = useState('');
   const [filterRel, setFilterRel] = useState('all');
+  const defSymbol = getCurrencySymbol(getDefaultCurrency());
 
   const filtered = people.filter((p) => {
     const matchesSearch = 
