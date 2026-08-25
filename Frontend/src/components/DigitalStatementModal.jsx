@@ -168,7 +168,7 @@ export const DigitalStatementModal = ({ isOpen, onClose, statement, loan }) => {
             <div>
               <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Principal Lent</span>
               <strong style={{ fontSize: '0.95rem' }}>
-                ₹{Number(data?.financial_summary?.principal || loan?.principal_amount || 0).toLocaleString()}
+                {currencySymbol}{Number(data?.financial_summary?.principal || loan?.principal_amount || 0).toLocaleString()}
               </strong>
             </div>
             <div>
@@ -178,13 +178,13 @@ export const DigitalStatementModal = ({ isOpen, onClose, statement, loan }) => {
             <div>
               <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Total Repaid</span>
               <strong style={{ fontSize: '0.95rem', color: 'var(--accent-emerald)' }}>
-                ₹{Number(data?.financial_summary?.total_repaid || loan?.balance?.total_repaid || 0).toLocaleString()}
+                {currencySymbol}{Number(data?.financial_summary?.total_repaid || loan?.balance?.total_repaid || 0).toLocaleString()}
               </strong>
             </div>
             <div>
               <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Balance Due</span>
               <strong style={{ fontSize: '1rem', color: 'var(--accent-cyan)' }}>
-                ₹{Number(data?.financial_summary?.outstanding_balance || loan?.balance?.outstanding || 0).toLocaleString()}
+                {currencySymbol}{Number(data?.financial_summary?.outstanding_balance || loan?.balance?.outstanding || 0).toLocaleString()}
               </strong>
             </div>
           </div>
@@ -192,7 +192,7 @@ export const DigitalStatementModal = ({ isOpen, onClose, statement, loan }) => {
           {/* Repayment History Ledger */}
           <div>
             <h4 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.6rem', color: 'var(--text-secondary)' }}>
-              REPAYMENT TRANSACTION LEDGER
+              REPAYMENT TRANSACTION LEDGER ({currencyCode})
             </h4>
             {(!data?.repayment_ledger || data.repayment_ledger.length === 0) ? (
               <div style={{ padding: '1rem', background: 'var(--inner-card-bg)', borderRadius: 'var(--radius-sm)', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -213,7 +213,7 @@ export const DigitalStatementModal = ({ isOpen, onClose, statement, loan }) => {
                     <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                       <td style={{ padding: '0.5rem' }}>{p.payment_date}</td>
                       <td style={{ padding: '0.5rem', fontWeight: 700, color: 'var(--accent-emerald)' }}>
-                        ₹{Number(p.amount).toLocaleString()}
+                        {currencySymbol}{Number(p.amount).toLocaleString()}
                       </td>
                       <td style={{ padding: '0.5rem', textTransform: 'capitalize' }}>
                         {p.payment_method?.replace('_', ' ')}
