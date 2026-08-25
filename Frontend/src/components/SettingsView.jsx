@@ -109,10 +109,13 @@ export const SettingsView = ({ onDataPurged }) => {
         first_name: firstName,
         last_name: lastName,
         email: email,
-        phone_number: phone
+        phone_number: phone,
+        base_currency: currency
       });
 
-      setProfileSuccess('Profile preferences updated successfully.');
+      if (onDataPurged) onDataPurged();
+
+      setProfileSuccess('Profile and base currency preferences updated successfully.');
       setTimeout(() => setProfileSuccess(''), 4000);
     } catch (err) {
       setProfileError(err.message || 'Failed to update profile.');
