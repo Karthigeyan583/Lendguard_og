@@ -130,7 +130,7 @@ class CustomReportEngine:
                 })
 
         elif data_source == 'payments':
-            payments = Payment.objects.filter(created_by=user, is_voided=False).select_related('loan', 'loan__person')
+            payments = Payment.objects.filter(Q(created_by=user) | Q(loan__created_by=user), is_voided=False).select_related('loan', 'loan__person')
             for p in payments:
                 amt, _ = convert_currency(p.amount, p.currency or p.loan.currency, reporting_currency, getattr(p, 'exchange_rate', None))
                 raw_rows.append({
@@ -150,7 +150,7 @@ class CustomReportEngine:
                 })
 
         elif data_source == 'people':
-            people = Person.objects.filter(created_by=user, is_archived=False)
+            people = Person.objects.filter(Q(created_by=user) | Q(loans__created_by=user), is_archived=False).distinct()
             for per in people:
                 loans_for_per = Loan.objects.filter(person=per, is_archived=False)
                 lent_out = Decimal('0.00')
