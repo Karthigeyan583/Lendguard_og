@@ -14,6 +14,7 @@ import {
   Calendar,
   DollarSign
 } from 'lucide-react';
+import { getCurrencySymbol, formatMoney } from '../utils/currency';
 
 const STATUS_TABS = [
   { id: 'all', label: 'All Records' },
