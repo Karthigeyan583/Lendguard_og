@@ -197,6 +197,10 @@ class AnalyticsModuleTests(TestCase):
             name='Test Export Report',
             data_source='loans'
         )
-        csv_res = self.client.get(f'/api/v1/analytics/reports/{report.id}/export/?format=csv')
+        csv_res = self.client.get(f'/api/v1/analytics/reports/{report.id}/export/?export_format=csv')
         self.assertEqual(csv_res.status_code, 200)
         self.assertEqual(csv_res['Content-Type'], 'text/csv; charset=utf-8')
+
+        json_res = self.client.get(f'/api/v1/analytics/reports/{report.id}/export/?export_format=json')
+        self.assertEqual(json_res.status_code, 200)
+        self.assertEqual(json_res['Content-Type'], 'application/json')
