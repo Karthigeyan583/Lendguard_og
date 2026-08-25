@@ -194,7 +194,7 @@ export const PersonDetailsModal = ({
                 Total Lent
               </span>
               <div style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: '0.25rem' }}>
-                ₹{Number(totalLent).toLocaleString()}
+                {borrowerSymbol}{Number(totalLent).toLocaleString()}
               </div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
                 Across {personLoans.length} total {personLoans.length === 1 ? 'loan' : 'loans'}
@@ -211,7 +211,7 @@ export const PersonDetailsModal = ({
                 Total Repaid
               </span>
               <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-emerald)', marginTop: '0.25rem' }}>
-                ₹{Number(totalRepaid).toLocaleString()}
+                {borrowerSymbol}{Number(totalRepaid).toLocaleString()}
               </div>
               <div style={{ fontSize: '0.7rem', color: 'var(--accent-emerald)', marginTop: '0.2rem' }}>
                 {recoveryRate}% recovered
@@ -233,7 +233,7 @@ export const PersonDetailsModal = ({
                 color: outstanding > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)',
                 marginTop: '0.25rem'
               }}>
-                ₹{Number(outstanding).toLocaleString()}
+                {borrowerSymbol}{Number(outstanding).toLocaleString()}
               </div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
                 {activeLoans.length} active {activeLoans.length === 1 ? 'record' : 'records'}
