@@ -877,6 +877,8 @@ export const DashboardView = ({
               ))}
             </div>
           )}
+        </div>
+
         {/* Row 2 Right: Samsung Stack Deck (Direction-Aware Exposure) */}
         {(() => {
           // Calculate filtered contacts for Stack Deck based on active dashboardDirection
