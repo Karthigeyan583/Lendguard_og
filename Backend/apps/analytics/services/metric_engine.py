@@ -581,7 +581,7 @@ class AnalyticsMetricService:
         payment size metrics (avg, median, largest), on-time vs late behavior, and directional volume.
         """
         filters = filters or {}
-        payments = Payment.objects.filter(created_by=user, is_voided=False).select_related('loan', 'loan__person')
+        payments = Payment.objects.filter(Q(created_by=user) | Q(loan__created_by=user), is_voided=False).select_related('loan', 'loan__person')
 
         # Apply Date Range Bounds
         date_preset = filters.get('date_range')
