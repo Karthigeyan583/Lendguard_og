@@ -120,10 +120,10 @@ export const RepaymentsCashflowView = ({
             >
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>{w.label}</div>
               <div style={{ fontSize: '1.05rem', fontWeight: 800, color: w.projected_net_position >= 0 ? 'var(--accent-emerald)' : 'var(--accent-rose)', margin: '0.2rem 0' }}>
-                {isMasked ? '••••' : `${w.projected_net_position >= 0 ? '+' : ''}${symbol}${Number(w.projected_net_position).toLocaleString()}`}
+                {isMasked ? '••••••' : `${w.projected_net_position >= 0 ? '+' : ''}${symbol}${Number(w.projected_net_position).toLocaleString()}`}
               </div>
               <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                In: {isMasked ? '••' : `${symbol}${Number(w.expected_inflows).toLocaleString()}`} • Out: {isMasked ? '••' : `${symbol}${Number(w.expected_outflows).toLocaleString()}`}
+                In: {isMasked ? '••••••' : `${symbol}${Number(w.expected_inflows).toLocaleString()}`} • Out: {isMasked ? '••••••' : `${symbol}${Number(w.expected_outflows).toLocaleString()}`}
               </div>
             </div>
           ))}
