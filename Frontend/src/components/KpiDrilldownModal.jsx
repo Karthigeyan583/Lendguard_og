@@ -214,7 +214,16 @@ export const KpiDrilldownModal = ({
               Aggregate Amount
             </div>
             <div style={{ fontSize: '1.75rem', fontWeight: 800, color: accentColor, letterSpacing: '-0.02em', marginTop: '0.1rem' }}>
-              {currSymbol}{Number(totalAmount).toLocaleString()}
+              {drilldownCurrencies.length > 0 ? (
+                drilldownCurrencies.map((c, i) => (
+                  <span key={c}>
+                    {i > 0 && <span style={{ color: 'var(--text-muted)', fontWeight: 500, margin: '0 0.35rem', fontSize: '1.25rem' }}>+</span>}
+                    {getCurrencySymbol(c)}{Number(drilldownTotalsByCurrency[c] || 0).toLocaleString()} <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>{c}</span>
+                  </span>
+                ))
+              ) : (
+                <span>{currSymbol}0</span>
+              )}
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
               {subMetricText}
