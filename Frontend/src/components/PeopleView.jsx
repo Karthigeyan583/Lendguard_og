@@ -154,32 +154,56 @@ export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArc
                 </div>
 
                 {/* Financial Exposure Card */}
-                <div style={{
-                  background: 'var(--inner-card-bg)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-sm)',
-                  padding: '0.85rem 1rem',
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(3, 1fr)',
-                  gap: '0.5rem',
-                  marginBottom: '1.25rem',
-                  textAlign: 'center'
-                }}>
-                  <div>
-                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Total Lent</span>
-                    <strong style={{ fontSize: '0.85rem' }}>{defSymbol}{Number(person.total_lent || 0).toLocaleString()}</strong>
+                {person.currency_breakdown && Object.keys(person.currency_breakdown).length > 1 ? (
+                  <div style={{
+                    background: 'var(--inner-card-bg)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.75rem 0.9rem',
+                    marginBottom: '1.25rem'
+                  }}>
+                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      Multi-Currency Balance:
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                      {Object.entries(person.currency_breakdown).map(([cCode, cStats]) => (
+                        <div key={cCode} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', alignItems: 'center' }}>
+                          <span style={{ fontWeight: 600 }}>{cCode}:</span>
+                          <span style={{ fontWeight: 800, color: cStats.outstanding > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)' }}>
+                            {getCurrencySymbol(cCode)}{Number(cStats.outstanding).toLocaleString()} owed
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div>
-                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Repaid</span>
-                    <strong style={{ fontSize: '0.85rem', color: 'var(--accent-emerald)' }}>{defSymbol}{Number(person.total_repaid || 0).toLocaleString()}</strong>
+                ) : (
+                  <div style={{
+                    background: 'var(--inner-card-bg)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.85rem 1rem',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: '0.5rem',
+                    marginBottom: '1.25rem',
+                    textAlign: 'center'
+                  }}>
+                    <div>
+                      <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Total Lent</span>
+                      <strong style={{ fontSize: '0.85rem' }}>{defSymbol}{Number(person.total_lent || 0).toLocaleString()}</strong>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Repaid</span>
+                      <strong style={{ fontSize: '0.85rem', color: 'var(--accent-emerald)' }}>{defSymbol}{Number(person.total_repaid || 0).toLocaleString()}</strong>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Owed Balance</span>
+                      <strong style={{ fontSize: '0.85rem', color: person.outstanding_balance > 0 ? 'var(--accent-cyan)' : 'var(--text-muted)' }}>
+                        {defSymbol}{Number(person.outstanding_balance || 0).toLocaleString()}
+                      </strong>
+                    </div>
                   </div>
-                  <div>
-                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Owed Balance</span>
-                    <strong style={{ fontSize: '0.85rem', color: person.outstanding_balance > 0 ? 'var(--accent-cyan)' : 'var(--text-muted)' }}>
-                      {defSymbol}{Number(person.outstanding_balance || 0).toLocaleString()}
-                    </strong>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Action Buttons */}
