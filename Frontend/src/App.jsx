@@ -17,6 +17,7 @@ import { AddPersonModal } from './components/AddPersonModal';
 import { RecordPaymentModal } from './components/RecordPaymentModal';
 import { DigitalStatementModal } from './components/DigitalStatementModal';
 import { PersonDetailsModal } from './components/PersonDetailsModal';
+import { KpiDrilldownModal } from './components/KpiDrilldownModal';
 import { AuthModal } from './components/AuthModal';
 
 import { api } from './services/api';
