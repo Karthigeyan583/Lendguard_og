@@ -99,7 +99,9 @@ export const Sidebar = ({
               {user?.first_name ? `${user.first_name}'s Ledger` : "My Ledger"}
             </span>
           </div>
-          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>INR (₹)</span>
+          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+            {CURRENCY_MAP[getDefaultCurrency()]?.label || `${getDefaultCurrency()} (${getCurrencySymbol(getDefaultCurrency())})`}
+          </span>
         </div>
       </div>
 
