@@ -32,6 +32,7 @@ export const Sidebar = ({
 
   const mainNavItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, description: 'Overview & Position' },
+    { id: 'analytics', label: 'Analytics & Reports', icon: FileText, description: 'Intelligence & Studio', badge: 'v2.0', badgeColor: 'var(--accent-emerald)' },
     { id: 'people', label: 'People & Contacts', icon: Users, description: 'Borrowers & Lenders' },
     { id: 'loans', label: 'Lending Ledger', icon: BookOpen, description: 'Money Lent (Receivables)' },
     { id: 'borrowing', label: 'Borrowing Ledger', icon: TrendingUp, description: 'Money Borrowed (Payables)' },
