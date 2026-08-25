@@ -23,7 +23,8 @@ export const DashboardView = ({
   onGenerateStatement, 
   onOpenNewLoan,
   onOpenAddPerson,
-  onOpenPersonDetails
+  onOpenPersonDetails,
+  onOpenDrilldown
 }) => {
   // Filter urgent active loans
   const overdueLoans = loans.filter(
