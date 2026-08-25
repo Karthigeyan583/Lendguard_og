@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
   Bell, 
@@ -7,8 +7,11 @@ import {
   Users, 
   ShieldCheck, 
   Menu,
-  Check
+  Check,
+  Globe2,
+  ChevronDown
 } from 'lucide-react';
+import { CURRENCY_MAP, getDefaultCurrency, setDefaultCurrency, getCurrencySymbol } from '../utils/currency';
 
 const TAB_METADATA = {
   dashboard: { title: 'Lending Dashboard', subtitle: 'Real-time portfolio overview, balance calculations, and urgent follow-ups' },
@@ -31,6 +34,23 @@ export const TopHeader = ({
 }) => {
   const { backendOnline } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useState(getDefaultCurrency());
+  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+
+  useEffect(() => {
+    const handleCurrencyUpdate = () => {
+      setSelectedCurrency(getDefaultCurrency());
+    };
+    window.addEventListener('currencyChange', handleCurrencyUpdate);
+    return () => window.removeEventListener('currencyChange', handleCurrencyUpdate);
+  }, []);
+
+  const handleSelectCurrency = (code) => {
+    setDefaultCurrency(code);
+    setSelectedCurrency(code);
+    setShowCurrencyDropdown(false);
+    window.dispatchEvent(new Event('currencyChange'));
+  };
 
   const currentMeta = TAB_METADATA[activeTab] || TAB_METADATA.dashboard;
   const unreadCount = notifications.filter(n => !n.is_read).length;
@@ -57,8 +77,79 @@ export const TopHeader = ({
         </div>
       </div>
 
-      {/* Right: Status, Notifications, & Quick Actions */}
+      {/* Right: Status, Currency Selector, Notifications, & Quick Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        {/* Global Currency Switcher */}
+        <div style={{ position: 'relative' }}>
+          <button
+            className="btn btn-secondary"
+            style={{
+              padding: '0.35rem 0.75rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              borderRadius: 'var(--radius-sm)',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-subtle)'
+            }}
+            onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
+            title="Switch Global Display Currency"
+          >
+            <Globe2 size={14} color="var(--accent-emerald)" />
+            <span>{selectedCurrency} ({getCurrencySymbol(selectedCurrency)})</span>
+            <ChevronDown size={13} color="var(--text-muted)" />
+          </button>
+
+          {showCurrencyDropdown && (
+            <div style={{
+              position: 'absolute',
+              right: 0,
+              top: '120%',
+              width: 190,
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-md)',
+              boxShadow: 'var(--shadow-lg)',
+              zIndex: 200,
+              padding: '0.4rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.2rem'
+            }}>
+              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', padding: '0.25rem 0.5rem', textTransform: 'uppercase' }}>
+                Display Currency
+              </div>
+              {Object.entries(CURRENCY_MAP).map(([code, meta]) => (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => handleSelectCurrency(code)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.45rem 0.65rem',
+                    borderRadius: 'var(--radius-sm)',
+                    border: 'none',
+                    background: selectedCurrency === code ? 'rgba(16, 185, 129, 0.15)' : 'transparent',
+                    color: selectedCurrency === code ? 'var(--accent-emerald)' : 'var(--text-primary)',
+                    fontWeight: selectedCurrency === code ? 700 : 500,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    width: '100%',
+                    transition: 'background 0.15s ease'
+                  }}
+                >
+                  <span>{meta.label}</span>
+                  {selectedCurrency === code && <Check size={14} color="var(--accent-emerald)" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         {/* Backend Status Badge */}
         <div
           title={backendOnline ? 'PostgreSQL Database Connected (Port 8000)' : 'Standalone Offline Mode'}
