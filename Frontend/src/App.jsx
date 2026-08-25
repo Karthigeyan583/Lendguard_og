@@ -319,6 +319,8 @@ function LendGuardApp() {
           notifications={notifications}
           onMarkNotificationRead={handleMarkNotificationRead}
           onMarkAllNotificationsRead={handleMarkAllNotificationsRead}
+          isMasked={isMasked}
+          onToggleMask={handleToggleMask}
         />
 
         <main className="content-area">
@@ -328,6 +330,7 @@ function LendGuardApp() {
                 summary={summary}
                 loans={loans}
                 people={people}
+                isMasked={isMasked}
                 onRecordPaymentForLoan={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
                 onGenerateStatement={handleGenerateStatement}
                 onOpenNewLoan={() => { setNewLoanPrefill(null); setIsNewLoanOpen(true); }}
@@ -352,6 +355,7 @@ function LendGuardApp() {
             {activeTab === 'people' && (
               <PeopleView
                 people={people}
+                isMasked={isMasked}
                 onOpenAddPerson={() => setIsAddPersonOpen(true)}
                 onLendToPerson={(p) => { setNewLoanPrefill({ person: p.id }); setIsNewLoanOpen(true); }}
                 onArchivePerson={handleArchivePerson}
@@ -362,7 +366,21 @@ function LendGuardApp() {
             {activeTab === 'loans' && (
               <LoansLedgerView
                 loans={loans}
+                isMasked={isMasked}
                 onOpenNewLoan={() => { setNewLoanPrefill(null); setIsNewLoanOpen(true); }}
+                onRecordPayment={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
+                onGenerateStatement={handleGenerateStatement}
+                onCancelLoan={handleCancelLoan}
+                onWriteOffLoan={handleWriteOffLoan}
+              />
+            )}
+
+            {activeTab === 'borrowing' && (
+              <LoansLedgerView
+                loans={loans}
+                initialDirection="borrowed"
+                isMasked={isMasked}
+                onOpenNewLoan={() => { setNewLoanPrefill({ direction: 'borrowed' }); setIsNewLoanOpen(true); }}
                 onRecordPayment={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
                 onGenerateStatement={handleGenerateStatement}
                 onCancelLoan={handleCancelLoan}
@@ -374,6 +392,7 @@ function LendGuardApp() {
               <ReportsAgingView
                 agingData={agingData}
                 loans={loans}
+                isMasked={isMasked}
                 onRecordPayment={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
                 onGenerateStatement={handleGenerateStatement}
               />
@@ -436,15 +455,21 @@ function LendGuardApp() {
         onClose={() => { setIsPersonDetailsOpen(false); setSelectedPersonForDetails(null); }}
         person={selectedPersonForDetails}
         loans={loans}
+        isMasked={isMasked}
         onOpenNewLoanForPerson={(p) => {
           setNewLoanPrefill({ person: p.id });
+          setIsPersonDetailsOpen(false);
           setIsNewLoanOpen(true);
         }}
         onRecordPaymentForLoan={(loan) => {
           setSelectedLoanForPayment(loan);
+          setIsPersonDetailsOpen(false);
           setIsPaymentOpen(true);
         }}
-        onGenerateStatementForLoan={handleGenerateStatement}
+        onGenerateStatementForLoan={(loan) => {
+          setIsPersonDetailsOpen(false);
+          handleGenerateStatement(loan);
+        }}
       />
 
       <KpiDrilldownModal
