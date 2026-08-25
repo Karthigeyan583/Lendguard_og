@@ -69,8 +69,25 @@ export const convertCurrency = (amount, fromCurrency, toCurrency, customRate = n
   return Number((num * rate).toFixed(2));
 };
 
-export const formatMoney = (amount, currencyCode) => {
-  const num = Number(amount || 0);
+export const isNumbersMasked = () => {
+  return localStorage.getItem('lendguard_mask_numbers') === 'true';
+};
+
+export const setNumbersMasked = (masked) => {
+  localStorage.setItem('lendguard_mask_numbers', masked ? 'true' : 'false');
+};
+
+export const formatMoney = (amount, currencyCode, isMasked = false) => {
   const symbol = getCurrencySymbol(currencyCode);
+  if (isMasked) {
+    return `${symbol}••••••`;
+  }
+  const num = Number(amount || 0);
   return `${symbol}${num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+};
+
+export const maskValue = (formattedString, isMasked = false) => {
+  if (!isMasked) return formattedString;
+  // If it contains a currency symbol, keep the symbol and mask the numbers
+  return formattedString.replace(/[\d,]+(\.\d+)?/g, '••••••');
 };
