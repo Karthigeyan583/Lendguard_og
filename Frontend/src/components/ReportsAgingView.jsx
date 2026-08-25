@@ -48,7 +48,7 @@ export const ReportsAgingView = ({ agingData, loans = [], onRecordPayment, onGen
               Total Overdue Capital
             </span>
             <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent-rose)' }}>
-              ₹{Number(totalOverdue).toLocaleString()}
+              {defSymbol}{Number(totalOverdue).toLocaleString()}
             </div>
           </div>
         </div>
@@ -73,7 +73,7 @@ export const ReportsAgingView = ({ agingData, loans = [], onRecordPayment, onGen
                 {tier.label}
               </div>
               <div style={{ fontSize: '1.65rem', fontWeight: 800, color: tier.color, marginBottom: '0.25rem' }}>
-                ₹{Number(tierData.amount).toLocaleString()}
+                {defSymbol}{Number(tierData.amount).toLocaleString()}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 {tierData.count} {tierData.count === 1 ? 'loan' : 'loans'} in this aging tier
@@ -121,10 +121,10 @@ export const ReportsAgingView = ({ agingData, loans = [], onRecordPayment, onGen
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-rose)' }}>
-                      ₹{Number(l.balance?.outstanding || l.principal_amount).toLocaleString()}
+                      {getCurrencySymbol(l.currency)}{Number(l.balance?.outstanding || l.principal_amount).toLocaleString()}
                     </div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                      Original: ₹{Number(l.principal_amount).toLocaleString()}
+                      Original: {getCurrencySymbol(l.currency)}{Number(l.principal_amount).toLocaleString()}
                     </div>
                   </div>
 
