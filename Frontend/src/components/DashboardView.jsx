@@ -32,7 +32,8 @@ export const DashboardView = ({
   onOpenNewLoan,
   onOpenAddPerson,
   onOpenPersonDetails,
-  onOpenDrilldown
+  onOpenDrilldown,
+  isMasked = false
 }) => {
   const [activeCurrencyFilter, setActiveCurrencyFilter] = useState('ALL');
   const [showCurrencySplitDropdown, setShowCurrencySplitDropdown] = useState(false);
