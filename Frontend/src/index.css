@@ -561,8 +561,9 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .dashboard-layout {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1.55fr 1.45fr;
   gap: 1.5rem;
+  align-items: stretch;
 }
 
 @media (max-width: 968px) {
