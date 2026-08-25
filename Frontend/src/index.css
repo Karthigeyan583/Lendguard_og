@@ -570,3 +570,91 @@ input[type="range"]::-webkit-slider-thumb:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* Samsung One UI "Now Bar" Styles & Animations */
+.samsung-now-bar-panel {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+  position: relative;
+}
+
+.now-bar-scroll-track {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.5rem 0.25rem 0.75rem;
+  scrollbar-width: none;
+}
+
+.now-bar-scroll-track::-webkit-scrollbar {
+  display: none;
+}
+
+.now-bar-card {
+  scroll-snap-align: start;
+  min-width: 260px;
+  max-width: 280px;
+  flex: 0 0 auto;
+  background: var(--inner-card-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 1.15rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.now-bar-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(99, 102, 241, 0.45);
+  box-shadow: 0 12px 28px rgba(99, 102, 241, 0.15);
+}
+
+.now-bar-dot {
+  height: 6px;
+  border-radius: 3px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--border-subtle);
+  cursor: pointer;
+}
+
+.now-bar-dot.active {
+  width: 22px;
+  background: var(--accent-indigo);
+  box-shadow: 0 0 10px var(--accent-indigo);
+}
+
+.now-bar-dot.inactive {
+  width: 6px;
+}
+
+.now-bar-nav-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--inner-card-bg);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.now-bar-nav-btn:hover {
+  background: var(--accent-indigo);
+  border-color: var(--accent-indigo);
+  color: #fff;
+  transform: scale(1.1);
+}
+
