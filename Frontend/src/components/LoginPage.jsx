@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth, DEMO_ACCOUNTS } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { 
@@ -13,21 +13,67 @@ import {
   CheckCircle2, 
   ArrowRight, 
   BookOpen, 
-  FileText, 
+  FileCheck2, 
   BarChart3,
   Sun,
   Moon,
+  ChevronLeft,
+  ChevronRight,
+  Shield,
   Layers,
-  FileCheck2,
-  BellRing,
   Database
 } from 'lucide-react';
+
+const POINTER_SLIDES = [
+  {
+    id: 'ledger',
+    number: '01',
+    title: 'Authoritative Multi-Currency Ledger',
+    tag: 'CORE LEDGER',
+    tagColor: 'var(--accent-emerald)',
+    tagBg: 'rgba(16, 185, 129, 0.15)',
+    icon: BookOpen,
+    image: '/assets/slides/slide_ledger.jpg',
+    badge: 'EUR • INR • USD Native',
+    description: 'Maintains original lending currencies without artificial mixing. Provides real-time principal, repayment installments, and deterministic balance calculation.',
+    highlights: ['Zero FX Distortion', 'Deterministic Balances', 'Installment Tracking']
+  },
+  {
+    id: 'statements',
+    number: '02',
+    title: 'Verifiable Digital IOUs & Statements',
+    tag: 'SHA-256 PROOF',
+    tagColor: 'var(--accent-cyan)',
+    tagBg: 'rgba(6, 182, 212, 0.15)',
+    icon: FileCheck2,
+    image: '/assets/slides/slide_statements.jpg',
+    badge: 'Cryptographic Security',
+    description: 'Generates formal printable PDF statements with tamper-evident SHA-256 cryptographic verification seals, signature verification, and dispute prevention.',
+    highlights: ['SHA-256 Verification', 'Print & PDF Export', 'Legal Dispute Proof']
+  },
+  {
+    id: 'aging',
+    number: '03',
+    title: 'Overdue Aging & Automated Reminders',
+    tag: 'SMART RECOVERY',
+    tagColor: 'var(--accent-rose)',
+    tagBg: 'rgba(244, 63, 94, 0.15)',
+    icon: BarChart3,
+    image: '/assets/slides/slide_aging.jpg',
+    badge: 'Auto Delinquency Engine',
+    description: 'Tiered overdue aging buckets (0–7d, 8–30d, 31–60d, 60+d) with smart suppression for settled debts and automated WhatsApp/SMS payment reminders.',
+    highlights: ['4 Tiered Buckets', 'Smart Suppression', 'WhatsApp & SMS Alerts']
+  }
+];
 
 export const LoginPage = () => {
   const { login, register, loginAsDemo, backendOnline } = useAuth();
   const { theme, toggleTheme, isDark } = useTheme();
   const [isRegister, setIsRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -40,6 +86,23 @@ export const LoginPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+
+  // Auto-looping carousel timer (every 4.5s, pauses on hover)
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % POINTER_SLIDES.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [isPaused]);
+
+  const handleNextSlide = () => {
+    setActiveSlide((prev) => (prev + 1) % POINTER_SLIDES.length);
+  };
+
+  const handlePrevSlide = () => {
+    setActiveSlide((prev) => (prev - 1 + POINTER_SLIDES.length) % POINTER_SLIDES.length);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -88,6 +151,9 @@ export const LoginPage = () => {
     }
   };
 
+  const currentSlide = POINTER_SLIDES[activeSlide];
+  const CurrentIcon = currentSlide.icon;
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -121,7 +187,7 @@ export const LoginPage = () => {
         </button>
       </div>
 
-      {/* Background Decorative Glow */}
+      {/* Background Decorative Ambient Glows */}
       <div style={{
         position: 'absolute',
         top: '-15%',
@@ -141,253 +207,323 @@ export const LoginPage = () => {
         pointerEvents: 'none'
       }} />
 
+      {/* Main 2-Column Equal Flex/Grid */}
       <div style={{
         width: '100%',
-        maxWidth: 1140,
+        maxWidth: 1200,
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
-        gap: '2.5rem',
-        alignItems: 'center',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(440px, 1fr))',
+        gap: '2rem',
+        alignItems: 'stretch',
         zIndex: 1
       }}>
-        {/* Left Side: Brand Story, Visual Artwork & Distinguished Feature Pillars */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '0.5rem 0' }}>
+        {/* Left Side: Brand & Looping Pointer Carousel Card */}
+        <div 
+          className="glass-panel" 
+          style={{
+            padding: '2rem',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-card)',
+            border: '1px solid var(--border-subtle)',
+            background: 'var(--bg-card)',
+            backdropFilter: 'blur(20px)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            gap: '1.25rem'
+          }}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
           {/* Brand Header */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '0.65rem' }}>
-              <div style={{
-                width: 48,
-                height: 48,
-                borderRadius: '14px',
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 8px 24px rgba(16, 185, 129, 0.45)'
-              }}>
-                <ShieldCheck size={28} color="#ffffff" strokeWidth={2.5} />
-              </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <h1 style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.03em', margin: 0, color: 'var(--text-primary)' }}>
-                    LendGuard
-                  </h1>
-                  <span style={{
-                    fontSize: '0.75rem',
-                    background: 'linear-gradient(90deg, #10b981, #06b6d4)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    fontWeight: 800,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}>
-                    v2.0
-                  </span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 8px 20px rgba(16, 185, 129, 0.4)'
+                }}>
+                  <ShieldCheck size={24} color="#ffffff" strokeWidth={2.5} />
                 </div>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
-                  Personal & Business Lending Ledger Platform
-                </p>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <h1 style={{ fontSize: '1.6rem', fontWeight: 800, letterSpacing: '-0.03em', margin: 0, color: 'var(--text-primary)' }}>
+                      LendGuard
+                    </h1>
+                    <span style={{
+                      fontSize: '0.7rem',
+                      background: 'linear-gradient(90deg, #10b981, #06b6d4)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      fontWeight: 800,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em'
+                    }}>
+                      v2.0
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
+                    Personal & Business Lending Ledger Platform
+                  </p>
+                </div>
+              </div>
+
+              {/* Carousel Slide Counter */}
+              <div style={{
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                color: 'var(--text-muted)',
+                background: 'var(--bg-surface)',
+                padding: '0.25rem 0.6rem',
+                borderRadius: 'var(--radius-full)',
+                border: '1px solid var(--border-subtle)'
+              }}>
+                <span style={{ color: currentSlide.tagColor }}>{currentSlide.number}</span> / 03
               </div>
             </div>
-            
-            <p style={{ fontSize: '0.98rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: '0.5rem 0 0' }}>
+
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.45, margin: '0.5rem 0 0' }}>
               Know who owes you, how much, when due, what was repaid, and what remains — with cryptographic audit trail.
             </p>
           </div>
 
-          {/* Hero Visual Artwork Card (Consistent Across Both Day & Night Modes) */}
+          {/* Active Carousel Slide Visual & Description */}
           <div style={{
-            position: 'relative',
-            borderRadius: '18px',
-            overflow: 'hidden',
-            border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(16, 185, 129, 0.25)',
-            boxShadow: isDark ? '0 16px 36px rgba(0, 0, 0, 0.4)' : '0 16px 36px rgba(15, 23, 42, 0.18)',
-            background: '#090e1a'
-          }}>
-            <img
-              src="/assets/lendguard_hero.jpg"
-              alt="LendGuard Secure Multi-Currency Lending & Digital Trust Vault"
-              style={{
-                width: '100%',
-                height: 'auto',
-                display: 'block',
-                objectFit: 'cover',
-                maxHeight: '235px',
-                filter: 'brightness(1.02) contrast(1.04)'
-              }}
-            />
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(6, 9, 19, 0.92) 100%)',
-              display: 'flex',
-              alignItems: 'flex-end',
-              padding: '0.75rem 1rem'
-            }}>
-              <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
-                <span style={{
-                  fontSize: '0.68rem',
-                  fontWeight: 700,
-                  padding: '0.2rem 0.6rem',
-                  borderRadius: 'var(--radius-full)',
-                  background: 'rgba(16, 185, 129, 0.25)',
-                  color: '#34d399',
-                  border: '1px solid rgba(16, 185, 129, 0.4)',
-                  backdropFilter: 'blur(8px)'
-                }}>
-                  ● Verified Credit Agreement
-                </span>
-                <span style={{
-                  fontSize: '0.68rem',
-                  fontWeight: 700,
-                  padding: '0.2rem 0.6rem',
-                  borderRadius: 'var(--radius-full)',
-                  background: 'rgba(99, 102, 241, 0.25)',
-                  color: '#a5b4fc',
-                  border: '1px solid rgba(99, 102, 241, 0.4)',
-                  backdropFilter: 'blur(8px)'
-                }}>
-                  Digital Trust Vault (€ • ₹ • $)
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Distinguished Feature Pillars */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-            {/* Pointer 1 */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '0.85rem',
-              padding: '0.75rem 0.95rem',
-              borderRadius: '14px',
-              background: 'var(--inner-card-bg)',
-              border: '1px solid var(--border-subtle)',
-              transition: 'all 0.2s ease'
-            }}>
-              <div style={{
-                width: 36,
-                height: 36,
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2))',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                border: '1px solid rgba(16, 185, 129, 0.3)'
-              }}>
-                <BookOpen size={18} color="var(--accent-emerald)" />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                    Authoritative Multi-Currency Ledger
-                  </strong>
-                  <span style={{ fontSize: '0.65rem', color: 'var(--accent-emerald)', fontWeight: 700 }}>
-                    CORE
-                  </span>
-                </div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-                  Maintains original transaction currencies (EUR, INR, USD) with zero artificial mixing and real-time balance calculations.
-                </div>
-              </div>
-            </div>
-
-            {/* Pointer 2 */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '0.85rem',
-              padding: '0.75rem 0.95rem',
-              borderRadius: '14px',
-              background: 'var(--inner-card-bg)',
-              border: '1px solid var(--border-subtle)',
-              transition: 'all 0.2s ease'
-            }}>
-              <div style={{
-                width: 36,
-                height: 36,
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(99, 102, 241, 0.2))',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                border: '1px solid rgba(6, 182, 212, 0.3)'
-              }}>
-                <FileCheck2 size={18} color="var(--accent-cyan)" />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                    Verifiable Digital IOUs & PDF Statements
-                  </strong>
-                  <span style={{ fontSize: '0.65rem', color: 'var(--accent-cyan)', fontWeight: 700 }}>
-                    VERIFIED
-                  </span>
-                </div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-                  Generates formal printable PDF statements with tamper-evident SHA-256 cryptographic verification seals.
-                </div>
-              </div>
-            </div>
-
-            {/* Pointer 3 */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '0.85rem',
-              padding: '0.75rem 0.95rem',
-              borderRadius: '14px',
-              background: 'var(--inner-card-bg)',
-              border: '1px solid var(--border-subtle)',
-              transition: 'all 0.2s ease'
-            }}>
-              <div style={{
-                width: 36,
-                height: 36,
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(245, 158, 11, 0.2))',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                border: '1px solid rgba(244, 63, 94, 0.3)'
-              }}>
-                <BarChart3 size={18} color="var(--accent-rose)" />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                    Overdue Aging & Automated Reminders
-                  </strong>
-                  <span style={{ fontSize: '0.65rem', color: 'var(--accent-rose)', fontWeight: 700 }}>
-                    AUTOMATED
-                  </span>
-                </div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-                  Deterministic overdue aging buckets (0–7d, 8–30d, 31–60d, 60+d) with smart suppression for settled debts.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* System Status Pill */}
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.45rem 0.95rem',
             background: 'var(--inner-card-bg)',
             border: '1px solid var(--border-subtle)',
-            borderRadius: 'var(--radius-full)',
-            fontSize: '0.75rem',
-            color: backendOnline ? 'var(--accent-emerald)' : 'var(--accent-amber)',
-            width: 'fit-content'
+            borderRadius: '16px',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+            position: 'relative'
           }}>
-            <span className={`status-dot ${backendOnline ? 'online' : 'offline'}`} />
-            <span>{backendOnline ? 'PostgreSQL 16 Enterprise Backend Connected (Port 8000)' : 'Standalone Mode'}</span>
+            {/* Slide Image Frame */}
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              height: '185px',
+              overflow: 'hidden',
+              background: '#090e1a'
+            }}>
+              <img
+                key={currentSlide.id}
+                src={currentSlide.image}
+                alt={currentSlide.title}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  filter: 'brightness(1.02) contrast(1.04)',
+                  transition: 'opacity 0.4s ease'
+                }}
+              />
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(6, 9, 19, 0.92) 100%)',
+                display: 'flex',
+                alignItems: 'flex-end',
+                justifyContent: 'space-between',
+                padding: '0.65rem 0.9rem'
+              }}>
+                <span style={{
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  padding: '0.2rem 0.55rem',
+                  borderRadius: 'var(--radius-full)',
+                  background: currentSlide.tagBg,
+                  color: currentSlide.tagColor,
+                  border: `1px solid ${currentSlide.tagColor}40`,
+                  backdropFilter: 'blur(8px)'
+                }}>
+                  {currentSlide.badge}
+                </span>
+
+                {/* Prev / Next controls over image */}
+                <div style={{ display: 'flex', gap: '0.35rem' }}>
+                  <button
+                    type="button"
+                    onClick={handlePrevSlide}
+                    style={{
+                      width: 26,
+                      height: 26,
+                      borderRadius: '50%',
+                      background: 'rgba(0,0,0,0.5)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      backdropFilter: 'blur(6px)',
+                      transition: 'all 0.2s ease'
+                    }}
+                    title="Previous Slide"
+                  >
+                    <ChevronLeft size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNextSlide}
+                    style={{
+                      width: 26,
+                      height: 26,
+                      borderRadius: '50%',
+                      background: 'rgba(0,0,0,0.5)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      backdropFilter: 'blur(6px)',
+                      transition: 'all 0.2s ease'
+                    }}
+                    title="Next Slide"
+                  >
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Slide Content */}
+            <div style={{ padding: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
+                <div style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '8px',
+                  background: currentSlide.tagBg,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: currentSlide.tagColor
+                }}>
+                  <CurrentIcon size={16} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                    {currentSlide.title}
+                  </h3>
+                </div>
+              </div>
+
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.45, margin: '0.4rem 0 0.65rem' }}>
+                {currentSlide.description}
+              </p>
+
+              {/* Highlight Chips */}
+              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                {currentSlide.highlights.map((h, idx) => (
+                  <span
+                    key={idx}
+                    style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 600,
+                      padding: '0.15rem 0.5rem',
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'var(--bg-surface)',
+                      color: 'var(--text-muted)',
+                      border: '1px solid var(--border-subtle)'
+                    }}
+                  >
+                    ✓ {h}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive Pointer Tabs / Thumbnails */}
+          <div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '0.5rem'
+            }}>
+              {POINTER_SLIDES.map((slide, idx) => {
+                const Icon = slide.icon;
+                const isActive = activeSlide === idx;
+                return (
+                  <button
+                    key={slide.id}
+                    type="button"
+                    onClick={() => setActiveSlide(idx)}
+                    style={{
+                      padding: '0.55rem 0.5rem',
+                      borderRadius: '10px',
+                      border: isActive ? `1.5px solid ${slide.tagColor}` : '1px solid var(--border-subtle)',
+                      background: isActive ? slide.tagBg : 'var(--bg-surface)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      textAlign: 'center'
+                    }}
+                  >
+                    <Icon size={16} color={isActive ? slide.tagColor : 'var(--text-muted)'} />
+                    <span style={{
+                      fontSize: '0.68rem',
+                      fontWeight: isActive ? 700 : 500,
+                      color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      maxWidth: '100%'
+                    }}>
+                      {slide.tag}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Auto-Progress Bar Indicator */}
+            <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.65rem' }}>
+              {POINTER_SLIDES.map((_, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => setActiveSlide(idx)}
+                  style={{
+                    flex: 1,
+                    height: 3,
+                    borderRadius: 2,
+                    background: activeSlide === idx ? currentSlide.tagColor : 'var(--border-subtle)',
+                    cursor: 'pointer',
+                    transition: 'background 0.3s ease'
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom System Status */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingTop: '0.5rem',
+            borderTop: '1px solid var(--border-subtle)',
+            fontSize: '0.72rem',
+            color: 'var(--text-muted)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span className={`status-dot ${backendOnline ? 'online' : 'offline'}`} />
+              <span style={{ color: backendOnline ? 'var(--accent-emerald)' : 'var(--accent-amber)', fontWeight: 600 }}>
+                {backendOnline ? 'PostgreSQL 16 Connected' : 'Standalone Mode'}
+              </span>
+            </div>
+            <span>🔒 AES-256 Encrypted</span>
           </div>
         </div>
 
@@ -398,7 +534,10 @@ export const LoginPage = () => {
           boxShadow: 'var(--shadow-card)',
           border: '1px solid var(--border-subtle)',
           background: 'var(--bg-card)',
-          backdropFilter: 'blur(20px)'
+          backdropFilter: 'blur(20px)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between'
         }}>
           {/* Tab Switcher */}
           <div style={{
