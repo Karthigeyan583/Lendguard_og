@@ -89,12 +89,13 @@ export const PersonDetailsModal = ({
   // Collect all repayments across this person's loans
   const allRepayments = [];
   personLoans.forEach(loan => {
-    if (Array.isArray(loan.repayments)) {
-      loan.repayments.forEach(rep => {
+    const list = loan.repayments || loan.recent_payments || [];
+    if (Array.isArray(list)) {
+      list.forEach(rep => {
         allRepayments.push({
           ...rep,
           loan_reference: loan.loan_reference,
-          currency: loan.currency || 'INR'
+          currency: rep.currency || loan.currency || 'INR'
         });
       });
     }
