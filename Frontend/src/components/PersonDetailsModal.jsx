@@ -485,7 +485,7 @@ export const PersonDetailsModal = ({
                     </div>
 
                     <div style={{ fontWeight: 700, color: 'var(--accent-emerald)', fontSize: '0.9rem' }}>
-                      +₹{Number(rep.amount || 0).toLocaleString()}
+                      +{getCurrencySymbol(rep.currency)}{Number(rep.amount || 0).toLocaleString()}
                     </div>
                   </div>
                 ))}
