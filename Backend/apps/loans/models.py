@@ -8,8 +8,10 @@ from apps.people.models import Person
 
 class Loan(models.Model):
     DIRECTION_CHOICES = [
-        ('lent', 'Money Lent (Given)'),
-        ('borrowed', 'Money Borrowed (Received)'),
+        ('lent', 'Money Lent (Given / Receivable)'),
+        ('borrowed', 'Money Borrowed (Received / Payable)'),
+        ('LENDING', 'Money Lent (Given / Receivable)'),
+        ('BORROWING', 'Money Borrowed (Received / Payable)'),
     ]
 
     INTEREST_MODEL_CHOICES = [
