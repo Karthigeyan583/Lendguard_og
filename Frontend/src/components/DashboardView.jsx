@@ -39,11 +39,11 @@ export const DashboardView = ({
       {/* 4 Main KPI Cards */}
       <div className="stats-grid">
         {/* Total Lent */}
-        <div className="glass-panel" style={{ padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
+        <div className="glass-panel kpi-card kpi-lent" style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>TOTAL CAPITAL LENT</span>
-            <div style={{ width: 34, height: 34, borderRadius: '8px', background: 'rgba(59, 130, 246, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ArrowUpRight size={18} color="var(--accent-blue)" />
+            <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(59, 130, 246, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ArrowUpRight size={19} color="var(--accent-blue)" />
             </div>
           </div>
           <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
@@ -55,11 +55,11 @@ export const DashboardView = ({
         </div>
 
         {/* Total Repaid */}
-        <div className="glass-panel" style={{ padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
+        <div className="glass-panel kpi-card kpi-repaid" style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>TOTAL REPAID</span>
-            <div style={{ width: 34, height: 34, borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CheckCircle2 size={18} color="var(--accent-emerald)" />
+            <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CheckCircle2 size={19} color="var(--accent-emerald)" />
             </div>
           </div>
           <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
@@ -71,11 +71,11 @@ export const DashboardView = ({
         </div>
 
         {/* Net Outstanding */}
-        <div className="glass-panel" style={{ padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
+        <div className="glass-panel kpi-card kpi-outstanding" style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>NET OUTSTANDING BALANCE</span>
-            <div style={{ width: 34, height: 34, borderRadius: '8px', background: 'rgba(6, 182, 212, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Clock size={18} color="var(--accent-cyan)" />
+            <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(6, 182, 212, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Clock size={19} color="var(--accent-cyan)" />
             </div>
           </div>
           <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-cyan)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
@@ -87,11 +87,11 @@ export const DashboardView = ({
         </div>
 
         {/* Total Overdue */}
-        <div className="glass-panel" style={{ padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
+        <div className="glass-panel kpi-card kpi-overdue" style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>OVERDUE AMOUNT</span>
-            <div style={{ width: 34, height: 34, borderRadius: '8px', background: 'rgba(244, 63, 94, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <AlertTriangle size={18} color="var(--accent-rose)" />
+            <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(244, 63, 94, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <AlertTriangle size={19} color="var(--accent-rose)" />
             </div>
           </div>
           <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-rose)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
@@ -104,7 +104,7 @@ export const DashboardView = ({
       </div>
 
       {/* Recovery Progress Bar Strip */}
-      <div className="glass-panel" style={{ padding: '1.25rem 1.5rem' }}>
+      <div className="glass-panel dashboard-item-card" style={{ padding: '1.25rem 1.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
           <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Overall Portfolio Recovery Progress</span>
           <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>{recoveryRate}% Settled</span>
@@ -135,7 +135,7 @@ export const DashboardView = ({
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {overdueLoans.map((l) => (
-                  <div key={l.id} style={{
+                  <div key={l.id} className="dashboard-item-card" style={{
                     background: 'var(--inner-card-bg)',
                     border: '1px solid rgba(244, 63, 94, 0.25)',
                     borderRadius: 'var(--radius-sm)',
@@ -195,7 +195,7 @@ export const DashboardView = ({
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {dueSoonLoans.map((l) => (
-                  <div key={l.id} style={{
+                  <div key={l.id} className="dashboard-item-card" style={{
                     background: 'var(--inner-card-bg)',
                     border: '1px solid var(--border-subtle)',
                     borderRadius: 'var(--radius-sm)',
@@ -260,7 +260,7 @@ export const DashboardView = ({
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {people.slice(0, 5).map((p) => (
-                  <div key={p.id} style={{
+                  <div key={p.id} className="dashboard-row-item" style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
