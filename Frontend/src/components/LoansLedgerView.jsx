@@ -31,10 +31,12 @@ export const LoansLedgerView = ({
   onRecordPayment, 
   onGenerateStatement, 
   onCancelLoan,
-  onWriteOffLoan 
+  onWriteOffLoan,
+  initialDirection = 'all',
+  isMasked = false
 }) => {
   const [activeTab, setActiveTab] = useState('all');
-  const [directionFilter, setDirectionFilter] = useState('all');
+  const [directionFilter, setDirectionFilter] = useState(initialDirection);
   const [search, setSearch] = useState('');
   const [expandedLoanId, setExpandedLoanId] = useState(null);
 
