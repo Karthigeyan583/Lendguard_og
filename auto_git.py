@@ -1,9 +1,13 @@
+import os
+import sys
 import subprocess
 import time
 from pathlib import Path
 from datetime import datetime
 
 PROJECT_DIR = Path(__file__).resolve().parent
+SCRIPT_FILE = Path(__file__).resolve()
+INITIAL_SCRIPT_MTIME = SCRIPT_FILE.stat().st_mtime
 WAIT_SECONDS = 4
 
 # Files/folders that should NOT trigger commits
@@ -203,6 +207,11 @@ def main():
 
     while True:
         try:
+            # Auto-reload if auto_git.py was modified
+            if SCRIPT_FILE.stat().st_mtime > INITIAL_SCRIPT_MTIME:
+                print("\n🔄 Detected update in auto_git.py! Reloading process with new logic...")
+                os.execv(sys.executable, [sys.executable, str(SCRIPT_FILE)] + sys.argv[1:])
+
             changed_files, status_lines, diff_text = get_git_status_and_changes()
 
             if changed_files:
