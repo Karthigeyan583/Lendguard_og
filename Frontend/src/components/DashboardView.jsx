@@ -11,9 +11,10 @@ import {
   Plus, 
   FileText,
   Share2,
-  ChevronRight
+  ChevronRight,
+  Layers
 } from 'lucide-react';
-import { getCurrencySymbol, getDefaultCurrency } from '../utils/currency';
+import { getCurrencySymbol, getDefaultCurrency, convertCurrency } from '../utils/currency';
 
 export const DashboardView = ({ 
   summary, 
@@ -144,6 +145,55 @@ export const DashboardView = ({
           )}
         </div>
       </div>
+
+      {/* Multi-Currency Breakdown Strip (if loans in multiple currencies exist) */}
+      {summary?.currency_breakdown && Object.keys(summary.currency_breakdown).length > 1 && (
+        <div
+          className="glass-panel"
+          style={{
+            padding: '0.85rem 1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+            background: 'rgba(99, 102, 241, 0.06)',
+            borderColor: 'rgba(99, 102, 241, 0.2)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <Layers size={17} color="var(--accent-indigo)" />
+            <div>
+              <span style={{ fontSize: '0.825rem', fontWeight: 700, color: 'var(--accent-indigo)' }}>
+                Multi-Currency Portfolio Breakdown
+              </span>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginLeft: 6 }}>
+                (Normalized into {reportingCurrency} Base Currency)
+              </span>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {Object.entries(summary.currency_breakdown).map(([code, stats]) => (
+              <span
+                key={code}
+                className="badge"
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '0.35rem 0.7rem',
+                  background: 'var(--inner-card-bg)',
+                  borderColor: 'var(--border-subtle)',
+                  color: 'var(--text-primary)'
+                }}
+              >
+                <strong>{getCurrencySymbol(code)}{Number(stats.total_lent).toLocaleString()} {code}</strong>
+                <span style={{ color: 'var(--text-muted)', marginLeft: 4 }}>
+                  ({getCurrencySymbol(code)}{Number(stats.outstanding).toLocaleString()} owed)
+                </span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Recovery Progress Bar Strip */}
       <div
