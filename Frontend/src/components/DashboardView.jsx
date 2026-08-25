@@ -407,392 +407,358 @@ export const DashboardView = ({
         </div>
       </div>
 
-      {/* Two Column Layout: Urgent Follow-ups + Recent Activity */}
+      {/* Two Column Layout: Aligned Grid Rows */}
       <div className="dashboard-layout">
-        {/* Left: Urgent Attention & Reminders */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Overdue Section */}
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--accent-rose)', boxShadow: '0 0 8px var(--accent-rose)' }} />
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Overdue Follow-ups</h3>
-              </div>
-              <span className="badge badge-rejected">{overdueLoans.length} Overdue</span>
+        {/* Row 1 Left: Overdue Follow-ups */}
+        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--accent-rose)', boxShadow: '0 0 8px var(--accent-rose)' }} />
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Overdue Follow-ups</h3>
             </div>
-
-            {overdueLoans.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                ✓ No overdue loans! All repayments are up to date.
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {overdueLoans.map((l) => (
-                  <div key={l.id} className="dashboard-item-card" style={{
-                    background: 'var(--inner-card-bg)',
-                    border: '1px solid rgba(244, 63, 94, 0.25)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: '0.75rem'
-                  }}>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{l.person_name || 'Borrower'}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        Loan: #{l.loan_reference} • Due: {l.due_date} (<strong style={{ color: 'var(--accent-rose)' }}>{l.days_overdue} days overdue</strong>)
-                      </div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-rose)', marginTop: '0.2rem' }}>
-                        {getCurrencySymbol(l.currency)}{Number(l.balance?.outstanding || l.principal_amount).toLocaleString()} Outstanding
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button
-                        className="btn btn-primary"
-                        style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}
-                        onClick={() => onRecordPaymentForLoan(l)}
-                      >
-                        Record Repayment
-                      </button>
-                      <button
-                        className="btn btn-secondary"
-                        style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem' }}
-                        onClick={() => onGenerateStatement(l)}
-                      >
-                        <FileText size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <span className="badge badge-rejected">{overdueLoans.length} Overdue</span>
           </div>
 
-          {/* Due Soon Section */}
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--accent-amber)' }} />
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Upcoming Due Dates (Next 7 Days)</h3>
-              </div>
-              <span className="badge badge-under_review">{dueSoonLoans.length} Due Soon</span>
+          {overdueLoans.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              ✓ No overdue loans! All repayments are up to date.
             </div>
-
-            {dueSoonLoans.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                No loans due in the next 7 days.
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {dueSoonLoans.map((l) => (
-                  <div key={l.id} className="dashboard-item-card" style={{
-                    background: 'var(--inner-card-bg)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '0.9rem 1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                  }}>
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{l.person_name}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        Due on: {l.due_date} • Owed: {getCurrencySymbol(l.currency)}{Number(l.balance?.outstanding || l.principal_amount).toLocaleString()}
-                      </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {overdueLoans.map((l) => (
+                <div key={l.id} className="dashboard-item-card" style={{
+                  background: 'var(--inner-card-bg)',
+                  border: '1px solid rgba(244, 63, 94, 0.25)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '0.75rem'
+                }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{l.person_name || 'Borrower'}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      Loan: #{l.loan_reference} • Due: {l.due_date} (<strong style={{ color: 'var(--accent-rose)' }}>{l.days_overdue} days overdue</strong>)
                     </div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-rose)', marginTop: '0.2rem' }}>
+                      {getCurrencySymbol(l.currency)}{Number(l.balance?.outstanding || l.principal_amount).toLocaleString()} Outstanding
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button
-                      className="btn btn-secondary"
+                      className="btn btn-primary"
                       style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}
                       onClick={() => onRecordPaymentForLoan(l)}
                     >
-                      Collect Repayment
+                      Record Repayment
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem' }}
+                      onClick={() => onGenerateStatement(l)}
+                    >
+                      <FileText size={14} />
                     </button>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Row 1 Right: Quick Actions Hub */}
+        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1.25rem' }}>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--accent-indigo)', boxShadow: '0 0 8px var(--accent-indigo)' }} />
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Quick Actions</h3>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', flex: 1, justifyContent: 'center' }}>
+            <button
+              className="btn btn-primary"
+              style={{ width: '100%', justifyContent: 'flex-start', padding: '0.75rem 1rem' }}
+              onClick={onOpenNewLoan}
+            >
+              <Plus size={18} />
+              <span>Record New Money Lent</span>
+            </button>
+
+            <button
+              className="btn btn-secondary"
+              style={{ width: '100%', justifyContent: 'flex-start', padding: '0.75rem 1rem' }}
+              onClick={onOpenAddPerson}
+            >
+              <Users size={18} />
+              <span>Add Borrower / Contact</span>
+            </button>
           </div>
         </div>
 
-        {/* Right: Quick Action Hub & People Exposure Snapshot */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Quick Actions Hub */}
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Quick Actions</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <button
-                className="btn btn-primary"
-                style={{ width: '100%', justifyContent: 'flex-start', padding: '0.75rem 1rem' }}
-                onClick={onOpenNewLoan}
-              >
-                <Plus size={18} />
-                <span>Record New Money Lent</span>
-              </button>
-
-              <button
-                className="btn btn-secondary"
-                style={{ width: '100%', justifyContent: 'flex-start', padding: '0.75rem 1rem' }}
-                onClick={onOpenAddPerson}
-              >
-                <Users size={18} />
-                <span>Add Borrower / Contact</span>
-              </button>
+        {/* Row 2 Left: Upcoming Due Dates (Next 7 Days) */}
+        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--accent-amber)', boxShadow: '0 0 8px var(--accent-amber)' }} />
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Upcoming Due Dates (Next 7 Days)</h3>
             </div>
+            <span className="badge badge-under_review">{dueSoonLoans.length} Due Soon</span>
           </div>
 
-          {/* Samsung Now Bar: 3D Stacked Card Deck */}
-          <div className="samsung-now-bar-panel" style={{ padding: '1.25rem' }}>
-            {/* Header with Live Now Indicator & Stack Controls */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '1rem',
-              paddingBottom: '0.75rem',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.06)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                <div style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #10b981, #06b6d4)',
+          {dueSoonLoans.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              No loans due in the next 7 days.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {dueSoonLoans.map((l) => (
+                <div key={l.id} className="dashboard-item-card" style={{
+                  background: 'var(--inner-card-bg)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.9rem 1rem',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 0 12px rgba(16, 185, 129, 0.4)'
+                  justifyContent: 'space-between'
                 }}>
-                  <Sparkles size={14} color="#ffffff" />
-                </div>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                    <h3 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0, letterSpacing: '-0.01em' }}>
-                      Borrower Exposure
-                    </h3>
-                    <span style={{
-                      fontSize: '0.65rem',
-                      fontWeight: 700,
-                      padding: '0.15rem 0.45rem',
-                      borderRadius: 'var(--radius-full)',
-                      background: 'rgba(16, 185, 129, 0.15)',
-                      color: 'var(--accent-emerald)',
-                      border: '1px solid rgba(16, 185, 129, 0.3)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.25rem'
-                    }}>
-                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent-emerald)', animation: 'pulse-green 1.5s infinite' }} />
-                      STACK DECK
-                    </span>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{l.person_name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      Due on: {l.due_date} • Owed: {getCurrencySymbol(l.currency)}{Number(l.balance?.outstanding || l.principal_amount).toLocaleString()}
+                    </div>
                   </div>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                    Scroll / swipe vertically to flick cards ({people.length > 0 ? `${activeStackIndex + 1} of ${people.length}` : '0'})
-                  </span>
+                  <button
+                    className="btn btn-secondary"
+                    style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}
+                    onClick={() => onRecordPaymentForLoan(l)}
+                  >
+                    Collect Repayment
+                  </button>
                 </div>
-              </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-              {people.length > 1 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                  <button
-                    className="now-bar-nav-btn"
-                    onClick={prevStack}
-                    title="Previous stacked card"
-                  >
-                    <ChevronUp size={15} />
-                  </button>
-                  <button
-                    className="now-bar-nav-btn"
-                    onClick={nextStack}
-                    title="Next stacked card"
-                  >
-                    <ChevronDown size={15} />
-                  </button>
-                </div>
-              )}
+        {/* Row 2 Right: Samsung Stack Deck (Borrower Exposure) */}
+        <div className="glass-panel samsung-now-bar-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
+          {/* Header with Live Now Indicator & Stack Controls */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '1.25rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--accent-emerald)', boxShadow: '0 0 8px var(--accent-emerald)' }} />
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Borrower Exposure</h3>
+              <span className="badge badge-approved" style={{ fontSize: '0.65rem', padding: '0.15rem 0.5rem' }}>
+                STACK DECK
+              </span>
             </div>
 
-            {/* Stack Deck Body */}
-            {people.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                No contacts yet. Click "Add Borrower" above to get started!
-              </div>
-            ) : (
-              <div
-                className="samsung-stack-container"
-                onWheel={handleStackWheel}
-                onTouchStart={handleStackTouchStart}
-                onTouchEnd={handleStackTouchEnd}
-              >
-                <div className="samsung-stack-wrapper">
-                  {people.map((p, idx) => {
-                    const offset = (idx - activeStackIndex + people.length) % people.length;
-                    const isVisible = offset < 3;
-                    const translateY = offset * 14;
-                    const scale = 1 - offset * 0.05;
-                    const opacity = offset === 0 ? 1 : offset === 1 ? 0.82 : offset === 2 ? 0.55 : 0;
-                    const zIndex = 10 - offset;
-
-                    const pLoans = loans.filter((l) => {
-                      if (l.person === p.id) return true;
-                      if (typeof l.person === 'object' && l.person?.id === p.id) return true;
-                      if (l.person_name && p.name && l.person_name.toLowerCase() === p.name.toLowerCase()) return true;
-                      return false;
-                    });
-                    const pCurrs = Array.from(new Set(pLoans.map(l => l.currency || 'INR')));
-                    const pLent = pLoans.reduce((acc, l) => l.status !== 'CANCELLED' ? acc + Number(l.principal_amount || 0) : acc, 0);
-                    const pRepaid = pLoans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
-                    const pOut = pLoans.reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + Number(l.balance?.outstanding || 0) : acc, 0);
-                    const pRecRate = pLent > 0 ? Math.min(100, Math.round((pRepaid / pLent) * 100)) : 100;
-                    const isOverdue = pLoans.some(l => (l.days_overdue > 0 || l.time_status === 'OVERDUE') && l.status !== 'PAID');
-
-                    return (
-                      <div
-                        key={p.id}
-                        className="samsung-stack-card"
-                        style={{
-                          transform: `translateY(${translateY}px) scale(${scale})`,
-                          opacity: opacity,
-                          zIndex: zIndex,
-                          pointerEvents: isVisible ? 'auto' : 'none',
-                          cursor: offset === 0 ? 'pointer' : 'pointer'
-                        }}
-                        onClick={() => {
-                          if (offset === 0) {
-                            if (onOpenPersonDetails) onOpenPersonDetails(p);
-                          } else {
-                            setActiveStackIndex(idx);
-                          }
-                        }}
-                        title={offset === 0 ? `Click to view full dossier for ${p.name}` : `Click to bring ${p.name} to front`}
-                      >
-                        {/* Top: Avatar, Name & Status */}
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                            <div style={{
-                              width: 38,
-                              height: 38,
-                              borderRadius: '50%',
-                              background: 'linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan))',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontWeight: 800,
-                              fontSize: '0.95rem',
-                              color: '#fff',
-                              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.35)',
-                              flexShrink: 0
-                            }}>
-                              {p.name ? p.name.charAt(0).toUpperCase() : 'B'}
-                            </div>
-                            <div>
-                              <strong style={{ fontSize: '0.95rem', display: 'block', letterSpacing: '-0.01em' }}>
-                                {p.name}
-                              </strong>
-                              <span className="badge-role" style={{ fontSize: '0.65rem', padding: '0.15rem 0.45rem', marginTop: '0.15rem', display: 'inline-block' }}>
-                                {p.relationship || 'Contact'}
-                              </span>
-                            </div>
-                          </div>
-
-                          <span
-                            className="badge"
-                            style={{
-                              fontSize: '0.62rem',
-                              padding: '0.2rem 0.5rem',
-                              background: isOverdue ? 'rgba(244, 63, 94, 0.15)' : pOut === 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(6, 182, 212, 0.15)',
-                              color: isOverdue ? 'var(--accent-rose)' : pOut === 0 ? 'var(--accent-emerald)' : 'var(--accent-cyan)',
-                              borderColor: isOverdue ? 'rgba(244, 63, 94, 0.3)' : pOut === 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(6, 182, 212, 0.3)'
-                            }}
-                          >
-                            {isOverdue ? 'OVERDUE' : pOut === 0 ? 'SETTLED' : 'ACTIVE'}
-                          </span>
-                        </div>
-
-                        {/* Middle: Owed Balance in Real Currency */}
-                        <div style={{
-                          background: 'rgba(255, 255, 255, 0.03)',
-                          border: '1px solid rgba(255, 255, 255, 0.05)',
-                          borderRadius: '12px',
-                          padding: '0.75rem 0.9rem',
-                          marginBottom: '0.75rem'
-                        }}>
-                          <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block' }}>
-                            Owed Capital Balance
-                          </span>
-
-                          {pCurrs.length > 1 ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginTop: '0.25rem' }}>
-                              {pCurrs.map(curr => {
-                                const cLoans = pLoans.filter(l => (l.currency || 'INR') === curr);
-                                const cOut = cLoans.reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + Number(l.balance?.outstanding || 0) : acc, 0);
-                                return (
-                                  <div key={curr} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                    <span style={{ fontSize: '1.05rem', fontWeight: 800, color: cOut > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)' }}>
-                                      {getCurrencySymbol(curr)}{cOut.toLocaleString()}
-                                    </span>
-                                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-secondary)' }}>{curr}</span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          ) : (
-                            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: pOut > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)', marginTop: '0.2rem' }}>
-                              {getCurrencySymbol(pCurrs[0] || 'INR')}{pOut.toLocaleString()} <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>{pCurrs[0] || 'INR'}</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Recovery Rate Mini Bar */}
-                        <div style={{ marginBottom: '0.75rem' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '0.25rem' }}>
-                            <span style={{ color: 'var(--text-muted)' }}>Recovery Progress</span>
-                            <strong style={{ color: 'var(--accent-emerald)' }}>{pRecRate}% Settled</strong>
-                          </div>
-                          <div style={{ height: 4, background: 'rgba(255, 255, 255, 0.08)', borderRadius: 2, overflow: 'hidden' }}>
-                            <div style={{ width: `${pRecRate}%`, height: '100%', background: 'linear-gradient(90deg, #10b981, #06b6d4)', transition: 'width 0.4s ease' }} />
-                          </div>
-                        </div>
-
-                        {/* Bottom Action Prompt */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          paddingTop: '0.5rem',
-                          borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-                          fontSize: '0.75rem',
-                          fontWeight: 700,
-                          color: 'var(--accent-indigo)'
-                        }}>
-                          <span>{pLoans.length} {pLoans.length === 1 ? 'Loan Record' : 'Loan Records'}</span>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                            {offset === 0 ? 'Open Dossier' : 'Bring to Front'} <ChevronRight size={13} />
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Stack Navigation Dots Indicator */}
-                {people.length > 1 && (
-                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', marginTop: '1.25rem' }}>
-                    {people.map((p, idx) => (
-                      <div
-                        key={p.id}
-                        className={`now-bar-dot ${activeStackIndex === idx ? 'active' : 'inactive'}`}
-                        onClick={() => setActiveStackIndex(idx)}
-                        title={`Flick to ${p.name}`}
-                      />
-                    ))}
-                  </div>
-                )}
+            {people.length > 1 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginRight: '0.25rem' }}>
+                  {activeStackIndex + 1} of {people.length}
+                </span>
+                <button
+                  className="now-bar-nav-btn"
+                  onClick={prevStack}
+                  title="Previous stacked card"
+                >
+                  <ChevronUp size={14} />
+                </button>
+                <button
+                  className="now-bar-nav-btn"
+                  onClick={nextStack}
+                  title="Next stacked card"
+                >
+                  <ChevronDown size={14} />
+                </button>
               </div>
             )}
           </div>
+
+          {/* Stack Deck Body */}
+          {people.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              No contacts yet. Click "Add Borrower" above to get started!
+            </div>
+          ) : (
+            <div
+              className="samsung-stack-container"
+              onWheel={handleStackWheel}
+              onTouchStart={handleStackTouchStart}
+              onTouchEnd={handleStackTouchEnd}
+            >
+              <div className="samsung-stack-wrapper">
+                {people.map((p, idx) => {
+                  const offset = (idx - activeStackIndex + people.length) % people.length;
+                  const isVisible = offset < 3;
+                  const translateY = offset * 14;
+                  const scale = 1 - offset * 0.05;
+                  const opacity = offset === 0 ? 1 : offset === 1 ? 0.82 : offset === 2 ? 0.55 : 0;
+                  const zIndex = 10 - offset;
+
+                  const pLoans = loans.filter((l) => {
+                    if (l.person === p.id) return true;
+                    if (typeof l.person === 'object' && l.person?.id === p.id) return true;
+                    if (l.person_name && p.name && l.person_name.toLowerCase() === p.name.toLowerCase()) return true;
+                    return false;
+                  });
+                  const pCurrs = Array.from(new Set(pLoans.map(l => l.currency || 'INR')));
+                  const pLent = pLoans.reduce((acc, l) => l.status !== 'CANCELLED' ? acc + Number(l.principal_amount || 0) : acc, 0);
+                  const pRepaid = pLoans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
+                  const pOut = pLoans.reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + Number(l.balance?.outstanding || 0) : acc, 0);
+                  const pRecRate = pLent > 0 ? Math.min(100, Math.round((pRepaid / pLent) * 100)) : 100;
+                  const isOverdue = pLoans.some(l => (l.days_overdue > 0 || l.time_status === 'OVERDUE') && l.status !== 'PAID');
+
+                  return (
+                    <div
+                      key={p.id}
+                      className="samsung-stack-card"
+                      style={{
+                        transform: `translateY(${translateY}px) scale(${scale})`,
+                        opacity: opacity,
+                        zIndex: zIndex,
+                        pointerEvents: isVisible ? 'auto' : 'none',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => {
+                        if (offset === 0) {
+                          if (onOpenPersonDetails) onOpenPersonDetails(p);
+                        } else {
+                          setActiveStackIndex(idx);
+                        }
+                      }}
+                      title={offset === 0 ? `Click to view full dossier for ${p.name}` : `Click to bring ${p.name} to front`}
+                    >
+                      {/* Top: Avatar, Name & Status */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                          <div style={{
+                            width: 38,
+                            height: 38,
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan))',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 800,
+                            fontSize: '0.95rem',
+                            color: '#fff',
+                            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.35)',
+                            flexShrink: 0
+                          }}>
+                            {p.name ? p.name.charAt(0).toUpperCase() : 'B'}
+                          </div>
+                          <div>
+                            <strong style={{ fontSize: '0.95rem', display: 'block', letterSpacing: '-0.01em' }}>
+                              {p.name}
+                            </strong>
+                            <span className="badge-role" style={{ fontSize: '0.65rem', padding: '0.15rem 0.45rem', marginTop: '0.15rem', display: 'inline-block' }}>
+                              {p.relationship || 'Contact'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <span
+                          className="badge"
+                          style={{
+                            fontSize: '0.62rem',
+                            padding: '0.2rem 0.5rem',
+                            background: isOverdue ? 'rgba(244, 63, 94, 0.15)' : pOut === 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(6, 182, 212, 0.15)',
+                            color: isOverdue ? 'var(--accent-rose)' : pOut === 0 ? 'var(--accent-emerald)' : 'var(--accent-cyan)',
+                            borderColor: isOverdue ? 'rgba(244, 63, 94, 0.3)' : pOut === 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(6, 182, 212, 0.3)'
+                          }}
+                        >
+                          {isOverdue ? 'OVERDUE' : pOut === 0 ? 'SETTLED' : 'ACTIVE'}
+                        </span>
+                      </div>
+
+                      {/* Middle: Owed Balance in Real Currency */}
+                      <div style={{
+                        background: 'rgba(255, 255, 255, 0.03)',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                        borderRadius: '12px',
+                        padding: '0.75rem 0.9rem',
+                        marginBottom: '0.75rem'
+                      }}>
+                        <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block' }}>
+                          Owed Capital Balance
+                        </span>
+
+                        {pCurrs.length > 1 ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginTop: '0.25rem' }}>
+                            {pCurrs.map(curr => {
+                              const cLoans = pLoans.filter(l => (l.currency || 'INR') === curr);
+                              const cOut = cLoans.reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + Number(l.balance?.outstanding || 0) : acc, 0);
+                              return (
+                                <div key={curr} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                  <span style={{ fontSize: '1.05rem', fontWeight: 800, color: cOut > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)' }}>
+                                    {getCurrencySymbol(curr)}{cOut.toLocaleString()}
+                                  </span>
+                                  <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-secondary)' }}>{curr}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: '1.25rem', fontWeight: 800, color: pOut > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)', marginTop: '0.2rem' }}>
+                            {getCurrencySymbol(pCurrs[0] || 'INR')}{pOut.toLocaleString()} <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>{pCurrs[0] || 'INR'}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Recovery Rate Mini Bar */}
+                      <div style={{ marginBottom: '0.75rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '0.25rem' }}>
+                          <span style={{ color: 'var(--text-muted)' }}>Recovery Progress</span>
+                          <strong style={{ color: 'var(--accent-emerald)' }}>{pRecRate}% Settled</strong>
+                        </div>
+                        <div style={{ height: 4, background: 'rgba(255, 255, 255, 0.08)', borderRadius: 2, overflow: 'hidden' }}>
+                          <div style={{ width: `${pRecRate}%`, height: '100%', background: 'linear-gradient(90deg, #10b981, #06b6d4)', transition: 'width 0.4s ease' }} />
+                        </div>
+                      </div>
+
+                      {/* Bottom Action Prompt */}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        paddingTop: '0.5rem',
+                        borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        color: 'var(--accent-indigo)'
+                      }}>
+                        <span>{pLoans.length} {pLoans.length === 1 ? 'Loan Record' : 'Loan Records'}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                          {offset === 0 ? 'Open Dossier' : 'Bring to Front'} <ChevronRight size={13} />
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Stack Navigation Dots Indicator */}
+              {people.length > 1 && (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', marginTop: '1.25rem' }}>
+                  {people.map((p, idx) => (
+                    <div
+                      key={p.id}
+                      className={`now-bar-dot ${activeStackIndex === idx ? 'active' : 'inactive'}`}
+                      onClick={() => setActiveStackIndex(idx)}
+                      title={`Flick to ${p.name}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
