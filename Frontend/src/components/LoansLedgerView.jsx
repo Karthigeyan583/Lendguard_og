@@ -292,41 +292,47 @@ export const LoansLedgerView = ({
                       )}
                     </div>
 
-                    {(!loan.recent_payments || loan.recent_payments.length === 0) ? (
-                      <div style={{ padding: '1rem', background: 'var(--inner-card-bg)', borderRadius: 'var(--radius-sm)', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                        No repayments recorded yet for this loan.
-                      </div>
-                    ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {loan.recent_payments.map((p) => (
-                          <div key={p.id} style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: '0.65rem 1rem',
-                            background: 'var(--inner-card-bg)',
-                            borderRadius: 'var(--radius-sm)',
-                            border: '1px solid var(--border-subtle)',
-                            fontSize: '0.825rem'
-                          }}>
-                            <div>
-                              <strong style={{ color: 'var(--accent-emerald)' }}>+ {getCurrencySymbol(loan.currency)}{Number(p.amount).toLocaleString()}</strong>
-                              <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem', fontSize: '0.75rem' }}>
-                                via {p.payment_method?.replace('_', ' ')}
-                              </span>
-                              {p.reference_number && (
-                                <span style={{ color: 'var(--text-secondary)', marginLeft: '0.5rem', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>
-                                  Ref: {p.reference_number}
-                                </span>
-                              )}
-                            </div>
-                            <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                              {p.payment_date}
-                            </span>
+                    {(() => {
+                      const paymentsList = loan.repayments || loan.recent_payments || [];
+                      if (paymentsList.length === 0) {
+                        return (
+                          <div style={{ padding: '1rem', background: 'var(--inner-card-bg)', borderRadius: 'var(--radius-sm)', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                            No repayments recorded yet for this loan.
                           </div>
-                        ))}
-                      </div>
-                    )}
+                        );
+                      }
+                      return (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          {paymentsList.map((p) => (
+                            <div key={p.id} style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '0.65rem 1rem',
+                              background: 'var(--inner-card-bg)',
+                              borderRadius: 'var(--radius-sm)',
+                              border: '1px solid var(--border-subtle)',
+                              fontSize: '0.825rem'
+                            }}>
+                              <div>
+                                <strong style={{ color: 'var(--accent-emerald)' }}>+ {getCurrencySymbol(p.currency || loan.currency)}{Number(p.amount).toLocaleString()} {p.currency || loan.currency}</strong>
+                                <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem', fontSize: '0.75rem' }}>
+                                  via {p.payment_method?.replace('_', ' ')}
+                                </span>
+                                {p.reference_number && (
+                                  <span style={{ color: 'var(--text-secondary)', marginLeft: '0.5rem', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>
+                                    Ref: {p.reference_number}
+                                  </span>
+                                )}
+                              </div>
+                              <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                                {p.payment_date}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
