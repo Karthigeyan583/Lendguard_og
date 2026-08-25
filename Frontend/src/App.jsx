@@ -422,6 +422,28 @@ function LendGuardApp() {
         onGenerateStatementForLoan={handleGenerateStatement}
       />
 
+      <KpiDrilldownModal
+        isOpen={isDrilldownOpen}
+        onClose={() => setIsDrilldownOpen(false)}
+        type={drilldownType}
+        loans={loans}
+        people={people}
+        summary={summary}
+        onRecordPayment={(loan) => {
+          setSelectedLoanForPayment(loan);
+          setIsPaymentOpen(true);
+        }}
+        onGenerateStatement={handleGenerateStatement}
+        onOpenPersonDetails={(person) => {
+          setSelectedPersonForDetails(person);
+          setIsPersonDetailsOpen(true);
+        }}
+        onOpenNewLoan={() => {
+          setNewLoanPrefill(null);
+          setIsNewLoanOpen(true);
+        }}
+      />
+
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
