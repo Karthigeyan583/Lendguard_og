@@ -204,6 +204,8 @@ export const PersonDetailsModal = ({
           </button>
         </div>
 
+        {/* 2. Scrollable Body Content */}
+        <div style={{ padding: '1.75rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {/* Financial Exposure KPI Bar (Split by actual loan currencies) */}
           <div style={{
             display: 'grid',
