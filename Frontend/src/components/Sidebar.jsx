@@ -18,6 +18,7 @@ import {
   Layers,
   Settings
 } from 'lucide-react';
+import { CURRENCY_MAP, getDefaultCurrency } from '../utils/currency';
 
 export const Sidebar = ({ 
   activeTab, 
