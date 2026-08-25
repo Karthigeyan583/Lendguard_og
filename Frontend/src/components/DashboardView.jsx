@@ -851,7 +851,7 @@ export const DashboardView = ({
                   <div>
                     <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{l.person_name}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      Due on: {l.due_date} • Owed: {getCurrencySymbol(l.currency)}{Number(l.balance?.outstanding || l.principal_amount).toLocaleString()}
+                      Due on: {l.due_date} • Owed: {getCurrencySymbol(l.currency)}{isMasked ? '••••••' : Number(l.balance?.outstanding || l.principal_amount).toLocaleString()}
                     </div>
                   </div>
                   <button
