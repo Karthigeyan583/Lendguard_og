@@ -32,7 +32,7 @@ import { CustomReportBuilder } from './CustomReportBuilder';
 import { CustomDashboardStudio } from './CustomDashboardStudio';
 import { ScheduledReportsAlertsView } from './ScheduledReportsAlertsView';
 import { DynamicFilterBuilderModal } from './DynamicFilterBuilderModal';
-import { getDefaultCurrency, CURRENCY_MAP } from '../../utils/currency';
+import { getDefaultCurrency, CURRENCY_MAP, convertCurrency } from '../../utils/currency';
 import { api } from '../../services/api';
 
 const SUB_TABS = [
@@ -68,22 +68,22 @@ export const AnalyticsView = ({
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   const [savedReportsList, setSavedReportsList] = useState([]);
 
-  // Compute live local fallback data from props
+  // Compute live local fallback data from props with full multi-currency normalization
   const computeLocalAnalytics = () => {
     const lentLoans = loans.filter(l => l.direction !== 'borrowed');
     const borrowedLoans = loans.filter(l => l.direction === 'borrowed');
 
-    const totalLent = lentLoans.reduce((acc, l) => acc + Number(l.principal_amount || 0), 0);
-    const lentRepaid = lentLoans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
-    const lentOut = lentLoans.filter(l => l.status === 'OPEN' || l.status === 'PARTIALLY_PAID').reduce((acc, l) => acc + Number(l.balance?.outstanding || l.principal_amount || 0), 0);
-    const overdueLent = lentLoans.filter(l => l.days_overdue > 0 && l.status !== 'PAID').reduce((acc, l) => acc + Number(l.balance?.outstanding || l.principal_amount || 0), 0);
+    const totalLent = lentLoans.reduce((acc, l) => acc + convertCurrency(l.principal_amount || 0, l.currency, reportingCurrency), 0);
+    const lentRepaid = lentLoans.reduce((acc, l) => acc + convertCurrency(l.balance?.total_repaid || 0, l.currency, reportingCurrency), 0);
+    const lentOut = lentLoans.filter(l => l.status === 'OPEN' || l.status === 'PARTIALLY_PAID').reduce((acc, l) => acc + convertCurrency(l.balance?.outstanding || l.principal_amount || 0, l.currency, reportingCurrency), 0);
+    const overdueLent = lentLoans.filter(l => l.days_overdue > 0 && l.status !== 'PAID').reduce((acc, l) => acc + convertCurrency(l.balance?.outstanding || l.principal_amount || 0, l.currency, reportingCurrency), 0);
     const overdueLentCount = lentLoans.filter(l => l.days_overdue > 0 && l.status !== 'PAID').length;
     const recoveryRate = totalLent > 0 ? Number(((lentRepaid / totalLent) * 100).toFixed(1)) : 0;
 
-    const totalBorrowed = borrowedLoans.reduce((acc, l) => acc + Number(l.principal_amount || 0), 0);
-    const borrowedRepaid = borrowedLoans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
-    const borrowedOut = borrowedLoans.filter(l => l.status === 'OPEN' || l.status === 'PARTIALLY_PAID').reduce((acc, l) => acc + Number(l.balance?.outstanding || l.principal_amount || 0), 0);
-    const overdueBorrowed = borrowedLoans.filter(l => l.days_overdue > 0 && l.status !== 'PAID').reduce((acc, l) => acc + Number(l.balance?.outstanding || l.principal_amount || 0), 0);
+    const totalBorrowed = borrowedLoans.reduce((acc, l) => acc + convertCurrency(l.principal_amount || 0, l.currency, reportingCurrency), 0);
+    const borrowedRepaid = borrowedLoans.reduce((acc, l) => acc + convertCurrency(l.balance?.total_repaid || 0, l.currency, reportingCurrency), 0);
+    const borrowedOut = borrowedLoans.filter(l => l.status === 'OPEN' || l.status === 'PARTIALLY_PAID').reduce((acc, l) => acc + convertCurrency(l.balance?.outstanding || l.principal_amount || 0, l.currency, reportingCurrency), 0);
+    const overdueBorrowed = borrowedLoans.filter(l => l.days_overdue > 0 && l.status !== 'PAID').reduce((acc, l) => acc + convertCurrency(l.balance?.outstanding || l.principal_amount || 0, l.currency, reportingCurrency), 0);
     const overdueBorrowedCount = borrowedLoans.filter(l => l.days_overdue > 0 && l.status !== 'PAID').length;
     const completionRate = totalBorrowed > 0 ? Number(((borrowedRepaid / totalBorrowed) * 100).toFixed(1)) : 0;
 
@@ -94,10 +94,11 @@ export const AnalyticsView = ({
     loans.forEach(l => {
       const c = l.currency || 'INR';
       if (!currencyMap[c]) currencyMap[c] = { currency: c, original_lent: 0, original_borrowed: 0, reporting_amount: 0, loan_count: 0 };
-      const amt = Number(l.principal_amount || 0);
-      if (l.direction === 'borrowed') currencyMap[c].original_borrowed += amt;
-      else currencyMap[c].original_lent += amt;
-      currencyMap[c].reporting_amount += amt;
+      const origAmt = Number(l.principal_amount || 0);
+      const repAmt = convertCurrency(origAmt, c, reportingCurrency);
+      if (l.direction === 'borrowed') currencyMap[c].original_borrowed += origAmt;
+      else currencyMap[c].original_lent += origAmt;
+      currencyMap[c].reporting_amount += repAmt;
       currencyMap[c].loan_count++;
     });
 
@@ -112,9 +113,12 @@ export const AnalyticsView = ({
     loans.forEach(l => {
       const m = l.date_given ? l.date_given.slice(0, 7) : 'Recent';
       if (!monthBuckets[m]) monthBuckets[m] = { month: m, lent: 0, borrowed: 0, repaid: 0, count: 0 };
-      if (l.direction === 'borrowed') monthBuckets[m].borrowed += Number(l.principal_amount || 0);
-      else monthBuckets[m].lent += Number(l.principal_amount || 0);
-      monthBuckets[m].repaid += Number(l.balance?.total_repaid || 0);
+      const repLent = l.direction !== 'borrowed' ? convertCurrency(l.principal_amount || 0, l.currency, reportingCurrency) : 0;
+      const repBorrowed = l.direction === 'borrowed' ? convertCurrency(l.principal_amount || 0, l.currency, reportingCurrency) : 0;
+      const repRepaid = convertCurrency(l.balance?.total_repaid || 0, l.currency, reportingCurrency);
+      monthBuckets[m].lent += repLent;
+      monthBuckets[m].borrowed += repBorrowed;
+      monthBuckets[m].repaid += repRepaid;
       monthBuckets[m].count++;
     });
     const monthlyTrends = Object.values(monthBuckets);
@@ -124,7 +128,7 @@ export const AnalyticsView = ({
     loans.forEach(l => {
       const p = l.purpose || 'General';
       if (!purposeMap[p]) purposeMap[p] = { purpose: p, total_amount: 0, count: 0 };
-      purposeMap[p].total_amount += Number(l.principal_amount || 0);
+      purposeMap[p].total_amount += convertCurrency(l.principal_amount || 0, l.currency, reportingCurrency);
       purposeMap[p].count++;
     });
     const purposeBreakdown = Object.values(purposeMap);
