@@ -16,7 +16,8 @@ const TAB_METADATA = {
   loans: { title: 'Lending Ledger', subtitle: 'Authoritative source of truth for money lent, due dates, and settlement progress' },
   aging: { title: 'Overdue Aging Analysis', subtitle: 'Deterministic overdue balance distribution categorized by days past due date' },
   calculator: { title: 'Loan EMI & Repayment Calculator', subtitle: 'Simulate monthly repayment schedules, interest accrual, and terms' },
-  'api-explorer': { title: 'API & OpenAPI 3.0 Documentation', subtitle: 'Interactive DRF Spectacular Swagger UI and endpoint schema' }
+  'api-explorer': { title: 'API & OpenAPI 3.0 Documentation', subtitle: 'Interactive DRF Spectacular Swagger UI and endpoint schema' },
+  settings: { title: 'Settings & Administration Hub', subtitle: 'Manage personal profile, security, automated reminders, ledger exports, and API keys' }
 };
 
 export const TopHeader = ({ 
