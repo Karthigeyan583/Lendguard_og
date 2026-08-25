@@ -153,57 +153,50 @@ export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArc
                   )}
                 </div>
 
-                {/* Financial Exposure Card */}
-                {person.currency_breakdown && Object.keys(person.currency_breakdown).length > 1 ? (
-                  <div style={{
-                    background: 'var(--inner-card-bg)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '0.75rem 0.9rem',
-                    marginBottom: '1.25rem'
-                  }}>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      Multi-Currency Balance:
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                      {Object.entries(person.currency_breakdown).map(([cCode, cStats]) => (
-                        <div key={cCode} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 600 }}>{cCode}:</span>
-                          <span style={{ fontWeight: 800, color: cStats.outstanding > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)' }}>
-                            {getCurrencySymbol(cCode)}{Number(cStats.outstanding).toLocaleString()} owed
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                {/* Financial Exposure Card (Dual Lending & Borrowing with Net Position) */}
+                <div style={{
+                  background: 'var(--inner-card-bg)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.85rem 1rem',
+                  marginBottom: '1.25rem'
+                }}>
+                  {/* Top Net Exposure Row */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.45rem' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+                      Net Exposure
+                    </span>
+                    <span style={{
+                      fontSize: '0.85rem',
+                      fontWeight: 800,
+                      color: (person.net_exposure || 0) > 0 ? 'var(--accent-emerald)' : (person.net_exposure || 0) < 0 ? 'var(--accent-rose)' : 'var(--text-muted)'
+                    }}>
+                      {(person.net_exposure || 0) >= 0 ? '+' : ''}{defSymbol}{Number(person.net_exposure || 0).toLocaleString()}
+                      <span style={{ fontSize: '0.68rem', fontWeight: 600, marginLeft: 4 }}>
+                        ({(person.net_exposure || 0) > 0 ? 'Owes You' : (person.net_exposure || 0) < 0 ? 'You Owe' : 'Even'})
+                      </span>
+                    </span>
                   </div>
-                ) : (
-                  <div style={{
-                    background: 'var(--inner-card-bg)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '0.85rem 1rem',
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: '0.5rem',
-                    marginBottom: '1.25rem',
-                    textAlign: 'center'
-                  }}>
-                    <div>
-                      <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Total Lent</span>
-                      <strong style={{ fontSize: '0.85rem' }}>{defSymbol}{Number(person.total_lent || 0).toLocaleString()}</strong>
-                    </div>
-                    <div>
-                      <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Repaid</span>
-                      <strong style={{ fontSize: '0.85rem', color: 'var(--accent-emerald)' }}>{defSymbol}{Number(person.total_repaid || 0).toLocaleString()}</strong>
-                    </div>
-                    <div>
-                      <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>Owed Balance</span>
-                      <strong style={{ fontSize: '0.85rem', color: person.outstanding_balance > 0 ? 'var(--accent-cyan)' : 'var(--text-muted)' }}>
-                        {defSymbol}{Number(person.outstanding_balance || 0).toLocaleString()}
+
+                  {/* Dual Columns: Lent vs Borrowed */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', textAlign: 'center' }}>
+                    <div style={{ padding: '0.35rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)' }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--accent-emerald)', display: 'block', fontWeight: 700 }}>🤝 Money Lent</span>
+                      <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
+                        {defSymbol}{Number(person.lent?.outstanding || person.outstanding_balance || 0).toLocaleString()}
                       </strong>
+                      <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>owed to you</span>
+                    </div>
+
+                    <div style={{ padding: '0.35rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)' }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--accent-indigo)', display: 'block', fontWeight: 700 }}>📥 Money Borrowed</span>
+                      <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
+                        {defSymbol}{Number(person.borrowed?.outstanding || 0).toLocaleString()}
+                      </strong>
+                      <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>you owe them</span>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Action Buttons */}
@@ -213,8 +206,16 @@ export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArc
                   style={{ flex: 1, padding: '0.45rem', fontSize: '0.78rem' }}
                   onClick={() => onLendToPerson(person)}
                 >
-                  <ArrowUpRight size={14} />
-                  <span>Lend Money</span>
+                  <Plus size={14} />
+                  <span>New Transaction</span>
+                </button>
+
+                <button
+                  className="btn btn-secondary"
+                  style={{ padding: '0.45rem 0.75rem', fontSize: '0.75rem' }}
+                  onClick={() => onOpenPersonDetails && onOpenPersonDetails(person)}
+                >
+                  History
                 </button>
 
                 {!person.is_archived && (
