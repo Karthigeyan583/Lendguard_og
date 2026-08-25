@@ -10,6 +10,7 @@ import { LoansLedgerView } from './components/LoansLedgerView';
 import { ReportsAgingView } from './components/ReportsAgingView';
 import { LoanCalculatorView } from './components/LoanCalculatorView';
 import { ApiExplorer } from './components/ApiExplorer';
+import { SettingsView } from './components/SettingsView';
 
 import { NewLoanModal } from './components/NewLoanModal';
 import { AddPersonModal } from './components/AddPersonModal';
