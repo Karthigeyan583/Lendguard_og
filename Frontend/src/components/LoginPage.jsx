@@ -206,20 +206,20 @@ export const LoginPage = () => {
           }}>
             <img
               src="/assets/lendguard_hero.jpg"
-              alt="LendGuard Cryptographic Multi-Currency Lending Platform"
+              alt="LendGuard Secure Multi-Currency Lending & Digital Trust Vault"
               style={{
                 width: '100%',
                 height: 'auto',
                 display: 'block',
                 objectFit: 'cover',
-                maxHeight: '210px',
-                filter: 'brightness(1.03) contrast(1.05)'
+                maxHeight: '235px',
+                filter: 'brightness(1.02) contrast(1.04)'
               }}
             />
             <div style={{
               position: 'absolute',
               inset: 0,
-              background: 'linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(6, 9, 19, 0.9) 100%)',
+              background: 'linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(6, 9, 19, 0.92) 100%)',
               display: 'flex',
               alignItems: 'flex-end',
               padding: '0.75rem 1rem'
@@ -228,26 +228,26 @@ export const LoginPage = () => {
                 <span style={{
                   fontSize: '0.68rem',
                   fontWeight: 700,
-                  padding: '0.2rem 0.55rem',
+                  padding: '0.2rem 0.6rem',
                   borderRadius: 'var(--radius-full)',
                   background: 'rgba(16, 185, 129, 0.25)',
                   color: '#34d399',
                   border: '1px solid rgba(16, 185, 129, 0.4)',
                   backdropFilter: 'blur(8px)'
                 }}>
-                  ● Cryptographic SHA-256
+                  ● Verified Credit Agreement
                 </span>
                 <span style={{
                   fontSize: '0.68rem',
                   fontWeight: 700,
-                  padding: '0.2rem 0.55rem',
+                  padding: '0.2rem 0.6rem',
                   borderRadius: 'var(--radius-full)',
                   background: 'rgba(99, 102, 241, 0.25)',
                   color: '#a5b4fc',
                   border: '1px solid rgba(99, 102, 241, 0.4)',
                   backdropFilter: 'blur(8px)'
                 }}>
-                  Multi-Currency Core (EUR • INR • USD)
+                  Digital Trust Vault (€ • ₹ • $)
                 </span>
               </div>
             </div>
