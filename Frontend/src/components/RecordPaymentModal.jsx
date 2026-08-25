@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, CheckCircle, ArrowDownLeft, AlertCircle } from 'lucide-react';
+import { getCurrencySymbol } from '../utils/currency';
 
 export const RecordPaymentModal = ({ isOpen, onClose, loan, onPaymentRecorded }) => {
   const [amount, setAmount] = useState('');
@@ -10,6 +11,7 @@ export const RecordPaymentModal = ({ isOpen, onClose, loan, onPaymentRecorded })
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  const currencySymbol = getCurrencySymbol(loan?.currency);
   const outstanding = Number(loan?.balance?.outstanding || (Number(loan?.principal_amount || 0) - Number(loan?.balance?.total_repaid || 0)));
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export const RecordPaymentModal = ({ isOpen, onClose, loan, onPaymentRecorded })
     }
 
     if (numAmount > outstanding) {
-      setError(`Overpayment Alert: Entered amount (₹${numAmount.toLocaleString()}) exceeds the outstanding balance (₹${outstanding.toLocaleString()}).`);
+      setError(`Overpayment Alert: Entered amount (${currencySymbol}${numAmount.toLocaleString()}) exceeds the outstanding balance (${currencySymbol}${outstanding.toLocaleString()}).`);
       return;
     }
 
