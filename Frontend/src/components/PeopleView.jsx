@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Users, Search, Plus, Phone, Mail, Tag, ArrowUpRight, Archive, CheckCircle2 } from 'lucide-react';
 
-export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArchivePerson }) => {
+export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArchivePerson, onOpenPersonDetails }) => {
   const [search, setSearch] = useState('');
   const [filterRel, setFilterRel] = useState('all');
 
