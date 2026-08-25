@@ -97,23 +97,29 @@ export const PersonDetailsModal = ({
   const isMultiCurrency = hasMultipleCurrencies;
 
   // Filtered loans list based on selected tab
-  const displayedLoans = personLoans.filter(l => {
-    if (personTabFilter === 'lent') return l.direction !== 'borrowed';
-    if (personTabFilter === 'borrowed') return l.direction === 'borrowed';
-    return true;
-  });
+  // Default single-currency stats
+  const singleBorrowerCurr = distinctCurrencies[0] || reportingCurrency;
+  const singleBorrowerStats = personTotalsByCurrency[singleBorrowerCurr] || {
+    lent: Number(person.total_lent || 0),
+    repaid: Number(person.total_repaid || 0),
+    outstanding: Number(person.outstanding_balance || 0),
+    overdue: overdueLoans.reduce((acc, l) => acc + Number(l.balance?.outstanding || 0), 0),
+    recovery: Number(person.recovery_rate || 0)
+  };
 
-  // Collect all repayments across this person's loans
+  const outstanding = activeLoans.reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + Number(l.balance?.outstanding || 0) : acc, 0);
+
+  // Extract all repayments for this person
   const allRepayments = [];
-  personLoans.forEach(loan => {
-    const list = loan.repayments || loan.recent_payments || [];
-    if (Array.isArray(list)) {
-      list.forEach(rep => {
+  personLoans.forEach((l) => {
+    const reps = l.repayments || l.recent_payments || [];
+    if (Array.isArray(reps)) {
+      reps.forEach((r) => {
         allRepayments.push({
-          ...rep,
-          direction: loan.direction,
-          loan_reference: loan.loan_reference,
-          currency: rep.currency || loan.currency || 'INR'
+          ...r,
+          loan_reference: l.loan_reference,
+          currency: r.currency || l.currency || reportingCurrency,
+          direction: l.direction
         });
       });
     }
@@ -178,37 +184,38 @@ export const PersonDetailsModal = ({
             </div>
 
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                <h2 style={{ fontSize: '1.3rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
                   {person.name}
                 </h2>
-                <span className="badge-role" style={{ fontSize: '0.72rem', textTransform: 'capitalize' }}>
+                <span className="badge-role" style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem', textTransform: 'capitalize' }}>
                   {person.relationship || 'Contact'}
                 </span>
-                {person.tags && (
-                  <span className="badge badge-indigo" style={{ fontSize: '0.7rem' }}>
-                    <Tag size={11} style={{ marginRight: 3 }} />
-                    {person.tags}
-                  </span>
+                {person.is_archived && (
+                  <span className="badge badge-draft" style={{ fontSize: '0.65rem' }}>Archived</span>
                 )}
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.3rem', flexWrap: 'wrap' }}>
+              {/* Contact meta pills */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.35rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                 {person.mobile && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    <Phone size={13} color="var(--accent-emerald)" />
-                    <span>{person.mobile}</span>
-                  </div>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <Phone size={12} />
+                    {person.mobile}
+                  </span>
                 )}
                 {person.email && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    <Mail size={13} color="var(--accent-cyan)" />
-                    <span>{person.email}</span>
-                  </div>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <Mail size={12} />
+                    {person.email}
+                  </span>
                 )}
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  ID: #{person.id}
-                </span>
+                {person.tags && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--accent-indigo)' }}>
+                    <Tag size={12} />
+                    {person.tags}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -217,15 +224,16 @@ export const PersonDetailsModal = ({
             onClick={onClose}
             className="btn btn-secondary"
             style={{ padding: '0.45rem', borderRadius: '50%', border: 'none' }}
-            title="Close popup"
+            title="Close dossier"
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* 2. Scrollable Body Content */}
-        <div style={{ padding: '1.75rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Net Position Summary Banner */}
+        {/* 2. Scrollable Body */}
+        <div style={{ padding: '1.5rem 1.75rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+
+          {/* NET POSITION HERO CARD */}
           <div style={{
             background: 'var(--inner-card-bg)',
             border: '1px solid var(--border-subtle)',
@@ -247,7 +255,7 @@ export const PersonDetailsModal = ({
                   fontWeight: 900,
                   color: netExposure > 0 ? 'var(--accent-emerald)' : netExposure < 0 ? 'var(--accent-rose)' : 'var(--text-primary)'
                 }}>
-                  {netExposure >= 0 ? '+' : ''}{reportingSymbol}{Number(netExposure).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{reportingCurrency}</span>
+                  {isMasked ? `${reportingSymbol}••••••` : `${netExposure >= 0 ? '+' : ''}${reportingSymbol}${Number(netExposure).toLocaleString()}`} <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{reportingCurrency}</span>
                 </span>
                 <span className="badge" style={{
                   background: netExposure > 0 ? 'rgba(16, 185, 129, 0.15)' : netExposure < 0 ? 'rgba(244, 63, 94, 0.15)' : 'rgba(148, 163, 184, 0.15)',
@@ -259,7 +267,7 @@ export const PersonDetailsModal = ({
                 </span>
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                Receivables: <strong>{reportingSymbol}{Number(lentOutstanding).toLocaleString()}</strong> • Payables: <strong>{reportingSymbol}{Number(borrowedOutstanding).toLocaleString()}</strong>
+                Receivables: <strong>{reportingSymbol}{isMasked ? '••••••' : Number(lentOutstanding).toLocaleString()}</strong> • Payables: <strong>{reportingSymbol}{isMasked ? '••••••' : Number(borrowedOutstanding).toLocaleString()}</strong>
               </div>
             </div>
 
@@ -276,7 +284,7 @@ export const PersonDetailsModal = ({
             </button>
           </div>
 
-          {/* Financial Exposure KPI Bar (Split by actual loan currencies) */}
+          {/* Financial Exposure KPI Bar */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
@@ -298,7 +306,7 @@ export const PersonDetailsModal = ({
                   {distinctCurrencies.map(curr => (
                     <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
                       <span style={{ fontSize: '1.15rem', fontWeight: 800 }}>
-                        {getCurrencySymbol(curr)}{Number(personTotalsByCurrency[curr].lent).toLocaleString()}
+                        {getCurrencySymbol(curr)}{isMasked ? '••••••' : Number(personTotalsByCurrency[curr].lent).toLocaleString()}
                       </span>
                       <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-blue)' }}>{curr}</span>
                     </div>
@@ -306,7 +314,7 @@ export const PersonDetailsModal = ({
                 </div>
               ) : (
                 <div style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: '0.25rem' }}>
-                  {getCurrencySymbol(singleBorrowerCurr)}{Number(singleBorrowerStats.lent).toLocaleString()} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{singleBorrowerCurr}</span>
+                  {getCurrencySymbol(singleBorrowerCurr)}{isMasked ? '••••••' : Number(singleBorrowerStats.lent).toLocaleString()} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{singleBorrowerCurr}</span>
                 </div>
               )}
 
@@ -331,7 +339,7 @@ export const PersonDetailsModal = ({
                   {distinctCurrencies.map(curr => (
                     <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
                       <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>
-                        {getCurrencySymbol(curr)}{Number(personTotalsByCurrency[curr].repaid).toLocaleString()}
+                        {getCurrencySymbol(curr)}{isMasked ? '••••••' : Number(personTotalsByCurrency[curr].repaid).toLocaleString()}
                       </span>
                       <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent-emerald)' }}>
                         {curr} ({personTotalsByCurrency[curr].recovery}%)
@@ -341,7 +349,7 @@ export const PersonDetailsModal = ({
                 </div>
               ) : (
                 <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-emerald)', marginTop: '0.25rem' }}>
-                  {getCurrencySymbol(singleBorrowerCurr)}{Number(singleBorrowerStats.repaid).toLocaleString()} <span style={{ fontSize: '0.75rem' }}>{singleBorrowerCurr}</span>
+                  {getCurrencySymbol(singleBorrowerCurr)}{isMasked ? '••••••' : Number(singleBorrowerStats.repaid).toLocaleString()} <span style={{ fontSize: '0.75rem' }}>{singleBorrowerCurr}</span>
                 </div>
               )}
 
@@ -366,7 +374,7 @@ export const PersonDetailsModal = ({
                   {distinctCurrencies.map(curr => (
                     <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
                       <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--accent-cyan)' }}>
-                        {getCurrencySymbol(curr)}{Number(personTotalsByCurrency[curr].outstanding).toLocaleString()}
+                        {getCurrencySymbol(curr)}{isMasked ? '••••••' : Number(personTotalsByCurrency[curr].outstanding).toLocaleString()}
                       </span>
                       <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>{curr}</span>
                     </div>
@@ -379,7 +387,7 @@ export const PersonDetailsModal = ({
                   color: singleBorrowerStats.outstanding > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)',
                   marginTop: '0.25rem'
                 }}>
-                  {getCurrencySymbol(singleBorrowerCurr)}{Number(singleBorrowerStats.outstanding).toLocaleString()} <span style={{ fontSize: '0.75rem' }}>{singleBorrowerCurr}</span>
+                  {getCurrencySymbol(singleBorrowerCurr)}{isMasked ? '••••••' : Number(singleBorrowerStats.outstanding).toLocaleString()} <span style={{ fontSize: '0.75rem' }}>{singleBorrowerCurr}</span>
                 </div>
               )}
 
