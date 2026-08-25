@@ -204,14 +204,13 @@ export const PersonDetailsModal = ({
           </button>
         </div>
 
-        {/* 2. Scrollable Body Content */}
-        <div style={{ padding: '1.75rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Financial Exposure KPI Bar (Normalized in Base Reporting Currency) */}
+          {/* Financial Exposure KPI Bar (Split by actual loan currencies) */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
             gap: '0.85rem'
           }}>
+            {/* Total Lent */}
             <div style={{
               background: 'var(--inner-card-bg)',
               border: '1px solid var(--border-subtle)',
@@ -221,14 +220,30 @@ export const PersonDetailsModal = ({
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Total Lent
               </span>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: '0.25rem' }}>
-                {reportingSymbol}{Number(totalLent).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
-              </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                {reportingCurrency} Base • {personLoans.length} {personLoans.length === 1 ? 'loan' : 'loans'}
+
+              {hasMultipleCurrencies ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginTop: '0.35rem' }}>
+                  {distinctCurrencies.map(curr => (
+                    <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '1.15rem', fontWeight: 800 }}>
+                        {getCurrencySymbol(curr)}{Number(personTotalsByCurrency[curr].lent).toLocaleString()}
+                      </span>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-blue)' }}>{curr}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: '0.25rem' }}>
+                  {getCurrencySymbol(singleBorrowerCurr)}{Number(singleBorrowerStats.lent).toLocaleString()} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{singleBorrowerCurr}</span>
+                </div>
+              )}
+
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+                Across {personLoans.length} total {personLoans.length === 1 ? 'loan' : 'loans'}
               </div>
             </div>
 
+            {/* Total Repaid */}
             <div style={{
               background: 'var(--inner-card-bg)',
               border: '1px solid var(--border-subtle)',
@@ -238,14 +253,32 @@ export const PersonDetailsModal = ({
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Total Repaid
               </span>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-emerald)', marginTop: '0.25rem' }}>
-                {reportingSymbol}{Number(totalRepaid).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
-              </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--accent-emerald)', marginTop: '0.2rem' }}>
-                {recoveryRate}% recovered
+
+              {hasMultipleCurrencies ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginTop: '0.35rem' }}>
+                  {distinctCurrencies.map(curr => (
+                    <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>
+                        {getCurrencySymbol(curr)}{Number(personTotalsByCurrency[curr].repaid).toLocaleString()}
+                      </span>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent-emerald)' }}>
+                        {curr} ({personTotalsByCurrency[curr].recovery}%)
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-emerald)', marginTop: '0.25rem' }}>
+                  {getCurrencySymbol(singleBorrowerCurr)}{Number(singleBorrowerStats.repaid).toLocaleString()} <span style={{ fontSize: '0.75rem' }}>{singleBorrowerCurr}</span>
+                </div>
+              )}
+
+              <div style={{ fontSize: '0.7rem', color: 'var(--accent-emerald)', marginTop: '0.3rem' }}>
+                {hasMultipleCurrencies ? 'Recovery % shown per currency' : `${singleBorrowerStats.recovery}% recovered`}
               </div>
             </div>
 
+            {/* Outstanding */}
             <div style={{
               background: 'var(--inner-card-bg)',
               border: '1px solid var(--border-subtle)',
@@ -255,19 +288,35 @@ export const PersonDetailsModal = ({
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Outstanding
               </span>
-              <div style={{
-                fontSize: '1.25rem',
-                fontWeight: 800,
-                color: outstanding > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)',
-                marginTop: '0.25rem'
-              }}>
-                {reportingSymbol}{Number(outstanding).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
-              </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+
+              {hasMultipleCurrencies ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginTop: '0.35rem' }}>
+                  {distinctCurrencies.map(curr => (
+                    <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--accent-cyan)' }}>
+                        {getCurrencySymbol(curr)}{Number(personTotalsByCurrency[curr].outstanding).toLocaleString()}
+                      </span>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>{curr}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{
+                  fontSize: '1.25rem',
+                  fontWeight: 800,
+                  color: singleBorrowerStats.outstanding > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)',
+                  marginTop: '0.25rem'
+                }}>
+                  {getCurrencySymbol(singleBorrowerCurr)}{Number(singleBorrowerStats.outstanding).toLocaleString()} <span style={{ fontSize: '0.75rem' }}>{singleBorrowerCurr}</span>
+                </div>
+              )}
+
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
                 {activeLoans.length} active {activeLoans.length === 1 ? 'record' : 'records'}
               </div>
             </div>
 
+            {/* Status */}
             <div style={{
               background: 'var(--inner-card-bg)',
               border: '1px solid var(--border-subtle)',
@@ -279,10 +328,17 @@ export const PersonDetailsModal = ({
               </span>
               <div style={{ fontSize: '1.1rem', fontWeight: 800, marginTop: '0.35rem' }}>
                 {overdueLoans.length > 0 ? (
-                  <span style={{ color: 'var(--accent-rose)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <AlertTriangle size={15} />
-                    {overdueLoans.length} Overdue
-                  </span>
+                  <div>
+                    <span style={{ color: 'var(--accent-rose)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <AlertTriangle size={15} />
+                      {overdueLoans.length} Overdue
+                    </span>
+                    {distinctCurrencies.filter(c => personTotalsByCurrency[c].overdue > 0).map(curr => (
+                      <span key={curr} style={{ fontSize: '0.72rem', color: 'var(--accent-rose)', display: 'block', marginTop: '0.15rem' }}>
+                        {getCurrencySymbol(curr)}{Number(personTotalsByCurrency[curr].overdue).toLocaleString()} ({curr})
+                      </span>
+                    ))}
+                  </div>
                 ) : outstanding === 0 ? (
                   <span style={{ color: 'var(--accent-emerald)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                     <CheckCircle2 size={15} />
