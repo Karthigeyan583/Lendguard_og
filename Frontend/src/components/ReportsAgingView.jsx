@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { AlertTriangle, Clock, Calendar, ArrowDownLeft, FileText, CheckCircle2 } from 'lucide-react';
-import { getDefaultCurrency, getCurrencySymbol } from '../utils/currency';
+import { getDefaultCurrency, getCurrencySymbol, maskValue } from '../utils/currency';
 
-export const ReportsAgingView = ({ agingData, loans = [], onRecordPayment, onGenerateStatement }) => {
+export const ReportsAgingView = ({ agingData, loans = [], onRecordPayment, onGenerateStatement, isMasked = false }) => {
   const [directionFilter, setDirectionFilter] = useState('all'); // 'all', 'lent', 'borrowed'
 
   const buckets = agingData?.buckets || {
@@ -53,7 +53,7 @@ export const ReportsAgingView = ({ agingData, loans = [], onRecordPayment, onGen
               {directionFilter === 'borrowed' ? 'Overdue Debt (You Owe)' : directionFilter === 'lent' ? 'Overdue Receivables (Owed to You)' : 'Total Overdue Balance'}
             </span>
             <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent-rose)' }}>
-              {defSymbol}{Number(totalOverdue).toLocaleString()}
+              {isMasked ? '••••••' : `${defSymbol}${Number(totalOverdue).toLocaleString()}`}
             </div>
           </div>
         </div>
