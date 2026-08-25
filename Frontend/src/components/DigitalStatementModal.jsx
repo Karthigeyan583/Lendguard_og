@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, ShieldCheck, Printer, Copy, Check, Lock, FileText, CheckCircle2 } from 'lucide-react';
+import { getCurrencySymbol, formatMoney } from '../utils/currency';
 
 export const DigitalStatementModal = ({ isOpen, onClose, statement, loan }) => {
   const [copied, setCopied] = useState(false);
@@ -8,6 +9,8 @@ export const DigitalStatementModal = ({ isOpen, onClose, statement, loan }) => {
 
   const data = statement?.canonical_data_snapshot;
   const hash = statement?.sha256_hash || 'SHA-256 Hash Generating...';
+  const currencyCode = data?.financial_summary?.currency || data?.loan_details?.currency || loan?.currency || 'INR';
+  const currencySymbol = getCurrencySymbol(currencyCode);
 
   const handleCopyHash = () => {
     if (statement?.sha256_hash) {
