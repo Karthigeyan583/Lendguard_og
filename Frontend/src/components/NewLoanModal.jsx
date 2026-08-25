@@ -84,6 +84,8 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
     }
   };
 
+  const isBorrowing = formData.direction === 'borrowed';
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
@@ -96,9 +98,13 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
           justifyContent: 'space-between'
         }}>
           <div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>Record Money Lent</h3>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>
+              {isBorrowing ? 'Record Money Borrowed' : 'Record Money Lent'}
+            </h3>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              Create a new entry in your authoritative lending ledger
+              {isBorrowing 
+                ? 'Create a new payable liability entry in your financial ledger'
+                : 'Create a new receivable entry in your authoritative lending ledger'}
             </p>
           </div>
           <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
@@ -125,10 +131,71 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
             </div>
           )}
 
-          {/* Borrower / Contact Selector */}
+          {/* Direction Switcher (Lending vs Borrowing) */}
+          <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+            <label className="form-label">Transaction Direction <span style={{ color: 'var(--accent-rose)' }}>*</span></label>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '0.75rem',
+              background: 'var(--inner-card-bg)',
+              padding: '0.35rem',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-subtle)'
+            }}>
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, direction: 'lent' })}
+                style={{
+                  padding: '0.6rem 0.75rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: 'none',
+                  background: !isBorrowing ? 'var(--accent-emerald)' : 'transparent',
+                  color: !isBorrowing ? '#ffffff' : 'var(--text-muted)',
+                  fontWeight: 700,
+                  fontSize: '0.82rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <span>🤝 Money I Lent</span>
+                <span style={{ fontSize: '0.68rem', opacity: 0.85 }}>(Receivable)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, direction: 'borrowed' })}
+                style={{
+                  padding: '0.6rem 0.75rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: 'none',
+                  background: isBorrowing ? 'var(--accent-indigo)' : 'transparent',
+                  color: isBorrowing ? '#ffffff' : 'var(--text-muted)',
+                  fontWeight: 700,
+                  fontSize: '0.82rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <span>📥 Money I Borrowed</span>
+                <span style={{ fontSize: '0.68rem', opacity: 0.85 }}>(Payable)</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Party / Contact Selector */}
           <div className="form-group">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-              <label className="form-label" style={{ margin: 0 }}>Borrower (Contact)</label>
+              <label className="form-label" style={{ margin: 0 }}>
+                {isBorrowing ? 'Lender (Contact)' : 'Borrower (Contact)'}
+              </label>
               <button
                 type="button"
                 onClick={onOpenAddPerson}
@@ -140,7 +207,7 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
 
             {people.length === 0 ? (
               <div style={{ padding: '0.75rem', background: 'var(--inner-card-bg)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>No contacts found. Please add a borrower.</span>
+                <span>No contacts found. Please add a contact.</span>
                 <button type="button" className="btn btn-secondary" onClick={onOpenAddPerson} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>
                   Add Contact
                 </button>
@@ -152,7 +219,7 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
                 value={formData.person}
                 onChange={(e) => setFormData({ ...formData, person: e.target.value })}
               >
-                <option value="">-- Select Borrower --</option>
+                <option value="">-- Select {isBorrowing ? 'Lender' : 'Borrower'} --</option>
                 {people.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name} ({p.relationship}) {p.mobile ? `• ${p.mobile}` : ''}
@@ -174,7 +241,7 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
                 min="0.01"
                 required
                 className="form-input"
-                placeholder="Enter loan amount (e.g. 25000)"
+                placeholder={isBorrowing ? "Amount borrowed (e.g. 25000)" : "Amount lent (e.g. 25000)"}
                 value={formData.principal_amount}
                 onChange={(e) => setFormData({ ...formData, principal_amount: e.target.value })}
               />
@@ -194,38 +261,35 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
                 <option value="USD">USD ($)</option>
                 <option value="EUR">EUR (€)</option>
                 <option value="GBP">GBP (£)</option>
+                <option value="CAD">CAD (CA$)</option>
+                <option value="AUD">AUD (AU$)</option>
+                <option value="AED">AED (AED)</option>
+                <option value="SGD">SGD (S$)</option>
               </select>
             </div>
           </div>
 
-          {/* Date Given & Due Date */}
+          {/* Dates */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="form-group">
               <label className="form-label">
-                Date Given (Transfer Date) <span style={{ color: 'var(--accent-rose)' }}>*</span>
+                {isBorrowing ? 'Date Borrowed' : 'Date Disbursed'} <span style={{ color: 'var(--accent-rose)' }}>*</span>
               </label>
               <input
                 type="date"
                 required
                 className="form-input"
                 value={formData.date_given}
-                onChange={(e) => {
-                  const newDateGiven = e.target.value;
-                  setFormData(prev => ({
-                    ...prev,
-                    date_given: newDateGiven,
-                    // If existing due date is before the newly selected date given, clear or update it
-                    due_date: prev.due_date && prev.due_date < newDateGiven ? newDateGiven : prev.due_date
-                  }));
-                }}
+                onChange={(e) => setFormData({ ...formData, date_given: e.target.value })}
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Agreed Due Date (Optional)</label>
+              <label className="form-label">
+                Repayment Target Due Date
+              </label>
               <input
                 type="date"
-                min={formData.date_given || new Date().toISOString().split('T')[0]}
                 className="form-input"
                 value={formData.due_date}
                 onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
@@ -233,41 +297,54 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
             </div>
           </div>
 
-          {/* Purpose / Remarks */}
+          {/* Purpose */}
           <div className="form-group">
             <label className="form-label">
-              Purpose / Lending Context <span style={{ color: 'var(--accent-rose)' }}>*</span>
+              Purpose / Financial Context <span style={{ color: 'var(--accent-rose)' }}>*</span>
             </label>
             <input
               type="text"
               required
-              placeholder="e.g. Emergency home repair, education fees, laptop purchase..."
               className="form-input"
+              placeholder={isBorrowing ? "e.g. Bridge loan for invoice clearance" : "e.g. Emergency medical bridge, Home renovation"}
               value={formData.purpose}
               onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
             />
           </div>
 
-          {/* Private Notes */}
+          {/* Notes */}
           <div className="form-group">
             <label className="form-label">Private Audit Notes</label>
             <textarea
+              className="form-input"
               rows={2}
-              placeholder="Optional notes only visible to you..."
-              className="form-textarea"
+              placeholder="Private lender notes, agreements, or repayment terms"
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
             />
           </div>
 
-          {/* Actions */}
+          {/* Form Actions */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
-            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={submitting}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onClose}
+              disabled={submitting}
+            >
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
-              <ArrowUpRight size={16} />
-              <span>{submitting ? 'Saving to Ledger...' : 'Save Lending Record'}</span>
+            <button
+              type="submit"
+              className={`btn ${isBorrowing ? 'btn-primary' : 'btn-primary'}`}
+              style={{
+                background: isBorrowing ? 'var(--accent-indigo)' : 'var(--accent-emerald)',
+                borderColor: isBorrowing ? 'var(--accent-indigo)' : 'var(--accent-emerald)',
+                padding: '0.6rem 1.4rem'
+              }}
+              disabled={submitting}
+            >
+              {submitting ? 'Recording...' : isBorrowing ? 'Record Money Borrowed' : 'Record Money Lent'}
             </button>
           </div>
         </form>
