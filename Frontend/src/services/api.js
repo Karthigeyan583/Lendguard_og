@@ -159,4 +159,59 @@ export const api = {
     request('/data/purge/', {
       method: 'POST',
     }),
+
+  // Analytics & Reporting Studio (Enterprise v2.0)
+  getAnalyticsOverview: (params = '') => request(`/analytics/overview/${params ? `?${params}` : ''}`),
+  getLendingAnalytics: (params = '') => request(`/analytics/lending/${params ? `?${params}` : ''}`),
+  getBorrowingAnalytics: (params = '') => request(`/analytics/borrowing/${params ? `?${params}` : ''}`),
+  getPaymentsAnalytics: (params = '') => request(`/analytics/payments/${params ? `?${params}` : ''}`),
+  getCashflowAnalytics: (params = '') => request(`/analytics/cashflow/${params ? `?${params}` : ''}`),
+  getAuditAnalytics: () => request('/analytics/audit/'),
+  getMetricsCatalog: () => request('/analytics/metrics/'),
+
+  // Custom Dynamic Report Builder & Pivot Studio
+  previewCustomReport: (config, params = '') =>
+    request(`/analytics/reports/preview/${params ? `?${params}` : ''}`, {
+      method: 'POST',
+      body: JSON.stringify(config),
+    }),
+  getSavedReports: () => request('/analytics/reports/'),
+  createSavedReport: (reportData) =>
+    request('/analytics/reports/', {
+      method: 'POST',
+      body: JSON.stringify(reportData),
+    }),
+  runSavedReport: (id, params = '') => request(`/analytics/reports/${id}/run/${params ? `?${params}` : ''}`),
+  deleteSavedReport: (id) =>
+    request(`/analytics/reports/${id}/`, {
+      method: 'DELETE',
+    }),
+
+  // Custom Dashboards
+  getCustomDashboards: () => request('/analytics/dashboards/'),
+  createCustomDashboard: (data) =>
+    request('/analytics/dashboards/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  addWidgetToDashboard: (dashboardId, widgetData) =>
+    request(`/analytics/dashboards/${dashboardId}/widgets/`, {
+      method: 'POST',
+      body: JSON.stringify(widgetData),
+    }),
+
+  // Schedules & Alerts
+  getReportSchedules: () => request('/analytics/schedules/'),
+  createReportSchedule: (data) =>
+    request('/analytics/schedules/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  getAlertRules: () => request('/analytics/alerts/'),
+  createAlertRule: (data) =>
+    request('/analytics/alerts/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  checkAlerts: (params = '') => request(`/analytics/alerts/check/${params ? `?${params}` : ''}`),
 };
