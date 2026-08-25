@@ -835,23 +835,6 @@ export const SettingsView = ({ onDataPurged }) => {
               </div>
             </div>
           </div>
-
-          {/* Interactive Documentation */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-subtle)', paddingTop: '1.25rem' }}>
-            <div style={{ fontSize: '0.825rem', color: 'var(--text-muted)' }}>
-              OpenAPI 3.0 Interactive Documentation
-            </div>
-            <a
-              href="http://127.0.0.1:8000/api/schema/swagger-ui/"
-              target="_blank"
-              rel="noreferrer"
-              className="btn btn-secondary"
-              style={{ fontSize: '0.8rem' }}
-            >
-              <span>View Swagger UI</span>
-              <ExternalLink size={14} />
-            </a>
-          </div>
         </div>
       )}
 
