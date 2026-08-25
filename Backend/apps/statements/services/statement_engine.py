@@ -27,27 +27,39 @@ def generate_digital_statement(loan, user=None) -> DigitalStatement:
         })
 
     # Canonical snapshot dictionary
+    is_borrowing = (loan.direction == 'borrowed')
+
+    user_info = {
+        'username': loan.created_by.username,
+        'email': loan.created_by.email,
+        'full_name': f"{loan.created_by.first_name} {loan.created_by.last_name}".strip() or loan.created_by.username
+    }
+    person_info = {
+        'person_id': loan.person.id,
+        'name': loan.person.name,
+        'mobile': loan.person.mobile,
+        'email': loan.person.email,
+        'relationship': loan.person.relationship
+    }
+
+    # Direction-aware party assignments
+    lender_party = person_info if is_borrowing else user_info
+    borrower_party = user_info if is_borrowing else person_info
+
+    # Canonical snapshot dictionary
     canonical_snapshot = {
         'platform': 'LendGuard Personal Lending & Ledger Platform',
         'version': '2.0',
-        'statement_type': 'OFFICIAL_DIGITAL_STATEMENT_AND_IOU',
+        'statement_type': 'OFFICIAL_DIGITAL_BORROWING_STATEMENT' if is_borrowing else 'OFFICIAL_DIGITAL_STATEMENT_AND_IOU',
+        'direction': loan.direction,
         'generated_at': now_iso,
-        'lender': {
-            'username': loan.created_by.username,
-            'email': loan.created_by.email,
-            'full_name': f"{loan.created_by.first_name} {loan.created_by.last_name}".strip()
-        },
-        'borrower': {
-            'person_id': loan.person.id,
-            'name': loan.person.name,
-            'mobile': loan.person.mobile,
-            'email': loan.person.email,
-            'relationship': loan.person.relationship
-        },
+        'lender': lender_party,
+        'borrower': borrower_party,
         'loan_details': {
             'loan_id': loan.id,
             'loan_reference': loan.loan_reference,
             'direction': loan.direction,
+            'direction_label': 'Money Borrowed (Payable)' if is_borrowing else 'Money Lent (Receivable)',
             'principal_amount': str(loan.principal_amount),
             'currency': loan.currency,
             'date_given': str(loan.date_given),
