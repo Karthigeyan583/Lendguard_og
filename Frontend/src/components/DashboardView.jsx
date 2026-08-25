@@ -702,9 +702,9 @@ export const DashboardView = ({
                   color: 'var(--text-primary)'
                 }}
               >
-                <strong>{getCurrencySymbol(code)}{Number(stats.total_lent).toLocaleString()} {code}</strong>
+                <strong>{getCurrencySymbol(code)}{isMasked ? '••••••' : Number(stats.total_lent).toLocaleString()} {code}</strong>
                 <span style={{ color: 'var(--text-muted)', marginLeft: 4 }}>
-                  ({getCurrencySymbol(code)}{Number(stats.outstanding).toLocaleString()} owed)
+                  ({getCurrencySymbol(code)}{isMasked ? '••••••' : Number(stats.outstanding).toLocaleString()} owed)
                 </span>
               </span>
             ))}
@@ -769,7 +769,7 @@ export const DashboardView = ({
                       Loan: #{l.loan_reference} • Due: {l.due_date} (<strong style={{ color: 'var(--accent-rose)' }}>{l.days_overdue} days overdue</strong>)
                     </div>
                     <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-rose)', marginTop: '0.2rem' }}>
-                      {getCurrencySymbol(l.currency)}{Number(l.balance?.outstanding || l.principal_amount).toLocaleString()} Outstanding
+                      {getCurrencySymbol(l.currency)}{isMasked ? '••••••' : Number(l.balance?.outstanding || l.principal_amount).toLocaleString()} Outstanding
                     </div>
                   </div>
 
