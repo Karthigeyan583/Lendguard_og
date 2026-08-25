@@ -13,6 +13,8 @@ import {
   Share2,
   ChevronRight,
   ChevronLeft,
+  ChevronUp,
+  ChevronDown,
   Sparkles,
   Activity,
   Layers,
@@ -82,23 +84,48 @@ export const DashboardView = ({
   const activeDebtorsCount = people.filter(p => Number(p.outstanding_balance || 0) > 0).length;
   const recoveryRate = singleStats.recovery || 0;
 
-  // Samsung Now Bar state & scrolling
-  const [activeNowBarIndex, setActiveNowBarIndex] = useState(0);
-  const nowBarTrackRef = React.useRef(null);
+  // Samsung One UI Stacked Card Deck state & gesture handling
+  const [activeStackIndex, setActiveStackIndex] = useState(0);
+  const touchStartY = React.useRef(null);
+  const lastWheelTime = React.useRef(0);
 
-  const scrollNowBar = (direction) => {
-    if (!nowBarTrackRef.current) return;
-    const track = nowBarTrackRef.current;
-    const scrollAmount = 280;
-    track.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+  const nextStack = () => {
+    if (people.length <= 1) return;
+    setActiveStackIndex(prev => (prev + 1) % people.length);
   };
 
-  const handleNowBarScroll = () => {
-    if (!nowBarTrackRef.current) return;
-    const track = nowBarTrackRef.current;
-    const cardWidth = 280;
-    const newIdx = Math.round(track.scrollLeft / cardWidth);
-    setActiveNowBarIndex(Math.max(0, Math.min(newIdx, people.length - 1)));
+  const prevStack = () => {
+    if (people.length <= 1) return;
+    setActiveStackIndex(prev => (prev - 1 + people.length) % people.length);
+  };
+
+  const handleStackWheel = (e) => {
+    const now = Date.now();
+    if (now - lastWheelTime.current < 300) return;
+    if (Math.abs(e.deltaY) > 15) {
+      lastWheelTime.current = now;
+      if (e.deltaY > 0) {
+        nextStack();
+      } else {
+        prevStack();
+      }
+    }
+  };
+
+  const handleStackTouchStart = (e) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleStackTouchEnd = (e) => {
+    if (touchStartY.current === null) return;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diff = touchStartY.current - touchEndY;
+    if (diff > 30) {
+      nextStack();
+    } else if (diff < -30) {
+      prevStack();
+    }
+    touchStartY.current = null;
   };
 
   return (
@@ -516,9 +543,9 @@ export const DashboardView = ({
             </div>
           </div>
 
-          {/* Samsung Now Bar: Borrower Exposure Interactive Carousel */}
+          {/* Samsung Now Bar: 3D Stacked Card Deck */}
           <div className="samsung-now-bar-panel" style={{ padding: '1.25rem' }}>
-            {/* Now Bar Header Capsule */}
+            {/* Header with Live Now Indicator & Stack Controls */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -558,11 +585,11 @@ export const DashboardView = ({
                       gap: '0.25rem'
                     }}>
                       <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent-emerald)', animation: 'pulse-green 1.5s infinite' }} />
-                      NOW BAR
+                      STACK DECK
                     </span>
                   </div>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                    Swipe / scroll horizontally across borrowers
+                    Scroll / swipe vertically to flick cards ({people.length > 0 ? `${activeStackIndex + 1} of ${people.length}` : '0'})
                   </span>
                 </div>
               </div>
@@ -571,35 +598,43 @@ export const DashboardView = ({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                   <button
                     className="now-bar-nav-btn"
-                    onClick={() => scrollNowBar('left')}
-                    title="Previous borrower"
+                    onClick={prevStack}
+                    title="Previous stacked card"
                   >
-                    <ChevronLeft size={15} />
+                    <ChevronUp size={15} />
                   </button>
                   <button
                     className="now-bar-nav-btn"
-                    onClick={() => scrollNowBar('right')}
-                    title="Next borrower"
+                    onClick={nextStack}
+                    title="Next stacked card"
                   >
-                    <ChevronRight size={15} />
+                    <ChevronDown size={15} />
                   </button>
                 </div>
               )}
             </div>
 
-            {/* Now Bar Horizontal Scroll Track */}
+            {/* Stack Deck Body */}
             {people.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                 No contacts yet. Click "Add Borrower" above to get started!
               </div>
             ) : (
-              <div>
-                <div
-                  className="now-bar-scroll-track"
-                  ref={nowBarTrackRef}
-                  onScroll={handleNowBarScroll}
-                >
+              <div
+                className="samsung-stack-container"
+                onWheel={handleStackWheel}
+                onTouchStart={handleStackTouchStart}
+                onTouchEnd={handleStackTouchEnd}
+              >
+                <div className="samsung-stack-wrapper">
                   {people.map((p, idx) => {
+                    const offset = (idx - activeStackIndex + people.length) % people.length;
+                    const isVisible = offset < 3;
+                    const translateY = offset * 14;
+                    const scale = 1 - offset * 0.05;
+                    const opacity = offset === 0 ? 1 : offset === 1 ? 0.82 : offset === 2 ? 0.55 : 0;
+                    const zIndex = 10 - offset;
+
                     const pLoans = loans.filter((l) => {
                       if (l.person === p.id) return true;
                       if (typeof l.person === 'object' && l.person?.id === p.id) return true;
@@ -616,9 +651,22 @@ export const DashboardView = ({
                     return (
                       <div
                         key={p.id}
-                        className="now-bar-card"
-                        onClick={() => onOpenPersonDetails && onOpenPersonDetails(p)}
-                        title={`Click to view full dossier for ${p.name}`}
+                        className="samsung-stack-card"
+                        style={{
+                          transform: `translateY(${translateY}px) scale(${scale})`,
+                          opacity: opacity,
+                          zIndex: zIndex,
+                          pointerEvents: isVisible ? 'auto' : 'none',
+                          cursor: offset === 0 ? 'pointer' : 'pointer'
+                        }}
+                        onClick={() => {
+                          if (offset === 0) {
+                            if (onOpenPersonDetails) onOpenPersonDetails(p);
+                          } else {
+                            setActiveStackIndex(idx);
+                          }
+                        }}
+                        title={offset === 0 ? `Click to view full dossier for ${p.name}` : `Click to bring ${p.name} to front`}
                       >
                         {/* Top: Avatar, Name & Status */}
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
@@ -721,7 +769,7 @@ export const DashboardView = ({
                         }}>
                           <span>{pLoans.length} {pLoans.length === 1 ? 'Loan Record' : 'Loan Records'}</span>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                            Dossier <ChevronRight size={13} />
+                            {offset === 0 ? 'Open Dossier' : 'Bring to Front'} <ChevronRight size={13} />
                           </span>
                         </div>
                       </div>
@@ -729,19 +777,15 @@ export const DashboardView = ({
                   })}
                 </div>
 
-                {/* Now Bar Pagination Indicator Dots */}
+                {/* Stack Navigation Dots Indicator */}
                 {people.length > 1 && (
-                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', marginTop: '0.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', marginTop: '1.25rem' }}>
                     {people.map((p, idx) => (
                       <div
                         key={p.id}
-                        className={`now-bar-dot ${activeNowBarIndex === idx ? 'active' : 'inactive'}`}
-                        onClick={() => {
-                          if (nowBarTrackRef.current) {
-                            nowBarTrackRef.current.scrollTo({ left: idx * 280, behavior: 'smooth' });
-                          }
-                        }}
-                        title={`Jump to ${p.name}`}
+                        className={`now-bar-dot ${activeStackIndex === idx ? 'active' : 'inactive'}`}
+                        onClick={() => setActiveStackIndex(idx)}
+                        title={`Flick to ${p.name}`}
                       />
                     ))}
                   </div>
