@@ -182,10 +182,15 @@ class CustomReportViewSet(viewsets.ModelViewSet):
         return Response(result)
 
     @action(detail=True, methods=['get', 'post'], url_path='export')
-    def export(self, request, pk=None):
+    def export(self, request, pk=None, format=None):
         """Export report as CSV, JSON, or HTML-PDF."""
         report = self.get_object()
-        fmt = str(request.query_params.get('format') or request.data.get('format', 'csv')).lower()
+        fmt = str(
+            request.query_params.get('export_format') or
+            request.query_params.get('format') or
+            format or
+            request.data.get('format', 'csv')
+        ).lower()
         rep_curr = _extract_reporting_currency(request)
         config = {
             'data_source': report.data_source,
