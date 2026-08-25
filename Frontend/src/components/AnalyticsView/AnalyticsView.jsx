@@ -614,6 +614,8 @@ export const AnalyticsView = ({
 
       {activeSubTab === 'builder' && (
         <CustomReportBuilder
+          loans={loans}
+          people={people}
           reportingCurrency={reportingCurrency}
           isMasked={isMasked}
           onSaveReport={handleSaveReport}
