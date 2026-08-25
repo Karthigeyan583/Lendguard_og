@@ -329,6 +329,18 @@ function LendGuardApp() {
               />
             )}
 
+            {activeTab === 'analytics' && (
+              <AnalyticsView
+                loans={loans}
+                people={people}
+                summary={summary}
+                isMasked={isMasked}
+                onOpenPersonDetails={(p) => { setSelectedPersonForDetails(p); setIsPersonDetailsOpen(true); }}
+                onRecordPayment={(loan) => { setSelectedLoanForPayment(loan); setIsPaymentOpen(true); }}
+                onGenerateStatement={handleGenerateStatement}
+              />
+            )}
+
             {activeTab === 'people' && (
               <PeopleView
                 people={people}
