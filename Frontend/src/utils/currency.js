@@ -86,8 +86,12 @@ export const formatMoney = (amount, currencyCode, isMasked = false) => {
   return `${symbol}${num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 };
 
-export const maskValue = (formattedString, isMasked = false) => {
-  if (!isMasked) return formattedString;
-  // If it contains a currency symbol, keep the symbol and mask the numbers
-  return formattedString.replace(/[\d,]+(\.\d+)?/g, '••••••');
+export const maskValue = (formattedString, isMasked = true) => {
+  if (isMasked === false) return formattedString;
+  const str = String(formattedString == null ? '' : formattedString);
+  const match = str.match(/^([^0-9\s]+)\s*/);
+  if (match) {
+    return `${match[1]}••••••`;
+  }
+  return '••••••';
 };
