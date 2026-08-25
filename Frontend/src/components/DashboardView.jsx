@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   DollarSign, 
   CheckCircle2, 
@@ -12,9 +12,10 @@ import {
   FileText,
   Share2,
   ChevronRight,
-  Layers
+  Layers,
+  Filter
 } from 'lucide-react';
-import { getCurrencySymbol, getDefaultCurrency, convertCurrency } from '../utils/currency';
+import { getCurrencySymbol, getDefaultCurrency } from '../utils/currency';
 
 export const DashboardView = ({ 
   summary, 
@@ -27,6 +28,12 @@ export const DashboardView = ({
   onOpenPersonDetails,
   onOpenDrilldown
 }) => {
+  const [activeCurrencyFilter, setActiveCurrencyFilter] = useState('ALL');
+
+  // Identify distinct currencies used across loans
+  const availableCurrencies = Array.from(new Set(loans.map(l => l.currency || 'INR')));
+  const isMulti = availableCurrencies.length > 1;
+
   // Filter urgent active loans
   const overdueLoans = loans.filter(
     l => (l.time_status === 'OVERDUE' || l.days_overdue > 0) &&
@@ -37,21 +44,83 @@ export const DashboardView = ({
          l.status !== 'PAID' && l.status !== 'CANCELLED' && l.status !== 'WRITTEN_OFF'
   );
 
-  const reportingCurrency = summary?.reporting_currency || (loans.length > 0 && loans[0].reporting_currency) || getDefaultCurrency();
-  const currSymbol = getCurrencySymbol(reportingCurrency);
+  // Group raw unmixed totals per currency directly from transaction records
+  const totalsByCurrency = {};
+  availableCurrencies.forEach((curr) => {
+    const currLoans = loans.filter(l => (l.currency || 'INR') === curr && l.status !== 'CANCELLED' && l.status !== 'WRITTEN_OFF');
+    const currOverdue = currLoans.filter(l => (l.time_status === 'OVERDUE' || l.days_overdue > 0) && l.status !== 'PAID');
+    const lent = currLoans.reduce((acc, l) => acc + Number(l.principal_amount || 0), 0);
+    const repaid = currLoans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
+    const outstanding = currLoans.reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + Number(l.balance?.outstanding || 0), 0);
+    const overdue = currOverdue.reduce((acc, l) => acc + Number(l.balance?.outstanding || 0), 0);
+    const recovery = lent > 0 ? Number(((repaid / lent) * 100).toFixed(1)) : 0;
+    totalsByCurrency[curr] = {
+      currency: curr,
+      lent,
+      repaid,
+      outstanding,
+      overdue,
+      recovery,
+      loansCount: currLoans.length,
+      overdueCount: currOverdue.length
+    };
+  });
 
-  const totalLent = summary?.total_lent ?? loans.reduce((acc, l) => l.status !== 'CANCELLED' ? acc + convertCurrency(l.principal_amount, l.currency, reportingCurrency, l.exchange_rate) : acc, 0);
-  const totalRepaid = summary?.total_repaid ?? loans.reduce((acc, l) => acc + convertCurrency(l.balance?.total_repaid || 0, l.currency, reportingCurrency, l.exchange_rate), 0);
-  const totalOutstanding = summary?.total_outstanding ?? loans.reduce((acc, l) => (l.status !== 'CANCELLED' && l.status !== 'PAID') ? acc + convertCurrency(l.balance?.outstanding || 0, l.currency, reportingCurrency, l.exchange_rate) : acc, 0);
-  const totalOverdue = summary?.total_overdue ?? overdueLoans.reduce((acc, l) => acc + convertCurrency(l.balance?.outstanding || 0, l.currency, reportingCurrency, l.exchange_rate), 0);
-  const recoveryRate = summary?.recovery_rate ?? (totalLent > 0 ? Number(((totalRepaid / totalLent) * 100).toFixed(1)) : 0);
-  const overdueCount = summary?.overdue_count ?? overdueLoans.length;
-  const dueSoonCount = summary?.due_soon_count ?? dueSoonLoans.length;
+  // Selected view data (either single currency or split)
+  const singleCurr = activeCurrencyFilter !== 'ALL' ? activeCurrencyFilter : availableCurrencies[0] || 'INR';
+  const singleStats = totalsByCurrency[singleCurr] || { lent: 0, repaid: 0, outstanding: 0, overdue: 0, recovery: 0, loansCount: 0, overdueCount: 0 };
+  const isSplitView = activeCurrencyFilter === 'ALL' && isMulti;
+
+  const totalLoansCount = activeCurrencyFilter === 'ALL' ? loans.length : (totalsByCurrency[singleCurr]?.loansCount || 0);
+  const overdueCount = activeCurrencyFilter === 'ALL' ? overdueLoans.length : (totalsByCurrency[singleCurr]?.overdueCount || 0);
+  const dueSoonCount = dueSoonLoans.length;
   const activeDebtorsCount = people.filter(p => Number(p.outstanding_balance || 0) > 0).length;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-      {/* 4 Main KPI Cards */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Top Currency Switcher Strip (when multiple currencies exist) */}
+      {isMulti && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
+          background: 'var(--inner-card-bg)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 'var(--radius-md)',
+          padding: '0.75rem 1.25rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <Layers size={16} color="var(--accent-indigo)" />
+            <span style={{ fontSize: '0.825rem', fontWeight: 700 }}>
+              Currency Split View:
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+            <button
+              className={`btn ${activeCurrencyFilter === 'ALL' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem', borderRadius: 'var(--radius-full)' }}
+              onClick={() => setActiveCurrencyFilter('ALL')}
+            >
+              All Currencies (Split Breakdown)
+            </button>
+            {availableCurrencies.map(curr => (
+              <button
+                key={curr}
+                className={`btn ${activeCurrencyFilter === curr ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem', borderRadius: 'var(--radius-full)' }}
+                onClick={() => setActiveCurrencyFilter(curr)}
+              >
+                {curr} ({getCurrencySymbol(curr)})
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 4 Main KPI Cards (Split by exact currencies) */}
       <div className="stats-grid">
         {/* Total Lent */}
         <div
@@ -66,11 +135,26 @@ export const DashboardView = ({
               <ArrowUpRight size={19} color="var(--accent-blue)" />
             </div>
           </div>
-          <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-            {currSymbol}{Number(totalLent).toLocaleString()}
-          </div>
+
+          {isSplitView ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.35rem' }}>
+              {availableCurrencies.map(curr => (
+                <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
+                    {getCurrencySymbol(curr)}{Number(totalsByCurrency[curr].lent).toLocaleString()}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-blue)' }}>{curr}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
+              {getCurrencySymbol(singleCurr)}{Number(singleStats.lent).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>{singleCurr}</span>
+            </div>
+          )}
+
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            Across {loans.length} total lending {loans.length === 1 ? 'record' : 'records'}
+            Across {totalLoansCount} lending {totalLoansCount === 1 ? 'record' : 'records'}
           </div>
         </div>
 
@@ -87,11 +171,28 @@ export const DashboardView = ({
               <CheckCircle2 size={19} color="var(--accent-emerald)" />
             </div>
           </div>
-          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-            {currSymbol}{Number(totalRepaid).toLocaleString()}
-          </div>
+
+          {isSplitView ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.35rem' }}>
+              {availableCurrencies.map(curr => (
+                <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, color: 'var(--accent-emerald)', letterSpacing: '-0.02em' }}>
+                    {getCurrencySymbol(curr)}{Number(totalsByCurrency[curr].repaid).toLocaleString()}
+                  </span>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-emerald)' }}>
+                    {curr} ({totalsByCurrency[curr].recovery}%)
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
+              {getCurrencySymbol(singleCurr)}{Number(singleStats.repaid).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-emerald)' }}>{singleCurr}</span>
+            </div>
+          )}
+
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            Recovery Rate: <strong>{recoveryRate}%</strong>
+            {isSplitView ? 'Recovery rate indicated per currency' : `Recovery Rate: ${singleStats.recovery}%`}
           </div>
         </div>
 
@@ -108,9 +209,24 @@ export const DashboardView = ({
               <Clock size={19} color="var(--accent-cyan)" />
             </div>
           </div>
-          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-cyan)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-            {currSymbol}{Number(totalOutstanding).toLocaleString()}
-          </div>
+
+          {isSplitView ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.35rem' }}>
+              {availableCurrencies.map(curr => (
+                <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, color: 'var(--accent-cyan)', letterSpacing: '-0.02em' }}>
+                    {getCurrencySymbol(curr)}{Number(totalsByCurrency[curr].outstanding).toLocaleString()}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>{curr}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-cyan)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
+              {getCurrencySymbol(singleCurr)}{Number(singleStats.outstanding).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-cyan)' }}>{singleCurr}</span>
+            </div>
+          )}
+
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
             {activeDebtorsCount > 0 
               ? `Owed across ${activeDebtorsCount} active ${activeDebtorsCount === 1 ? 'borrower' : 'borrowers'}`
@@ -131,9 +247,32 @@ export const DashboardView = ({
               <AlertTriangle size={19} color="var(--accent-rose)" />
             </div>
           </div>
-          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: overdueCount > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-            {currSymbol}{Number(totalOverdue).toLocaleString()}
-          </div>
+
+          {isSplitView ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.35rem' }}>
+              {availableCurrencies.filter(c => totalsByCurrency[c].overdue > 0).length > 0 ? (
+                availableCurrencies.filter(c => totalsByCurrency[c].overdue > 0).map(curr => (
+                  <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, color: 'var(--accent-rose)', letterSpacing: '-0.02em' }}>
+                      {getCurrencySymbol(curr)}{Number(totalsByCurrency[curr].overdue).toLocaleString()}
+                    </span>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-rose)' }}>
+                      {curr} ({totalsByCurrency[curr].overdueCount} {totalsByCurrency[curr].overdueCount === 1 ? 'loan' : 'loans'})
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>
+                  0.00 <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>All up to date</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ fontSize: '1.85rem', fontWeight: 800, color: singleStats.overdue > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
+              {getCurrencySymbol(singleCurr)}{Number(singleStats.overdue).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{singleCurr}</span>
+            </div>
+          )}
+
           {overdueCount > 0 ? (
             <div style={{ fontSize: '0.75rem', color: 'var(--accent-rose)' }}>
               {overdueCount} {overdueCount === 1 ? 'loan requires' : 'loans require'} immediate attention
