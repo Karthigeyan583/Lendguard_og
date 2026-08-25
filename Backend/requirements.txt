@@ -1,0 +1,12 @@
+# Django & REST Framework
+Django>=5.1.0,<6.0
+djangorestframework>=3.15.2
+django-cors-headers>=4.4.0
+django-filter>=24.3
+drf-spectacular>=0.27.2
+
+# Database Drivers
+psycopg2-binary>=2.9.9
+
+# Utilities & Configuration
+python-dotenv>=1.0.1
