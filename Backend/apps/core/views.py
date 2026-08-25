@@ -38,16 +38,16 @@ class HealthCheckView(APIView):
 
 class DashboardSummaryView(APIView):
     """
-    Dashboard Financial Snapshot & Quick Actions (Bible Section 17):
-    Calculates Total Lent, Total Repaid, Outstanding, Overdue, Recovery %, and Multi-Currency Breakdown
-    normalized into the user's configured Reporting/Base Currency.
+    Dashboard Financial Snapshot & Quick Actions (Bible Section 17 & Borrowing Extension):
+    Calculates separate metrics for Money Lent (Receivables), Money Borrowed (Payables),
+    Net Financial Position, and Multi-Currency Breakdown normalized into the user's Reporting Currency.
     """
     permission_classes = [IsAuthenticated]
     serializer_class = None
 
     @extend_schema(
         summary="Dashboard Summary",
-        description="Returns top-level financial metrics normalized into reporting currency and itemized currency breakdown.",
+        description="Returns directional financial metrics (Lending, Borrowing, Net Position) normalized into reporting currency and itemized currency breakdown.",
         responses={200: OpenApiResponse(description="Financial KPIs and recent ledger activity.")},
         tags=["Dashboard"]
     )
@@ -60,14 +60,25 @@ class DashboardSummaryView(APIView):
         if hasattr(user, 'profile') and user.profile.base_currency:
             reporting_currency = user.profile.base_currency
 
-        total_lent = Decimal('0.00')
-        total_repaid = Decimal('0.00')
-        total_outstanding = Decimal('0.00')
-        total_overdue = Decimal('0.00')
-        overdue_count = 0
-        due_soon_count = 0
-        active_loans_count = 0
-        paid_loans_count = 0
+        # Lending (Receivables)
+        lending_lent = Decimal('0.00')
+        lending_repaid = Decimal('0.00')
+        lending_outstanding = Decimal('0.00')
+        lending_overdue = Decimal('0.00')
+        lending_overdue_count = 0
+        lending_due_soon_count = 0
+        lending_active_count = 0
+        lending_paid_count = 0
+
+        # Borrowing (Payables)
+        borrowing_borrowed = Decimal('0.00')
+        borrowing_repaid = Decimal('0.00')
+        borrowing_outstanding = Decimal('0.00')
+        borrowing_overdue = Decimal('0.00')
+        borrowing_overdue_count = 0
+        borrowing_due_soon_count = 0
+        borrowing_active_count = 0
+        borrowing_paid_count = 0
 
         currency_breakdown = {}
 
@@ -78,9 +89,7 @@ class DashboardSummaryView(APIView):
             balance = calculate_loan_balance(loan, target_reporting_currency=reporting_currency)
             status_info = evaluate_loan_status(loan)
 
-            total_lent += balance['reporting_principal']
-            total_repaid += balance['reporting_total_repaid']
-            total_outstanding += balance['reporting_outstanding']
+            is_borrowing = (loan.direction == 'borrowed')
 
             # Multi-Currency Itemized Tracking (in original currencies)
             curr = loan.currency or 'INR'
@@ -88,30 +97,78 @@ class DashboardSummaryView(APIView):
                 currency_breakdown[curr] = {
                     'currency': curr,
                     'total_lent': 0.0,
-                    'total_repaid': 0.0,
-                    'outstanding': 0.0,
+                    'total_borrowed': 0.0,
+                    'lent_repaid': 0.0,
+                    'borrowed_repaid': 0.0,
+                    'lent_outstanding': 0.0,
+                    'borrowed_outstanding': 0.0,
+                    'net_outstanding': 0.0,
+                    'lent_count': 0,
+                    'borrowed_count': 0,
                     'loans_count': 0
                 }
-            currency_breakdown[curr]['total_lent'] = round(currency_breakdown[curr]['total_lent'] + float(balance['principal']), 2)
-            currency_breakdown[curr]['total_repaid'] = round(currency_breakdown[curr]['total_repaid'] + float(balance['total_repaid']), 2)
-            currency_breakdown[curr]['outstanding'] = round(currency_breakdown[curr]['outstanding'] + float(balance['outstanding']), 2)
-            currency_breakdown[curr]['loans_count'] += 1
 
-            if status_info['financial_status'] == 'PAID':
-                paid_loans_count += 1
+            if is_borrowing:
+                borrowing_borrowed += balance['reporting_principal']
+                borrowing_repaid += balance['reporting_total_repaid']
+                borrowing_outstanding += balance['reporting_outstanding']
+
+                currency_breakdown[curr]['total_borrowed'] = round(currency_breakdown[curr]['total_borrowed'] + float(balance['principal']), 2)
+                currency_breakdown[curr]['borrowed_repaid'] = round(currency_breakdown[curr]['borrowed_repaid'] + float(balance['total_repaid']), 2)
+                currency_breakdown[curr]['borrowed_outstanding'] = round(currency_breakdown[curr]['borrowed_outstanding'] + float(balance['outstanding']), 2)
+                currency_breakdown[curr]['borrowed_count'] += 1
+
+                if status_info['financial_status'] == 'PAID':
+                    borrowing_paid_count += 1
+                else:
+                    borrowing_active_count += 1
+
+                if status_info['time_status'] == 'OVERDUE':
+                    borrowing_overdue += balance['reporting_outstanding']
+                    borrowing_overdue_count += 1
+                elif status_info['time_status'] in ['DUE_SOON', 'DUE_TODAY']:
+                    borrowing_due_soon_count += 1
             else:
-                active_loans_count += 1
+                lending_lent += balance['reporting_principal']
+                lending_repaid += balance['reporting_total_repaid']
+                lending_outstanding += balance['reporting_outstanding']
 
-            if status_info['time_status'] == 'OVERDUE':
-                total_overdue += balance['reporting_outstanding']
-                overdue_count += 1
-            elif status_info['time_status'] == 'DUE_SOON' or status_info['time_status'] == 'DUE_TODAY':
-                due_soon_count += 1
+                currency_breakdown[curr]['total_lent'] = round(currency_breakdown[curr]['total_lent'] + float(balance['principal']), 2)
+                currency_breakdown[curr]['lent_repaid'] = round(currency_breakdown[curr]['lent_repaid'] + float(balance['total_repaid']), 2)
+                currency_breakdown[curr]['lent_outstanding'] = round(currency_breakdown[curr]['lent_outstanding'] + float(balance['outstanding']), 2)
+                currency_breakdown[curr]['lent_count'] += 1
 
-        # Recovery Rate Percentage (Calculated against normalized reporting totals)
+                if status_info['financial_status'] == 'PAID':
+                    lending_paid_count += 1
+                else:
+                    lending_active_count += 1
+
+                if status_info['time_status'] == 'OVERDUE':
+                    lending_overdue += balance['reporting_outstanding']
+                    lending_overdue_count += 1
+                elif status_info['time_status'] in ['DUE_SOON', 'DUE_TODAY']:
+                    lending_due_soon_count += 1
+
+            currency_breakdown[curr]['loans_count'] += 1
+            currency_breakdown[curr]['net_outstanding'] = round(
+                currency_breakdown[curr]['lent_outstanding'] - currency_breakdown[curr]['borrowed_outstanding'], 2
+            )
+            # Legacy compatibility fields
+            currency_breakdown[curr]['outstanding'] = currency_breakdown[curr]['lent_outstanding']
+            currency_breakdown[curr]['total_repaid'] = currency_breakdown[curr]['lent_repaid']
+
+        # Recovery Rate Percentage (Lending only)
         recovery_rate = 0.0
-        if total_lent > Decimal('0.00'):
-            recovery_rate = round(float((total_repaid / total_lent) * Decimal('100.00')), 1)
+        if lending_lent > Decimal('0.00'):
+            recovery_rate = round(float((lending_repaid / lending_lent) * Decimal('100.00')), 1)
+
+        # Repayment Completion Rate Percentage (Borrowing only)
+        repayment_completion_rate = 0.0
+        if borrowing_borrowed > Decimal('0.00'):
+            repayment_completion_rate = round(float((borrowing_repaid / borrowing_borrowed) * Decimal('100.00')), 1)
+
+        # Net Financial Position (Receivables - Payables)
+        net_position = lending_outstanding - borrowing_outstanding
 
         # Recent Loans & Payments
         recent_loans = loans.order_by('-created_at')[:5]
@@ -119,20 +176,45 @@ class DashboardSummaryView(APIView):
 
         return Response({
             'reporting_currency': reporting_currency,
-            'total_lent': float(total_lent),
-            'total_repaid': float(total_repaid),
-            'total_outstanding': float(total_outstanding),
-            'total_overdue': float(total_overdue),
+            'net_position': float(net_position),
+            'lending': {
+                'total_lent': float(lending_lent),
+                'total_repaid': float(lending_repaid),
+                'total_outstanding': float(lending_outstanding),
+                'total_overdue': float(lending_overdue),
+                'recovery_rate': recovery_rate,
+                'active_loans_count': lending_active_count,
+                'paid_loans_count': lending_paid_count,
+                'overdue_count': lending_overdue_count,
+                'due_soon_count': lending_due_soon_count,
+            },
+            'borrowing': {
+                'total_borrowed': float(borrowing_borrowed),
+                'total_repaid': float(borrowing_repaid),
+                'total_outstanding': float(borrowing_outstanding),
+                'total_overdue': float(borrowing_overdue),
+                'repayment_completion_rate': repayment_completion_rate,
+                'active_loans_count': borrowing_active_count,
+                'paid_loans_count': borrowing_paid_count,
+                'overdue_count': borrowing_overdue_count,
+                'due_soon_count': borrowing_due_soon_count,
+            },
+            # Top-level legacy fields for 100% backward compatibility
+            'total_lent': float(lending_lent),
+            'total_repaid': float(lending_repaid),
+            'total_outstanding': float(lending_outstanding),
+            'total_overdue': float(lending_overdue),
             'recovery_rate': recovery_rate,
-            'active_loans_count': active_loans_count,
-            'paid_loans_count': paid_loans_count,
-            'overdue_count': overdue_count,
-            'due_soon_count': due_soon_count,
+            'active_loans_count': lending_active_count,
+            'paid_loans_count': lending_paid_count,
+            'overdue_count': lending_overdue_count,
+            'due_soon_count': lending_due_soon_count,
             'currency_breakdown': currency_breakdown,
             'total_people_count': Person.objects.filter(created_by=user, is_archived=False).count(),
             'recent_loans': [{
                 'id': l.id,
                 'loan_reference': l.loan_reference,
+                'direction': l.direction,
                 'person_name': l.person.name,
                 'amount': float(l.principal_amount),
                 'currency': l.currency,
@@ -144,6 +226,7 @@ class DashboardSummaryView(APIView):
             'recent_payments': [{
                 'id': p.id,
                 'loan_reference': p.loan.loan_reference,
+                'direction': p.loan.direction,
                 'person_name': p.loan.person.name,
                 'amount': float(p.amount),
                 'currency': getattr(p, 'currency', p.loan.currency),
@@ -157,15 +240,16 @@ class DashboardSummaryView(APIView):
 
 class ReportsAgingView(APIView):
     """
-    Overdue Aging Analysis Report (Bible Section 18):
-    Buckets overdue loan balances into 0-7d, 8-30d, 31-60d, and 60+ days, normalized into reporting currency.
+    Overdue Aging Analysis Report (Bible Section 18 & Borrowing Extension):
+    Buckets overdue loan balances into 0-7d, 8-30d, 31-60d, and 60+ days, normalized into reporting currency,
+    with directional filtering (Lending, Borrowing, or All).
     """
     permission_classes = [IsAuthenticated]
     serializer_class = None
 
     @extend_schema(
         summary="Overdue Aging Analysis",
-        description="Overdue loans grouped into aging tiers (0-7d, 8-30d, 31-60d, 60+ days) in reporting currency.",
+        description="Overdue loans grouped into aging tiers (0-7d, 8-30d, 31-60d, 60+ days) in reporting currency with optional direction filter.",
         responses={200: OpenApiResponse(description="Overdue loans grouped by aging bucket.")},
         tags=["Reports"]
     )
@@ -173,6 +257,14 @@ class ReportsAgingView(APIView):
         user = request.user
         loans = Loan.objects.filter(created_by=user, status__in=['OPEN', 'PARTIALLY_PAID'])
         today = timezone.localdate()
+
+        direction_param = request.query_params.get('direction')
+        if direction_param and direction_param.lower() != 'all':
+            d_lower = direction_param.strip().lower()
+            if d_lower in ['borrowed', 'borrowing']:
+                loans = loans.filter(direction='borrowed')
+            elif d_lower in ['lent', 'lending']:
+                loans = loans.filter(direction='lent')
 
         reporting_currency = 'INR'
         if hasattr(user, 'profile') and user.profile.base_currency:
@@ -200,6 +292,7 @@ class ReportsAgingView(APIView):
             loan_summary = {
                 'id': loan.id,
                 'loan_reference': loan.loan_reference,
+                'direction': loan.direction,
                 'person_name': loan.person.name,
                 'due_date': str(loan.due_date),
                 'days_overdue': days_overdue,
