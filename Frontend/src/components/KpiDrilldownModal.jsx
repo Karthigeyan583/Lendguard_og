@@ -36,15 +36,16 @@ export const KpiDrilldownModal = ({
   // Extract all repayments across all loans
   const allRepayments = [];
   loans.forEach((l) => {
-    if (Array.isArray(l.repayments)) {
-      l.repayments.forEach((rep) => {
+    const list = l.repayments || l.recent_payments || [];
+    if (Array.isArray(list)) {
+      list.forEach((rep) => {
         allRepayments.push({
           ...rep,
           loan_id: l.id,
           loan_reference: l.loan_reference,
-          person_name: l.person_name,
-          currency: l.currency || reportingCurrency,
-          exchange_rate: l.exchange_rate
+          person_name: rep.person_name || l.person_name || 'Borrower',
+          currency: rep.currency || l.currency || reportingCurrency,
+          exchange_rate: rep.exchange_rate || l.exchange_rate
         });
       });
     }
@@ -58,42 +59,53 @@ export const KpiDrilldownModal = ({
   let subtitle = '';
   let icon = null;
   let accentColor = '';
-  let totalAmount = 0;
   let subMetricText = '';
 
   const activeLoans = loans.filter(l => l.status !== 'CANCELLED' && l.status !== 'WRITTEN_OFF');
   const openLoans = loans.filter(l => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') && l.status !== 'CANCELLED');
   const overdueLoans = loans.filter(l => (l.days_overdue > 0 || l.time_status === 'OVERDUE') && l.status !== 'PAID' && l.status !== 'CANCELLED');
 
+  // Compute breakdown by currency for drilldown header
+  const drilldownTotalsByCurrency = {};
+  if (type === 'repaid') {
+    allRepayments.forEach(r => {
+      const c = r.currency || 'INR';
+      drilldownTotalsByCurrency[c] = (drilldownTotalsByCurrency[c] || 0) + Number(r.amount || 0);
+    });
+  } else {
+    const listToSum = type === 'overdue' ? overdueLoans : type === 'outstanding' ? openLoans : activeLoans;
+    listToSum.forEach(l => {
+      const c = l.currency || 'INR';
+      const val = type === 'lent' ? Number(l.principal_amount || 0) : Number(l.balance?.outstanding || 0);
+      drilldownTotalsByCurrency[c] = (drilldownTotalsByCurrency[c] || 0) + val;
+    });
+  }
+  const drilldownCurrencies = Object.keys(drilldownTotalsByCurrency);
+
   if (type === 'lent') {
     title = 'Total Capital Lent Breakdown';
-    subtitle = `Authoritative lending register normalized into ${reportingCurrency} Base Reporting Currency`;
+    subtitle = `Authoritative lending register of all disbursements across active loans`;
     icon = <ArrowUpRight size={22} color="var(--accent-blue)" />;
     accentColor = 'var(--accent-blue)';
-    totalAmount = summary?.total_lent ?? loans.reduce((acc, l) => acc + (l.status !== 'CANCELLED' ? convertCurrency(l.principal_amount, l.currency, reportingCurrency, l.exchange_rate) : 0), 0);
-    subMetricText = `${activeLoans.length} total active lending records (${reportingCurrency} Base)`;
+    subMetricText = `${activeLoans.length} total active lending records`;
   } else if (type === 'repaid') {
     title = 'Total Repayments & Recoveries';
-    subtitle = `Itemized transaction audit ledger of all funds collected from borrowers (${reportingCurrency} Base)`;
+    subtitle = `Itemized transaction audit ledger of all funds collected from borrowers`;
     icon = <CheckCircle2 size={22} color="var(--accent-emerald)" />;
     accentColor = 'var(--accent-emerald)';
-    totalAmount = summary?.total_repaid ?? loans.reduce((acc, l) => acc + convertCurrency(l.balance?.total_repaid || 0, l.currency, reportingCurrency, l.exchange_rate), 0);
-    const recoveryRate = summary?.recovery_rate ?? (totalAmount > 0 ? ((totalAmount / (summary?.total_lent || 1)) * 100).toFixed(1) : 0);
-    subMetricText = `Portfolio Recovery Rate: ${recoveryRate}% across ${allRepayments.length} transactions`;
+    subMetricText = `${allRepayments.length} total ${allRepayments.length === 1 ? 'recovery transaction' : 'recovery transactions'} recorded`;
   } else if (type === 'outstanding') {
     title = 'Net Outstanding Portfolio';
-    subtitle = `Real-time overview of uncollected capital currently owed across active borrowers (${reportingCurrency} Base)`;
+    subtitle = `Real-time overview of uncollected capital currently owed across active borrowers`;
     icon = <Clock size={22} color="var(--accent-cyan)" />;
     accentColor = 'var(--accent-cyan)';
-    totalAmount = summary?.total_outstanding ?? openLoans.reduce((acc, l) => acc + convertCurrency(l.balance?.outstanding || 0, l.currency, reportingCurrency, l.exchange_rate), 0);
     const debtorCount = people.filter(p => Number(p.outstanding_balance || 0) > 0).length;
     subMetricText = `Owed across ${debtorCount} active borrowers in ${openLoans.length} active loans`;
   } else if (type === 'overdue') {
     title = 'Overdue Loans & Delinquency Report';
-    subtitle = `High-priority loans that have passed their agreed maturity due date without full settlement (${reportingCurrency} Base)`;
+    subtitle = `High-priority loans that have passed their agreed maturity due date without full settlement`;
     icon = <AlertTriangle size={22} color="var(--accent-rose)" />;
     accentColor = 'var(--accent-rose)';
-    totalAmount = summary?.total_overdue ?? overdueLoans.reduce((acc, l) => acc + convertCurrency(l.balance?.outstanding || 0, l.currency, reportingCurrency, l.exchange_rate), 0);
     subMetricText = `${overdueLoans.length} ${overdueLoans.length === 1 ? 'loan requires' : 'loans require'} immediate collection action`;
   }
 
