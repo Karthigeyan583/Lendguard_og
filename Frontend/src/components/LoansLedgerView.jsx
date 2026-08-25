@@ -212,15 +212,15 @@ export const LoansLedgerView = ({
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.3rem' }}>
                       <span style={{ color: 'var(--text-muted)' }}>Outstanding:</span>
                       <strong style={{ color: outstanding > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)', fontSize: '0.95rem' }}>
-                        ₹{outstanding.toLocaleString()}
+                        {getCurrencySymbol(loan.currency)}{outstanding.toLocaleString()}
                       </strong>
                     </div>
                     <div style={{ height: 6, background: 'var(--bg-surface)', borderRadius: 3, overflow: 'hidden', display: 'flex' }}>
                       <div style={{ width: `${progressPercent}%`, background: 'var(--accent-emerald)' }} />
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                      <span>Repaid: ₹{repaid.toLocaleString()} ({progressPercent}%)</span>
-                      <span>Principal: ₹{principal.toLocaleString()}</span>
+                      <span>Repaid: {getCurrencySymbol(loan.currency)}{repaid.toLocaleString()} ({progressPercent}%)</span>
+                      <span>Principal: {getCurrencySymbol(loan.currency)}{principal.toLocaleString()}</span>
                     </div>
                   </div>
 
