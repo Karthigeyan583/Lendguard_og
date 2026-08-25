@@ -22,17 +22,24 @@ export const DashboardView = ({
   onOpenNewLoan,
   onOpenAddPerson 
 }) => {
-  const totalLent = summary?.total_lent || 210000;
-  const totalRepaid = summary?.total_repaid || 140000;
-  const totalOutstanding = summary?.total_outstanding || 70000;
-  const totalOverdue = summary?.total_overdue || 15000;
-  const recoveryRate = summary?.recovery_rate || (totalLent > 0 ? ((totalRepaid / totalLent) * 100).toFixed(1) : 0);
-  const overdueCount = summary?.overdue_count || 1;
-  const dueSoonCount = summary?.due_soon_count || 1;
+  // Filter urgent active loans
+  const overdueLoans = loans.filter(
+    l => (l.time_status === 'OVERDUE' || l.days_overdue > 0) &&
+         l.status !== 'PAID' && l.status !== 'CANCELLED' && l.status !== 'WRITTEN_OFF'
+  );
+  const dueSoonLoans = loans.filter(
+    l => (l.time_status === 'DUE_SOON' || l.time_status === 'DUE_TODAY') &&
+         l.status !== 'PAID' && l.status !== 'CANCELLED' && l.status !== 'WRITTEN_OFF'
+  );
 
-  // Filter urgent loans
-  const overdueLoans = loans.filter(l => l.time_status === 'OVERDUE' || l.days_overdue > 0);
-  const dueSoonLoans = loans.filter(l => l.time_status === 'DUE_SOON' || l.time_status === 'DUE_TODAY');
+  const totalLent = summary?.total_lent ?? loans.reduce((acc, l) => acc + (l.status !== 'CANCELLED' ? Number(l.principal_amount || 0) : 0), 0);
+  const totalRepaid = summary?.total_repaid ?? loans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
+  const totalOutstanding = summary?.total_outstanding ?? loans.reduce((acc, l) => acc + (l.status !== 'CANCELLED' && l.status !== 'PAID' ? Number(l.balance?.outstanding || 0) : 0), 0);
+  const totalOverdue = summary?.total_overdue ?? overdueLoans.reduce((acc, l) => acc + Number(l.balance?.outstanding || 0), 0);
+  const recoveryRate = summary?.recovery_rate ?? (totalLent > 0 ? Number(((totalRepaid / totalLent) * 100).toFixed(1)) : 0);
+  const overdueCount = summary?.overdue_count ?? overdueLoans.length;
+  const dueSoonCount = summary?.due_soon_count ?? dueSoonLoans.length;
+  const activeDebtorsCount = people.filter(p => Number(p.outstanding_balance || 0) > 0).length;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
@@ -50,7 +57,7 @@ export const DashboardView = ({
             ₹{Number(totalLent).toLocaleString()}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            Across {loans.length} total lending records
+            Across {loans.length} total lending {loans.length === 1 ? 'record' : 'records'}
           </div>
         </div>
 
@@ -82,7 +89,9 @@ export const DashboardView = ({
             ₹{Number(totalOutstanding).toLocaleString()}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            Owed by {people.length} active contacts
+            {activeDebtorsCount > 0 
+              ? `Owed across ${activeDebtorsCount} active ${activeDebtorsCount === 1 ? 'borrower' : 'borrowers'}`
+              : `Zero outstanding balance across contacts`}
           </div>
         </div>
 
@@ -94,12 +103,18 @@ export const DashboardView = ({
               <AlertTriangle size={19} color="var(--accent-rose)" />
             </div>
           </div>
-          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-rose)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
+          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: overdueCount > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
             ₹{Number(totalOverdue).toLocaleString()}
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--accent-rose)' }}>
-            {overdueCount} {overdueCount === 1 ? 'loan requires' : 'loans require'} immediate attention
-          </div>
+          {overdueCount > 0 ? (
+            <div style={{ fontSize: '0.75rem', color: 'var(--accent-rose)' }}>
+              {overdueCount} {overdueCount === 1 ? 'loan requires' : 'loans require'} immediate attention
+            </div>
+          ) : (
+            <div style={{ fontSize: '0.75rem', color: 'var(--accent-emerald)' }}>
+              ✓ All loan repayments are up to date
+            </div>
+          )}
         </div>
       </div>
 
@@ -259,7 +274,10 @@ export const DashboardView = ({
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {people.slice(0, 5).map((p) => (
+                {[...people]
+                  .sort((a, b) => Number(b.outstanding_balance || 0) - Number(a.outstanding_balance || 0))
+                  .slice(0, 5)
+                  .map((p) => (
                   <div key={p.id} className="dashboard-row-item" style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -277,8 +295,8 @@ export const DashboardView = ({
                       </span>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 700, color: p.outstanding_balance > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)' }}>
-                        ₹{Number(p.outstanding_balance).toLocaleString()}
+                      <div style={{ fontWeight: 700, color: Number(p.outstanding_balance || 0) > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)' }}>
+                        ₹{Number(p.outstanding_balance || 0).toLocaleString()}
                       </div>
                       <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                         Owed balance

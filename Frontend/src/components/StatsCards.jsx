@@ -1,18 +1,16 @@
 import React from 'react';
 import { DollarSign, FileText, CheckCircle2, TrendingUp, ShieldAlert } from 'lucide-react';
 
-export const StatsCards = ({ stats, loansCount }) => {
-  const totalAmount = stats?.total_requested_amount || 362000;
-  const totalApps = stats?.total_applications || loansCount || 4;
-  const avgAmount = stats?.average_loan_amount || (totalApps > 0 ? totalAmount / totalApps : 0);
+export const StatsCards = ({ stats, loansCount = 0 }) => {
+  const totalAmount = stats?.total_requested_amount ?? 0;
+  const totalApps = stats?.total_applications ?? loansCount;
+  const avgAmount = stats?.average_loan_amount ?? (totalApps > 0 ? totalAmount / totalApps : 0);
 
   // Calculate approval rate
   let approvedCount = 0;
   if (stats?.status_breakdown) {
     const approvedObj = stats.status_breakdown.find(s => s.status === 'approved');
     approvedCount = approvedObj ? approvedObj.count : 0;
-  } else {
-    approvedCount = 1;
   }
   const approvalRate = totalApps > 0 ? Math.round((approvedCount / totalApps) * 100) : 0;
 

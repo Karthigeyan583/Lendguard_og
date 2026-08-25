@@ -20,101 +20,16 @@ import { AuthModal } from './components/AuthModal';
 import { api } from './services/api';
 import { ShieldCheck } from 'lucide-react';
 
-// Initial Bible v2.0 mock data
-const INITIAL_PEOPLE = [
-  { id: 1, name: 'Rahul Sharma', relationship: 'colleague', mobile: '+91-9884401122', email: 'rahul.sharma@example.com', tags: 'work, emergency', total_lent: 50000, total_repaid: 20000, outstanding_balance: 30000, is_archived: false },
-  { id: 2, name: 'Priya Patel', relationship: 'friend', mobile: '+91-9884403344', email: 'priya.patel@example.com', tags: 'close_friend', total_lent: 15000, total_repaid: 0, outstanding_balance: 15000, is_archived: false },
-  { id: 3, name: 'Vikram Mehta', relationship: 'business', mobile: '+91-9884405566', email: 'vikram.mehta@example.com', tags: 'vendor, equipment', total_lent: 120000, total_repaid: 120000, outstanding_balance: 0, is_archived: false },
-  { id: 4, name: 'Anita Desai', relationship: 'family', mobile: '+91-9884407788', email: 'anita.desai@example.com', tags: 'family, cousin', total_lent: 25000, total_repaid: 0, outstanding_balance: 25000, is_archived: false },
-];
-
-const INITIAL_LOANS = [
-  {
-    id: 1,
-    loan_reference: 'LG-2026-0001',
-    person: 1,
-    person_name: 'Rahul Sharma',
-    person_mobile: '+91-9884401122',
-    person_relationship: 'colleague',
-    principal_amount: 50000,
-    currency: 'INR',
-    date_given: '2026-08-01',
-    due_date: '2026-09-10',
-    purpose: 'Emergency home repair expenses',
-    status: 'PARTIALLY_PAID',
-    time_status: 'UPCOMING',
-    days_overdue: 0,
-    balance: { principal: 50000, total_repaid: 20000, outstanding: 30000, is_fully_paid: false },
-    recent_payments: [{ id: 1, amount: 20000, payment_date: '2026-08-20', payment_method: 'upi_bank_transfer', reference_number: 'UPI/2026/894721' }]
-  },
-  {
-    id: 2,
-    loan_reference: 'LG-2026-0002',
-    person: 2,
-    person_name: 'Priya Patel',
-    person_mobile: '+91-9884403344',
-    person_relationship: 'friend',
-    principal_amount: 15000,
-    currency: 'INR',
-    date_given: '2026-08-05',
-    due_date: '2026-08-20',
-    purpose: 'Exam certification fees',
-    status: 'OPEN',
-    time_status: 'OVERDUE',
-    days_overdue: 5,
-    balance: { principal: 15000, total_repaid: 0, outstanding: 15000, is_fully_paid: false },
-    recent_payments: []
-  },
-  {
-    id: 3,
-    loan_reference: 'LG-2026-0003',
-    person: 3,
-    person_name: 'Vikram Mehta',
-    person_mobile: '+91-9884405566',
-    person_relationship: 'business',
-    principal_amount: 120000,
-    currency: 'INR',
-    date_given: '2026-07-01',
-    due_date: '2026-08-15',
-    purpose: 'Advance raw materials procurement',
-    status: 'PAID',
-    time_status: 'PAID',
-    days_overdue: 0,
-    balance: { principal: 120000, total_repaid: 120000, outstanding: 0, is_fully_paid: true },
-    recent_payments: [{ id: 2, amount: 120000, payment_date: '2026-08-14', payment_method: 'upi_bank_transfer', reference_number: 'NEFT/HDFC/0091823' }]
-  },
-  {
-    id: 4,
-    loan_reference: 'LG-2026-0004',
-    person: 4,
-    person_name: 'Anita Desai',
-    person_mobile: '+91-9884407788',
-    person_relationship: 'family',
-    principal_amount: 25000,
-    currency: 'INR',
-    date_given: '2026-08-18',
-    due_date: '2026-09-18',
-    purpose: 'Medical treatment bridge loan',
-    status: 'OPEN',
-    time_status: 'DUE_SOON',
-    days_overdue: 0,
-    balance: { principal: 25000, total_repaid: 0, outstanding: 25000, is_fully_paid: false },
-    recent_payments: []
-  }
-];
-
 function LendGuardApp() {
   const { user, token, loading, backendOnline } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   
-  const [people, setPeople] = useState(INITIAL_PEOPLE);
-  const [loans, setLoans] = useState(INITIAL_LOANS);
+  const [people, setPeople] = useState([]);
+  const [loans, setLoans] = useState([]);
   const [summary, setSummary] = useState(null);
   const [agingData, setAgingData] = useState(null);
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: 'Overdue Loan Alert', message: 'Loan #LG-2026-0002 to Priya Patel is 5 days overdue.', is_read: false },
-    { id: 2, title: 'Repayment Received', message: 'Received ₹20,000 via UPI from Rahul Sharma.', is_read: true }
-  ]);
+  const [notifications, setNotifications] = useState([]);
+  const [dataLoading, setDataLoading] = useState(false);
 
   // Modals
   const [isNewLoanOpen, setIsNewLoanOpen] = useState(false);
@@ -127,9 +42,10 @@ function LendGuardApp() {
   const [selectedLoanForStatement, setSelectedLoanForStatement] = useState(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
-  // Sync data from Backend when authenticated
+  // Sync data strictly from Backend
   const refreshData = async () => {
     if (!backendOnline || !token || !user) return;
+    setDataLoading(true);
     try {
       const [pRes, lRes, sRes, aRes, nRes] = await Promise.all([
         api.getPeople().catch(() => null),
@@ -154,13 +70,21 @@ function LendGuardApp() {
         if (Array.isArray(nList)) setNotifications(nList);
       }
     } catch (e) {
-      console.warn('Backend sync failed:', e);
+      console.warn('Backend sync error:', e);
+    } finally {
+      setDataLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && token) {
       refreshData();
+    } else {
+      setPeople([]);
+      setLoans([]);
+      setSummary(null);
+      setAgingData(null);
+      setNotifications([]);
     }
   }, [backendOnline, token, user]);
 
@@ -333,7 +257,29 @@ function LendGuardApp() {
     }
   };
 
-  const overdueTotalCount = summary?.overdue_count || loans.filter(l => l.time_status === 'OVERDUE' || l.days_overdue > 0).length;
+  const handleMarkNotificationRead = async (id) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+    if (backendOnline && token) {
+      try {
+        await api.markNotificationRead(id);
+      } catch (e) {
+        console.warn('Failed to mark notification read on backend:', e);
+      }
+    }
+  };
+
+  const handleMarkAllNotificationsRead = async () => {
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    if (backendOnline && token) {
+      try {
+        await api.markAllNotificationsRead();
+      } catch (e) {
+        console.warn('Failed to mark all notifications read on backend:', e);
+      }
+    }
+  };
+
+  const overdueTotalCount = summary?.overdue_count ?? loans.filter(l => (l.time_status === 'OVERDUE' || l.days_overdue > 0) && l.status !== 'PAID' && l.status !== 'CANCELLED' && l.status !== 'WRITTEN_OFF').length;
 
   return (
     <div className="saas-layout">
@@ -353,8 +299,8 @@ function LendGuardApp() {
           onOpenNewLoan={() => { setNewLoanPrefill(null); setIsNewLoanOpen(true); }}
           onOpenAddPerson={() => setIsAddPersonOpen(true)}
           notifications={notifications}
-          onMarkNotificationRead={(id) => setNotifications(notifications.map(n => n.id === id ? { ...n, is_read: true } : n))}
-          onMarkAllNotificationsRead={() => setNotifications(notifications.map(n => ({ ...n, is_read: true })))}
+          onMarkNotificationRead={handleMarkNotificationRead}
+          onMarkAllNotificationsRead={handleMarkAllNotificationsRead}
         />
 
         <main className="content-area">

@@ -128,10 +128,10 @@ export const DigitalStatementModal = ({ isOpen, onClose, statement, loan }) => {
                 LENDER (CREDITOR)
               </span>
               <div style={{ fontWeight: 700, fontSize: '0.95rem', marginTop: '0.2rem' }}>
-                {data?.lender?.full_name || 'Karthik Ramaswamy'}
+                {data?.lender?.full_name || 'Lender'}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                {data?.lender?.email || 'karthik@lendguard.io'}
+                {data?.lender?.email || ''}
               </div>
             </div>
 

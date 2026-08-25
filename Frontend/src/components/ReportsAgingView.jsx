@@ -3,13 +3,17 @@ import { AlertTriangle, Clock, Calendar, ArrowDownLeft, FileText, CheckCircle2 }
 
 export const ReportsAgingView = ({ agingData, loans = [], onRecordPayment, onGenerateStatement }) => {
   const buckets = agingData?.buckets || {
-    tier_0_to_7_days: { count: 1, amount: 15000, loans: [] },
+    tier_0_to_7_days: { count: 0, amount: 0, loans: [] },
     tier_8_to_30_days: { count: 0, amount: 0, loans: [] },
     tier_31_to_60_days: { count: 0, amount: 0, loans: [] },
     tier_60_plus_days: { count: 0, amount: 0, loans: [] }
   };
 
-  const totalOverdue = agingData?.total_overdue || 15000;
+  const overdueLoans = loans.filter(
+    l => l.days_overdue > 0 && l.status !== 'PAID' && l.status !== 'CANCELLED' && l.status !== 'WRITTEN_OFF'
+  );
+
+  const totalOverdue = agingData?.total_overdue ?? overdueLoans.reduce((acc, l) => acc + Number(l.balance?.outstanding || 0), 0);
 
   const tiers = [
     { key: 'tier_0_to_7_days', label: '0 – 7 Days Overdue', color: 'var(--accent-amber)', bg: 'rgba(245, 158, 11, 0.12)', border: 'rgba(245, 158, 11, 0.3)' },
@@ -79,14 +83,14 @@ export const ReportsAgingView = ({ agingData, loans = [], onRecordPayment, onGen
       {/* Overdue Loans List */}
       <div className="glass-panel" style={{ padding: '1.75rem' }}>
         <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1.25rem' }}>Detailed Overdue Loans</h3>
-        {loans.filter(l => l.days_overdue > 0).length === 0 ? (
+        {overdueLoans.length === 0 ? (
           <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
             <CheckCircle2 size={36} color="var(--accent-emerald)" style={{ marginBottom: '0.75rem' }} />
             <div>All loans are currently up to date! Zero overdue balances.</div>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {loans.filter(l => l.days_overdue > 0).map((l) => (
+            {overdueLoans.map((l) => (
               <div
                 key={l.id}
                 style={{
