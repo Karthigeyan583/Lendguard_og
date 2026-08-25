@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertTriangle, Clock, Calendar, ArrowDownLeft, FileText, CheckCircle2 } from 'lucide-react';
+import { getDefaultCurrency, getCurrencySymbol } from '../utils/currency';
 
 export const ReportsAgingView = ({ agingData, loans = [], onRecordPayment, onGenerateStatement }) => {
   const buckets = agingData?.buckets || {
@@ -8,6 +9,8 @@ export const ReportsAgingView = ({ agingData, loans = [], onRecordPayment, onGen
     tier_31_to_60_days: { count: 0, amount: 0, loans: [] },
     tier_60_plus_days: { count: 0, amount: 0, loans: [] }
   };
+
+  const defSymbol = getCurrencySymbol(getDefaultCurrency());
 
   const overdueLoans = loans.filter(
     l => l.days_overdue > 0 && l.status !== 'PAID' && l.status !== 'CANCELLED' && l.status !== 'WRITTEN_OFF'
