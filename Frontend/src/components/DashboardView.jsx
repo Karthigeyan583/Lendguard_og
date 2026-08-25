@@ -303,170 +303,354 @@ export const DashboardView = ({
         </div>
       )}
 
-      {/* 4 Main KPI Cards (Split by exact currencies) */}
-      <div className="stats-grid">
-        {/* Total Lent */}
-        <div
-          className="glass-panel kpi-card kpi-lent"
-          style={{ padding: '1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
-          onClick={() => onOpenDrilldown && onOpenDrilldown('lent')}
-          title="Click to view full breakdown of capital lent"
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>TOTAL CAPITAL LENT</span>
-            <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(59, 130, 246, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ArrowUpRight size={19} color="var(--accent-blue)" />
-            </div>
+      {/* Net Financial Position & Direction Switcher Bar */}
+      <div className="glass-panel" style={{
+        padding: '1.25rem 1.5rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '1rem',
+        background: 'var(--inner-card-bg)',
+        border: '1px solid var(--border-subtle)'
+      }}>
+        {/* Left: Net Position Summary */}
+        <div>
+          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Authoritative Financial Position
           </div>
-
-          {isSplitView ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.35rem' }}>
-              {availableCurrencies.map(curr => (
-                <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
-                    {getCurrencySymbol(curr)}{Number(totalsByCurrency[curr].lent).toLocaleString()}
-                  </span>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-blue)' }}>{curr}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-              {getCurrencySymbol(singleCurr)}{Number(singleStats.lent).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>{singleCurr}</span>
-            </div>
-          )}
-
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            Across {totalLoansCount} lending {totalLoansCount === 1 ? 'record' : 'records'}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginTop: '0.2rem', flexWrap: 'wrap' }}>
+            <span style={{
+              fontSize: '1.5rem',
+              fontWeight: 900,
+              color: singleStats.netOutstanding > 0 ? 'var(--accent-emerald)' : singleStats.netOutstanding < 0 ? 'var(--accent-rose)' : 'var(--text-primary)'
+            }}>
+              {singleStats.netOutstanding >= 0 ? '+' : ''}{getCurrencySymbol(singleCurr)}{Number(singleStats.netOutstanding).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{singleCurr}</span>
+            </span>
+            <span className="badge" style={{
+              background: singleStats.netOutstanding > 0 ? 'rgba(16, 185, 129, 0.15)' : singleStats.netOutstanding < 0 ? 'rgba(244, 63, 94, 0.15)' : 'rgba(148, 163, 184, 0.15)',
+              color: singleStats.netOutstanding > 0 ? 'var(--accent-emerald)' : singleStats.netOutstanding < 0 ? 'var(--accent-rose)' : 'var(--text-muted)',
+              fontSize: '0.75rem',
+              fontWeight: 700
+            }}>
+              {singleStats.netOutstanding > 0 ? 'Net Receivable (You are owed money)' : singleStats.netOutstanding < 0 ? 'Net Payable (You owe money)' : 'Even / Settled Net Position'}
+            </span>
           </div>
-        </div>
-
-        {/* Total Repaid */}
-        <div
-          className="glass-panel kpi-card kpi-repaid"
-          style={{ padding: '1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
-          onClick={() => onOpenDrilldown && onOpenDrilldown('repaid')}
-          title="Click to view total repayments and collection ledger"
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>TOTAL REPAID</span>
-            <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CheckCircle2 size={19} color="var(--accent-emerald)" />
-            </div>
-          </div>
-
-          {isSplitView ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.35rem' }}>
-              {availableCurrencies.map(curr => (
-                <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, color: 'var(--accent-emerald)', letterSpacing: '-0.02em' }}>
-                    {getCurrencySymbol(curr)}{Number(totalsByCurrency[curr].repaid).toLocaleString()}
-                  </span>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-emerald)' }}>
-                    {curr} ({totalsByCurrency[curr].recovery}%)
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-              {getCurrencySymbol(singleCurr)}{Number(singleStats.repaid).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-emerald)' }}>{singleCurr}</span>
-            </div>
-          )}
-
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            {isSplitView ? 'Recovery rate indicated per currency' : `Recovery Rate: ${singleStats.recovery}%`}
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+            Receivables: <strong>{getCurrencySymbol(singleCurr)}{Number(singleStats.lentOutstanding).toLocaleString()}</strong> • Payables: <strong>{getCurrencySymbol(singleCurr)}{Number(singleStats.borrowedOutstanding).toLocaleString()}</strong>
           </div>
         </div>
 
-        {/* Net Outstanding */}
-        <div
-          className="glass-panel kpi-card kpi-outstanding"
-          style={{ padding: '1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
-          onClick={() => onOpenDrilldown && onOpenDrilldown('outstanding')}
-          title="Click to view net outstanding loans and debtors"
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>NET OUTSTANDING BALANCE</span>
-            <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(6, 182, 212, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Clock size={19} color="var(--accent-cyan)" />
-            </div>
-          </div>
+        {/* Right: Dashboard View Direction Switcher */}
+        <div style={{
+          display: 'flex',
+          gap: '0.35rem',
+          background: 'var(--bg-surface)',
+          padding: '0.3rem',
+          borderRadius: 'var(--radius-md)',
+          border: '1px solid var(--border-subtle)'
+        }}>
+          <button
+            type="button"
+            onClick={() => setDashboardDirection('overview')}
+            style={{
+              padding: '0.45rem 0.85rem',
+              borderRadius: 'var(--radius-sm)',
+              border: 'none',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              background: dashboardDirection === 'overview' ? 'var(--bg-card)' : 'transparent',
+              color: dashboardDirection === 'overview' ? 'var(--text-primary)' : 'var(--text-muted)',
+              boxShadow: dashboardDirection === 'overview' ? '0 1px 4px rgba(0,0,0,0.1)' : 'none'
+            }}
+          >
+            ⚖️ Net Overview
+          </button>
+          <button
+            type="button"
+            onClick={() => setDashboardDirection('lent')}
+            style={{
+              padding: '0.45rem 0.85rem',
+              borderRadius: 'var(--radius-sm)',
+              border: 'none',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              background: dashboardDirection === 'lent' ? 'var(--accent-emerald)' : 'transparent',
+              color: dashboardDirection === 'lent' ? '#ffffff' : 'var(--text-muted)'
+            }}
+          >
+            🤝 Money Lent ({lentLoans.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setDashboardDirection('borrowed')}
+            style={{
+              padding: '0.45rem 0.85rem',
+              borderRadius: 'var(--radius-sm)',
+              border: 'none',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              background: dashboardDirection === 'borrowed' ? 'var(--accent-indigo)' : 'transparent',
+              color: dashboardDirection === 'borrowed' ? '#ffffff' : 'var(--text-muted)'
+            }}
+          >
+            📥 Money Borrowed ({borrowedLoans.length})
+          </button>
+        </div>
+      </div>
 
-          {isSplitView ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.35rem' }}>
-              {availableCurrencies.map(curr => (
-                <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, color: 'var(--accent-cyan)', letterSpacing: '-0.02em' }}>
-                    {getCurrencySymbol(curr)}{Number(totalsByCurrency[curr].outstanding).toLocaleString()}
-                  </span>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>{curr}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-cyan)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-              {getCurrencySymbol(singleCurr)}{Number(singleStats.outstanding).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-cyan)' }}>{singleCurr}</span>
+      {/* 4 Main KPI Cards for Money Lent (Receivables) */}
+      {(dashboardDirection === 'overview' || dashboardDirection === 'lent') && (
+        <div>
+          {dashboardDirection === 'overview' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', marginTop: '0.25rem' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>🤝 MONEY LENT (RECEIVABLES / ASSETS)</span>
             </div>
           )}
+          <div className="stats-grid">
+            {/* Total Lent */}
+            <div
+              className="glass-panel kpi-card kpi-lent"
+              style={{ padding: '1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
+              onClick={() => onOpenDrilldown && onOpenDrilldown('lent')}
+              title="Click to view full breakdown of capital lent"
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>TOTAL CAPITAL LENT</span>
+                <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(59, 130, 246, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ArrowUpRight size={19} color="var(--accent-blue)" />
+                </div>
+              </div>
 
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            {activeDebtorsCount > 0 
-              ? `Owed across ${activeDebtorsCount} active ${activeDebtorsCount === 1 ? 'borrower' : 'borrowers'}`
-              : `Zero outstanding balance across contacts`}
-          </div>
-        </div>
-
-        {/* Total Overdue */}
-        <div
-          className="glass-panel kpi-card kpi-overdue"
-          style={{ padding: '1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
-          onClick={() => onOpenDrilldown && onOpenDrilldown('overdue')}
-          title="Click to view detailed overdue loans report"
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>OVERDUE AMOUNT</span>
-            <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(244, 63, 94, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <AlertTriangle size={19} color="var(--accent-rose)" />
-            </div>
-          </div>
-
-          {isSplitView ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.35rem' }}>
-              {availableCurrencies.filter(c => totalsByCurrency[c].overdue > 0).length > 0 ? (
-                availableCurrencies.filter(c => totalsByCurrency[c].overdue > 0).map(curr => (
-                  <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, color: 'var(--accent-rose)', letterSpacing: '-0.02em' }}>
-                      {getCurrencySymbol(curr)}{Number(totalsByCurrency[curr].overdue).toLocaleString()}
-                    </span>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-rose)' }}>
-                      {curr} ({totalsByCurrency[curr].overdueCount} {totalsByCurrency[curr].overdueCount === 1 ? 'loan' : 'loans'})
-                    </span>
-                  </div>
-                ))
+              {isSplitView ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.35rem' }}>
+                  {availableCurrencies.map(curr => (
+                    <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
+                        {getCurrencySymbol(curr)}{Number(totalsByCurrency[curr].lent).toLocaleString()}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-blue)' }}>{curr}</span>
+                    </div>
+                  ))}
+                </div>
               ) : (
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>
-                  0.00 <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>All up to date</span>
+                <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
+                  {getCurrencySymbol(singleCurr)}{Number(singleStats.lent).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>{singleCurr}</span>
+                </div>
+              )}
+
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                Across {singleStats.lentCount || lentLoans.length} lending records
+              </div>
+            </div>
+
+            {/* Total Recovered */}
+            <div
+              className="glass-panel kpi-card kpi-repaid"
+              style={{ padding: '1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
+              onClick={() => onOpenDrilldown && onOpenDrilldown('repaid')}
+              title="Click to view total repayments and collection ledger"
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>TOTAL RECOVERED</span>
+                <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CheckCircle2 size={19} color="var(--accent-emerald)" />
+                </div>
+              </div>
+
+              {isSplitView ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.35rem' }}>
+                  {availableCurrencies.map(curr => (
+                    <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, color: 'var(--accent-emerald)', letterSpacing: '-0.02em' }}>
+                        {getCurrencySymbol(curr)}{Number(totalsByCurrency[curr].lentRepaid).toLocaleString()}
+                      </span>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-emerald)' }}>
+                        {curr} ({totalsByCurrency[curr].lentRecovery}%)
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
+                  {getCurrencySymbol(singleCurr)}{Number(singleStats.lentRepaid).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-emerald)' }}>{singleCurr}</span>
+                </div>
+              )}
+
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                {isSplitView ? 'Recovery rate indicated per currency' : `Recovery Rate: ${singleStats.lentRecovery}%`}
+              </div>
+            </div>
+
+            {/* Outstanding Receivable */}
+            <div
+              className="glass-panel kpi-card kpi-outstanding"
+              style={{ padding: '1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
+              onClick={() => onOpenDrilldown && onOpenDrilldown('outstanding')}
+              title="Click to view outstanding receivables"
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>OUTSTANDING RECEIVABLE</span>
+                <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(6, 182, 212, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Clock size={19} color="var(--accent-cyan)" />
+                </div>
+              </div>
+
+              {isSplitView ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.35rem' }}>
+                  {availableCurrencies.map(curr => (
+                    <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, color: 'var(--accent-cyan)', letterSpacing: '-0.02em' }}>
+                        {getCurrencySymbol(curr)}{Number(totalsByCurrency[curr].lentOutstanding).toLocaleString()}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>{curr}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-cyan)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
+                  {getCurrencySymbol(singleCurr)}{Number(singleStats.lentOutstanding).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-cyan)' }}>{singleCurr}</span>
+                </div>
+              )}
+
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                {activeDebtorsCount > 0 
+                  ? `Owed by ${activeDebtorsCount} contacts`
+                  : `Zero outstanding balance`}
+              </div>
+            </div>
+
+            {/* Overdue Receivables */}
+            <div
+              className="glass-panel kpi-card kpi-overdue"
+              style={{ padding: '1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
+              onClick={() => onOpenDrilldown && onOpenDrilldown('overdue')}
+              title="Click to view overdue lending report"
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>OVERDUE RECEIVABLES</span>
+                <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(244, 63, 94, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <AlertTriangle size={19} color="var(--accent-rose)" />
+                </div>
+              </div>
+
+              {isSplitView ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.35rem' }}>
+                  {availableCurrencies.filter(c => totalsByCurrency[c].lentOverdue > 0).length > 0 ? (
+                    availableCurrencies.filter(c => totalsByCurrency[c].lentOverdue > 0).map(curr => (
+                      <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, color: 'var(--accent-rose)', letterSpacing: '-0.02em' }}>
+                          {getCurrencySymbol(curr)}{Number(totalsByCurrency[curr].lentOverdue).toLocaleString()}
+                        </span>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-rose)' }}>
+                          {curr} ({totalsByCurrency[curr].lentOverdueCount} overdue)
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>
+                      0.00 <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>All up to date</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ fontSize: '1.85rem', fontWeight: 800, color: singleStats.lentOverdue > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
+                  {getCurrencySymbol(singleCurr)}{Number(singleStats.lentOverdue).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{singleCurr}</span>
+                </div>
+              )}
+
+              {singleStats.lentOverdueCount > 0 ? (
+                <div style={{ fontSize: '0.75rem', color: 'var(--accent-rose)' }}>
+                  {singleStats.lentOverdueCount} {singleStats.lentOverdueCount === 1 ? 'loan requires' : 'loans require'} attention
+                </div>
+              ) : (
+                <div style={{ fontSize: '0.75rem', color: 'var(--accent-emerald)' }}>
+                  ✓ All repayments are up to date
                 </div>
               )}
             </div>
-          ) : (
-            <div style={{ fontSize: '1.85rem', fontWeight: 800, color: singleStats.overdue > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-              {getCurrencySymbol(singleCurr)}{Number(singleStats.overdue).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{singleCurr}</span>
-            </div>
-          )}
-
-          {overdueCount > 0 ? (
-            <div style={{ fontSize: '0.75rem', color: 'var(--accent-rose)' }}>
-              {overdueCount} {overdueCount === 1 ? 'loan requires' : 'loans require'} immediate attention
-            </div>
-          ) : (
-            <div style={{ fontSize: '0.75rem', color: 'var(--accent-emerald)' }}>
-              ✓ All loan repayments are up to date
-            </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* 4 Main KPI Cards for Money Borrowed (Payables) */}
+      {(dashboardDirection === 'overview' || dashboardDirection === 'borrowed') && (
+        <div style={{ marginTop: dashboardDirection === 'overview' ? '1rem' : '0' }}>
+          {dashboardDirection === 'overview' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-indigo)' }}>📥 MONEY BORROWED (PAYABLES / LIABILITIES)</span>
+            </div>
+          )}
+          <div className="stats-grid">
+            {/* Total Borrowed */}
+            <div className="glass-panel kpi-card" style={{ padding: '1.5rem', borderLeft: '3px solid var(--accent-indigo)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>TOTAL CAPITAL BORROWED</span>
+                <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(99, 102, 241, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ArrowDownLeft size={19} color="var(--accent-indigo)" />
+                </div>
+              </div>
+              <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
+                {getCurrencySymbol(singleCurr)}{Number(singleStats.borrowed).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>{singleCurr}</span>
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                Across {singleStats.borrowedCount || borrowedLoans.length} borrowing obligations
+              </div>
+            </div>
+
+            {/* Total Repaid to Lenders */}
+            <div className="glass-panel kpi-card" style={{ padding: '1.5rem', borderLeft: '3px solid var(--accent-emerald)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>TOTAL REPAID TO LENDERS</span>
+                <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CheckCircle2 size={19} color="var(--accent-emerald)" />
+                </div>
+              </div>
+              <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem', color: 'var(--accent-emerald)' }}>
+                {getCurrencySymbol(singleCurr)}{Number(singleStats.borrowedRepaid).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-emerald)' }}>{singleCurr}</span>
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                Repayment Completion: {singleStats.borrowedRepaymentRate}%
+              </div>
+            </div>
+
+            {/* Outstanding Payable */}
+            <div className="glass-panel kpi-card" style={{ padding: '1.5rem', borderLeft: '3px solid var(--accent-amber)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>OUTSTANDING PAYABLE (YOU OWE)</span>
+                <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Clock size={19} color="var(--accent-amber)" />
+                </div>
+              </div>
+              <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem', color: singleStats.borrowedOutstanding > 0 ? 'var(--accent-amber)' : 'var(--accent-emerald)' }}>
+                {getCurrencySymbol(singleCurr)}{Number(singleStats.borrowedOutstanding).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{singleCurr}</span>
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                {singleStats.borrowedOutstanding > 0 ? `Remaining debt obligation` : `No outstanding borrowing liabilities`}
+              </div>
+            </div>
+
+            {/* Overdue Payables */}
+            <div className="glass-panel kpi-card" style={{ padding: '1.5rem', borderLeft: '3px solid var(--accent-rose)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>OVERDUE PAYABLES</span>
+                <div className="kpi-icon" style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(244, 63, 94, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <AlertTriangle size={19} color="var(--accent-rose)" />
+                </div>
+              </div>
+              <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem', color: singleStats.borrowedOverdue > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)' }}>
+                {getCurrencySymbol(singleCurr)}{Number(singleStats.borrowedOverdue).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{singleCurr}</span>
+              </div>
+              <div style={{ fontSize: '0.75rem', color: singleStats.borrowedOverdue > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)' }}>
+                {singleStats.borrowedOverdue > 0 ? `${singleStats.borrowedOverdueCount} overdue payment(s) to settle` : `✓ All your debts are current`}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Multi-Currency Breakdown Strip (if loans in multiple currencies exist) */}
       {summary?.currency_breakdown && Object.keys(summary.currency_breakdown).length > 1 && (
