@@ -24,6 +24,8 @@ export const DigitalStatementModal = ({ isOpen, onClose, statement, loan }) => {
     window.print();
   };
 
+  const isBorrowing = (data?.direction === 'borrowed' || loan?.direction === 'borrowed');
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card" style={{ maxWidth: 680, background: 'var(--bg-card)' }} onClick={(e) => e.stopPropagation()}>
@@ -36,8 +38,10 @@ export const DigitalStatementModal = ({ isOpen, onClose, statement, loan }) => {
           justifyContent: 'space-between'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <ShieldCheck size={22} color="var(--accent-emerald)" />
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>Digital IOU & Loan Statement</h3>
+            <ShieldCheck size={22} color={isBorrowing ? "var(--accent-indigo)" : "var(--accent-emerald)"} />
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>
+              {isBorrowing ? 'Digital Borrowing Statement' : 'Digital IOU & Loan Statement'}
+            </h3>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -67,12 +71,12 @@ export const DigitalStatementModal = ({ isOpen, onClose, statement, loan }) => {
                 LENDGUARD
               </div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Official Personal Lending Ledger & IOU Record
+                {isBorrowing ? 'Official Personal Borrowing Ledger & Liability Statement' : 'Official Personal Lending Ledger & IOU Record'}
               </div>
             </div>
 
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-emerald)' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 700, color: isBorrowing ? 'var(--accent-indigo)' : 'var(--accent-emerald)' }}>
                 {statement?.statement_number || `STMT-${loan?.loan_reference}-01`}
               </div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
@@ -83,8 +87,8 @@ export const DigitalStatementModal = ({ isOpen, onClose, statement, loan }) => {
 
           {/* Cryptographic SHA-256 Integrity Seal */}
           <div style={{
-            background: 'rgba(16, 185, 129, 0.08)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
+            background: isBorrowing ? 'rgba(99, 102, 241, 0.08)' : 'rgba(16, 185, 129, 0.08)',
+            border: `1px solid ${isBorrowing ? 'rgba(99, 102, 241, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`,
             borderRadius: 'var(--radius-sm)',
             padding: '0.75rem 1rem',
             marginBottom: '1.5rem',
@@ -94,9 +98,9 @@ export const DigitalStatementModal = ({ isOpen, onClose, statement, loan }) => {
             gap: '0.75rem'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <Lock size={16} color="var(--accent-emerald)" />
+              <Lock size={16} color={isBorrowing ? "var(--accent-indigo)" : "var(--accent-emerald)"} />
               <div>
-                <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent-emerald)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, color: isBorrowing ? "var(--accent-indigo)" : "var(--accent-emerald)", textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Cryptographic SHA-256 Integrity Seal
                 </span>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-secondary)', wordBreak: 'break-all' }}>
@@ -131,10 +135,10 @@ export const DigitalStatementModal = ({ isOpen, onClose, statement, loan }) => {
                 LENDER (CREDITOR)
               </span>
               <div style={{ fontWeight: 700, fontSize: '0.95rem', marginTop: '0.2rem' }}>
-                {data?.lender?.full_name || 'Lender'}
+                {isBorrowing ? (data?.lender?.name || loan?.person_name) : (data?.lender?.full_name || 'Lender (You)')}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                {data?.lender?.email || ''}
+                {isBorrowing ? (data?.lender?.mobile || loan?.person_mobile || '') : (data?.lender?.email || '')}
               </div>
             </div>
 
@@ -143,14 +147,16 @@ export const DigitalStatementModal = ({ isOpen, onClose, statement, loan }) => {
                 BORROWER (DEBTOR)
               </span>
               <div style={{ fontWeight: 700, fontSize: '0.95rem', marginTop: '0.2rem' }}>
-                {data?.borrower?.name || loan?.person_name}
+                {isBorrowing ? (data?.borrower?.full_name || 'You') : (data?.borrower?.name || loan?.person_name)}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                {data?.borrower?.mobile || loan?.person_mobile || 'No mobile specified'}
+                {isBorrowing ? (data?.borrower?.email || '') : (data?.borrower?.mobile || loan?.person_mobile || 'No mobile specified')}
               </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--accent-indigo)', textTransform: 'capitalize' }}>
-                Relationship: {data?.borrower?.relationship || loan?.person_relationship || 'Contact'}
-              </div>
+              {!isBorrowing && (
+                <div style={{ fontSize: '0.7rem', color: 'var(--accent-indigo)', textTransform: 'capitalize' }}>
+                  Relationship: {data?.borrower?.relationship || loan?.person_relationship || 'Contact'}
+                </div>
+              )}
             </div>
           </div>
 
