@@ -55,6 +55,8 @@ export const PersonDetailsModal = ({
   const recoveryRate = totalLent > 0 ? Math.min(100, Math.round((totalRepaid / totalLent) * 100)) : 100;
   const activeLoans = personLoans.filter(l => l.status === 'OPEN' || l.status === 'PARTIALLY_PAID');
   const overdueLoans = activeLoans.filter(l => l.days_overdue > 0 || l.time_status === 'OVERDUE');
+  const borrowerCurrency = personLoans[0]?.currency || 'INR';
+  const borrowerSymbol = getCurrencySymbol(borrowerCurrency);
 
   // Collect all repayments across this person's loans
   const allRepayments = [];
