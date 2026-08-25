@@ -265,7 +265,9 @@ export const KpiDrilldownModal = ({
               Aggregate Amount
             </div>
             <div style={{ fontSize: '1.75rem', fontWeight: 800, color: accentColor, letterSpacing: '-0.02em', marginTop: '0.1rem' }}>
-              {drilldownCurrencies.length > 0 ? (
+              {isMasked ? (
+                <span>{currSymbol}••••••</span>
+              ) : drilldownCurrencies.length > 0 ? (
                 drilldownCurrencies.map((c, i) => (
                   <span key={c}>
                     {i > 0 && <span style={{ color: 'var(--text-muted)', fontWeight: 500, margin: '0 0.35rem', fontSize: '1.25rem' }}>+</span>}
@@ -286,7 +288,7 @@ export const KpiDrilldownModal = ({
               <Search size={14} color="var(--text-muted)" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="text"
-                placeholder="Search borrower or ref..."
+                placeholder="Search contact or ref..."
                 className="form-input"
                 style={{ paddingLeft: '2rem', fontSize: '0.8rem', height: 36 }}
                 value={search}
@@ -294,7 +296,7 @@ export const KpiDrilldownModal = ({
               />
             </div>
 
-            {type === 'lent' && onOpenNewLoan && (
+            {onOpenNewLoan && (
               <button
                 className="btn btn-primary"
                 style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem', gap: '0.35rem' }}
@@ -304,7 +306,7 @@ export const KpiDrilldownModal = ({
                 }}
               >
                 <Plus size={14} />
-                <span>Lend Money</span>
+                <span>{isBorrowingType ? 'Record Borrowing' : 'Lend Money'}</span>
               </button>
             )}
           </div>
@@ -312,7 +314,7 @@ export const KpiDrilldownModal = ({
 
         {/* 3. Scrollable List Body */}
         <div style={{ padding: '1.5rem 1.75rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-          {type === 'repaid' ? (
+          {(type === 'repaid' || type === 'borrowed_repaid') ? (
             /* Repayments List */
             filteredRepayments.length === 0 ? (
               <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
@@ -339,17 +341,25 @@ export const KpiDrilldownModal = ({
                       width: 38,
                       height: 38,
                       borderRadius: '50%',
-                      background: 'rgba(16, 185, 129, 0.15)',
+                      background: rep.direction === 'borrowed' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(16, 185, 129, 0.15)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       flexShrink: 0
                     }}>
-                      <ArrowDownLeft size={18} color="var(--accent-emerald)" />
+                      <ArrowDownLeft size={18} color={rep.direction === 'borrowed' ? 'var(--accent-indigo)' : 'var(--accent-emerald)'} />
                     </div>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <strong style={{ fontSize: '0.925rem' }}>{rep.person_name || 'Borrower'}</strong>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <strong style={{ fontSize: '0.925rem' }}>{rep.person_name || 'Contact'}</strong>
+                        <span className="badge" style={{
+                          fontSize: '0.62rem',
+                          background: rep.direction === 'borrowed' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                          color: rep.direction === 'borrowed' ? 'var(--accent-indigo)' : 'var(--accent-emerald)',
+                          borderColor: rep.direction === 'borrowed' ? 'rgba(99, 102, 241, 0.3)' : 'rgba(16, 185, 129, 0.3)'
+                        }}>
+                          {rep.direction === 'borrowed' ? '📥 Debt Paid' : '🤝 Recovered'}
+                        </span>
                         <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--accent-indigo)' }}>
                           #{rep.loan_reference}
                         </span>
@@ -368,7 +378,7 @@ export const KpiDrilldownModal = ({
 
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>
-                      +{getCurrencySymbol(rep.currency)}{Number(rep.amount).toLocaleString()}
+                      {isMasked ? '••••••' : `+${getCurrencySymbol(rep.currency)}${Number(rep.amount).toLocaleString()}`}
                     </div>
                     <span className="badge badge-settled" style={{ fontSize: '0.65rem', marginTop: '0.2rem' }}>
                       Settled
@@ -378,16 +388,17 @@ export const KpiDrilldownModal = ({
               ))
             )
           ) : (
-            /* Loans List (Lent, Outstanding, Overdue) */
+            /* Loans List (Lent, Borrowed, Outstanding, Overdue) */
             filteredLoans.length === 0 ? (
               <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                {type === 'overdue' ? 'No loans are currently overdue! All payments are up to date.' : 'No lending records match your query.'}
+                {(type === 'overdue' || type === 'borrowed_overdue') ? 'No items are currently overdue! All payments are up to date.' : 'No records match your query.'}
               </div>
             ) : (
               filteredLoans.map((loan) => {
                 const loanOutstanding = Number(loan.balance?.outstanding ?? loan.principal_amount ?? 0);
                 const isPaid = loan.status === 'PAID' || loanOutstanding === 0;
                 const isOverdue = (loan.days_overdue > 0 || loan.time_status === 'OVERDUE') && !isPaid;
+                const isBorrowing = loan.direction === 'borrowed';
                 const loanSymbol = getCurrencySymbol(loan.currency);
 
                 return (
@@ -406,7 +417,7 @@ export const KpiDrilldownModal = ({
                     }}
                   >
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.25rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
                         <span
                           style={{ fontWeight: 700, fontSize: '0.95rem', cursor: onOpenPersonDetails ? 'pointer' : 'default', color: 'var(--text-primary)' }}
                           onClick={() => {
@@ -418,13 +429,25 @@ export const KpiDrilldownModal = ({
                               }
                             }
                           }}
-                          title="Click to view borrower dossier"
+                          title="Click to view contact dossier"
                         >
                           {loan.person_name}
                         </span>
 
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--accent-indigo)' }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: isBorrowing ? 'var(--accent-indigo)' : 'var(--accent-emerald)' }}>
                           #{loan.loan_reference}
+                        </span>
+
+                        <span
+                          className="badge"
+                          style={{
+                            fontSize: '0.62rem',
+                            background: isBorrowing ? 'rgba(99, 102, 241, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                            color: isBorrowing ? 'var(--accent-indigo)' : 'var(--accent-emerald)',
+                            borderColor: isBorrowing ? 'rgba(99, 102, 241, 0.3)' : 'rgba(16, 185, 129, 0.3)'
+                          }}
+                        >
+                          {isBorrowing ? '📥 Borrowed' : '🤝 Lent'}
                         </span>
 
                         <span
@@ -436,12 +459,12 @@ export const KpiDrilldownModal = ({
                             borderColor: isPaid ? 'rgba(16, 185, 129, 0.3)' : isOverdue ? 'rgba(244, 63, 94, 0.3)' : 'rgba(99, 102, 241, 0.3)'
                           }}
                         >
-                          {isPaid ? 'PAID' : isOverdue ? `OVERDUE (${loan.days_overdue}d)` : loan.status}
+                          {isPaid ? 'SETTLED' : isOverdue ? `OVERDUE (${loan.days_overdue}d)` : loan.status}
                         </span>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        <span>Lent: <strong>{loan.date_given}</strong></span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', fontSize: '0.75rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
+                        <span>{isBorrowing ? 'Borrowed:' : 'Lent:'} <strong>{loan.date_given}</strong></span>
                         {loan.due_date ? (
                           <span style={{ color: isOverdue ? 'var(--accent-rose)' : 'var(--text-muted)' }}>
                             Due: <strong>{loan.due_date}</strong>
@@ -456,10 +479,10 @@ export const KpiDrilldownModal = ({
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                       <div style={{ textAlign: 'right' }}>
                         <div style={{ fontWeight: 800, fontSize: '1rem', color: isPaid ? 'var(--accent-emerald)' : isOverdue ? 'var(--accent-rose)' : 'var(--accent-cyan)' }}>
-                          {loanSymbol}{loanOutstanding.toLocaleString()}
+                          {isMasked ? `${loanSymbol}••••••` : `${loanSymbol}${loanOutstanding.toLocaleString()}`}
                         </div>
                         <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                          Principal: {loanSymbol}{Number(loan.principal_amount || 0).toLocaleString()}
+                          Principal: {isMasked ? `${loanSymbol}••••••` : `${loanSymbol}${Number(loan.principal_amount || 0).toLocaleString()}`}
                         </div>
                       </div>
 
@@ -467,15 +490,21 @@ export const KpiDrilldownModal = ({
                         {!isPaid && onRecordPayment && (
                           <button
                             className="btn btn-primary"
-                            style={{ padding: '0.35rem 0.7rem', fontSize: '0.75rem', gap: '0.3rem' }}
+                            style={{
+                              padding: '0.35rem 0.7rem',
+                              fontSize: '0.75rem',
+                              gap: '0.3rem',
+                              background: isBorrowing ? 'var(--accent-indigo)' : 'var(--accent-emerald)',
+                              borderColor: isBorrowing ? 'var(--accent-indigo)' : 'var(--accent-emerald)'
+                            }}
                             onClick={() => {
                               onClose();
                               onRecordPayment(loan);
                             }}
-                            title="Record repayment for this loan"
+                            title={isBorrowing ? "Record repayment to lender" : "Record repayment from borrower"}
                           >
                             <ArrowDownLeft size={13} />
-                            <span>Collect</span>
+                            <span>{isBorrowing ? 'Pay' : 'Collect'}</span>
                           </button>
                         )}
 
