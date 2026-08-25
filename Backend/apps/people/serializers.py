@@ -9,6 +9,12 @@ class PersonSerializer(serializers.ModelSerializer):
     total_repaid = serializers.SerializerMethodField()
     outstanding_balance = serializers.SerializerMethodField()
     active_loans_count = serializers.SerializerMethodField()
+    
+    # Directional Breakdown & Net Exposure (Borrowing Extension)
+    lent = serializers.SerializerMethodField()
+    borrowed = serializers.SerializerMethodField()
+    net_exposure = serializers.SerializerMethodField()
+    net_exposure_label = serializers.SerializerMethodField()
     currency_breakdown = serializers.SerializerMethodField()
 
     class Meta:
@@ -29,6 +35,10 @@ class PersonSerializer(serializers.ModelSerializer):
             'total_repaid',
             'outstanding_balance',
             'active_loans_count',
+            'lent',
+            'borrowed',
+            'net_exposure',
+            'net_exposure_label',
             'currency_breakdown',
             'created_at',
             'updated_at'
@@ -45,34 +55,79 @@ class PersonSerializer(serializers.ModelSerializer):
     def get_reporting_currency(self, obj) -> str:
         return self._get_reporting_currency(obj)
 
-    def get_total_lent(self, obj) -> float:
+    def get_lent(self, obj) -> dict:
         rep_curr = self._get_reporting_currency(obj)
-        total = 0.0
-        for l in obj.loans.filter(status__in=['OPEN', 'PARTIALLY_PAID', 'PAID']):
-            b = calculate_loan_balance(l, target_reporting_currency=rep_curr)
-            total += float(b['reporting_principal'])
-        return round(total, 2)
+        total_lent = 0.0
+        total_repaid = 0.0
+        outstanding = 0.0
+        active_count = 0
 
-    def get_total_repaid(self, obj) -> float:
-        rep_curr = self._get_reporting_currency(obj)
-        repaid = 0.0
-        for l in obj.loans.all():
+        for l in obj.loans.filter(direction='lent'):
             if l.status == 'CANCELLED':
                 continue
             b = calculate_loan_balance(l, target_reporting_currency=rep_curr)
-            repaid += float(b['reporting_total_repaid'])
-        return round(repaid, 2)
+            total_lent += float(b['reporting_principal'])
+            total_repaid += float(b['reporting_total_repaid'])
+            if l.status in ['OPEN', 'PARTIALLY_PAID']:
+                outstanding += float(b['reporting_outstanding'])
+                active_count += 1
+
+        return {
+            'total_lent': round(total_lent, 2),
+            'total_repaid': round(total_repaid, 2),
+            'outstanding': round(outstanding, 2),
+            'active_loans_count': active_count
+        }
+
+    def get_borrowed(self, obj) -> dict:
+        rep_curr = self._get_reporting_currency(obj)
+        total_borrowed = 0.0
+        total_repaid = 0.0
+        outstanding = 0.0
+        active_count = 0
+
+        for l in obj.loans.filter(direction='borrowed'):
+            if l.status == 'CANCELLED':
+                continue
+            b = calculate_loan_balance(l, target_reporting_currency=rep_curr)
+            total_borrowed += float(b['reporting_principal'])
+            total_repaid += float(b['reporting_total_repaid'])
+            if l.status in ['OPEN', 'PARTIALLY_PAID']:
+                outstanding += float(b['reporting_outstanding'])
+                active_count += 1
+
+        return {
+            'total_borrowed': round(total_borrowed, 2),
+            'total_repaid': round(total_repaid, 2),
+            'outstanding': round(outstanding, 2),
+            'active_loans_count': active_count
+        }
+
+    def get_net_exposure(self, obj) -> float:
+        lent_data = self.get_lent(obj)
+        borrowed_data = self.get_borrowed(obj)
+        net = lent_data['outstanding'] - borrowed_data['outstanding']
+        return round(net, 2)
+
+    def get_net_exposure_label(self, obj) -> str:
+        net = self.get_net_exposure(obj)
+        if net > 0:
+            return 'Receivable (Owes You)'
+        elif net < 0:
+            return 'Payable (You Owe)'
+        return 'Settled (Zero Net)'
+
+    def get_total_lent(self, obj) -> float:
+        return self.get_lent(obj)['total_lent']
+
+    def get_total_repaid(self, obj) -> float:
+        return self.get_lent(obj)['total_repaid']
 
     def get_outstanding_balance(self, obj) -> float:
-        rep_curr = self._get_reporting_currency(obj)
-        out = 0.0
-        for l in obj.loans.filter(status__in=['OPEN', 'PARTIALLY_PAID']):
-            b = calculate_loan_balance(l, target_reporting_currency=rep_curr)
-            out += float(b['reporting_outstanding'])
-        return round(out, 2)
+        return self.get_lent(obj)['outstanding']
 
     def get_active_loans_count(self, obj) -> int:
-        return obj.loans.filter(status__in=['OPEN', 'PARTIALLY_PAID']).count()
+        return self.get_lent(obj)['active_loans_count']
 
     def get_currency_breakdown(self, obj) -> dict:
         breakdown = {}
@@ -85,13 +140,26 @@ class PersonSerializer(serializers.ModelSerializer):
                 breakdown[curr] = {
                     'currency': curr,
                     'total_lent': 0.0,
-                    'total_repaid': 0.0,
+                    'total_borrowed': 0.0,
+                    'lent_outstanding': 0.0,
+                    'borrowed_outstanding': 0.0,
+                    'net_outstanding': 0.0,
                     'outstanding': 0.0,
+                    'total_repaid': 0.0,
                     'count': 0
                 }
-            breakdown[curr]['total_lent'] = round(breakdown[curr]['total_lent'] + float(b['principal']), 2)
+            
+            is_borrowing = (l.direction == 'borrowed')
+            if is_borrowing:
+                breakdown[curr]['total_borrowed'] = round(breakdown[curr]['total_borrowed'] + float(b['principal']), 2)
+                breakdown[curr]['borrowed_outstanding'] = round(breakdown[curr]['borrowed_outstanding'] + float(b['outstanding']), 2)
+            else:
+                breakdown[curr]['total_lent'] = round(breakdown[curr]['total_lent'] + float(b['principal']), 2)
+                breakdown[curr]['lent_outstanding'] = round(breakdown[curr]['lent_outstanding'] + float(b['outstanding']), 2)
+            
+            breakdown[curr]['net_outstanding'] = round(breakdown[curr]['lent_outstanding'] - breakdown[curr]['borrowed_outstanding'], 2)
+            breakdown[curr]['outstanding'] = breakdown[curr]['lent_outstanding']
             breakdown[curr]['total_repaid'] = round(breakdown[curr]['total_repaid'] + float(b['total_repaid']), 2)
-            breakdown[curr]['outstanding'] = round(breakdown[curr]['outstanding'] + float(b['outstanding']), 2)
             breakdown[curr]['count'] += 1
         return breakdown
 
