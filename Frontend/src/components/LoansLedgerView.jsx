@@ -310,7 +310,7 @@ export const LoansLedgerView = ({
                             fontSize: '0.825rem'
                           }}>
                             <div>
-                              <strong style={{ color: 'var(--accent-emerald)' }}>+ ₹{Number(p.amount).toLocaleString()}</strong>
+                              <strong style={{ color: 'var(--accent-emerald)' }}>+ {getCurrencySymbol(loan.currency)}{Number(p.amount).toLocaleString()}</strong>
                               <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem', fontSize: '0.75rem' }}>
                                 via {p.payment_method?.replace('_', ' ')}
                               </span>
