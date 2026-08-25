@@ -297,7 +297,7 @@ class AnalyticsMetricService:
             },
             'currency_exposure': currency_breakdown,
             'comparison': comparison_data,
-            'total_active_contacts': Person.objects.filter(created_by=user, is_archived=False).count(),
+            'total_active_contacts': Person.objects.filter(Q(created_by=user) | Q(loans__created_by=user), is_archived=False).distinct().count(),
         }
 
     @classmethod
