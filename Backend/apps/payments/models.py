@@ -13,6 +13,10 @@ class Payment(models.Model):
         ('card', 'Debit / Credit Card'),
         ('check', 'Cheque'),
         ('other', 'Other Transfer Method'),
+        ('BANK_TRANSFER', 'Bank Transfer'),
+        ('UPI', 'UPI Payment'),
+        ('CASH', 'Cash'),
+        ('CHEQUE', 'Cheque'),
     ]
 
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name='payments', null=True, blank=True)
