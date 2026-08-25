@@ -474,7 +474,7 @@ export const PersonDetailsModal = ({
                         padding: '0.25rem 0.6rem'
                       }}
                     >
-                      {getCurrencySymbol(curr)}{currLent.toLocaleString()} {curr} ({getCurrencySymbol(curr)}{currOut.toLocaleString()} owed)
+                      {getCurrencySymbol(curr)}{isMasked ? '••••••' : currLent.toLocaleString()} {curr} ({getCurrencySymbol(curr)}{isMasked ? '••••••' : currOut.toLocaleString()} owed)
                     </span>
                   );
                 })}
