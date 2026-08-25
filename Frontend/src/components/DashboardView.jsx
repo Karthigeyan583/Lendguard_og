@@ -280,24 +280,35 @@ export const DashboardView = ({
                   .sort((a, b) => Number(b.outstanding_balance || 0) - Number(a.outstanding_balance || 0))
                   .slice(0, 5)
                   .map((p) => (
-                  <div key={p.id} className="dashboard-row-item" style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.65rem 0.85rem',
-                    background: 'var(--inner-card-bg)',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--border-subtle)',
-                    fontSize: '0.825rem'
-                  }}>
+                  <div
+                    key={p.id}
+                    className="dashboard-row-item"
+                    onClick={() => onOpenPersonDetails && onOpenPersonDetails(p)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.75rem 0.95rem',
+                      background: 'var(--inner-card-bg)',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-subtle)',
+                      fontSize: '0.825rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.18s ease'
+                    }}
+                    title={`Click to view full dossier & loan records for ${p.name}`}
+                  >
                     <div>
-                      <div style={{ fontWeight: 600 }}>{p.name}</div>
-                      <span className="badge-role" style={{ fontSize: '0.65rem', textTransform: 'capitalize' }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span>{p.name}</span>
+                        <ChevronRight size={13} color="var(--text-muted)" style={{ opacity: 0.6 }} />
+                      </div>
+                      <span className="badge-role" style={{ fontSize: '0.65rem', textTransform: 'capitalize', marginTop: '0.2rem', display: 'inline-block' }}>
                         {p.relationship}
                       </span>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 700, color: Number(p.outstanding_balance || 0) > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)' }}>
+                      <div style={{ fontWeight: 800, fontSize: '0.95rem', color: Number(p.outstanding_balance || 0) > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)' }}>
                         ₹{Number(p.outstanding_balance || 0).toLocaleString()}
                       </div>
                       <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
