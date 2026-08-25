@@ -28,7 +28,8 @@ export const PersonDetailsModal = ({
   loans = [],
   onOpenNewLoanForPerson,
   onRecordPaymentForLoan,
-  onGenerateStatementForLoan
+  onGenerateStatementForLoan,
+  isMasked = false
 }) => {
   const [personTabFilter, setPersonTabFilter] = React.useState('all');
 
@@ -69,6 +70,8 @@ export const PersonDetailsModal = ({
 
   // Identify distinct currencies used by this contact
   const distinctCurrencies = Array.from(new Set(personLoans.map(l => l.currency || 'INR')));
+  const hasMultipleCurrencies = distinctCurrencies.length > 1;
+  const isMultiCurrency = hasMultipleCurrencies;
 
   // Calculate unmixed totals per currency directly from transaction records
   const personTotalsByCurrency = {};
@@ -91,13 +94,6 @@ export const PersonDetailsModal = ({
     };
   });
 
-  const singleBorrowerCurr = distinctCurrencies[0] || 'INR';
-  const singleBorrowerStats = personTotalsByCurrency[singleBorrowerCurr] || { lent: 0, repaid: 0, outstanding: 0, overdue: 0, recovery: 0 };
-  const hasMultipleCurrencies = distinctCurrencies.length > 1;
-  const isMultiCurrency = hasMultipleCurrencies;
-
-  // Filtered loans list based on selected tab
-  // Default single-currency stats
   const singleBorrowerCurr = distinctCurrencies[0] || reportingCurrency;
   const singleBorrowerStats = personTotalsByCurrency[singleBorrowerCurr] || {
     lent: Number(person.total_lent || 0),
@@ -107,7 +103,12 @@ export const PersonDetailsModal = ({
     recovery: Number(person.recovery_rate || 0)
   };
 
-  const outstanding = activeLoans.reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + Number(l.balance?.outstanding || 0) : acc, 0);
+  // Filtered loans list based on selected tab
+  const displayedLoans = personLoans.filter(l => {
+    if (personTabFilter === 'lent') return l.direction !== 'borrowed';
+    if (personTabFilter === 'borrowed') return l.direction === 'borrowed';
+    return true;
+  });
 
   // Extract all repayments for this person
   const allRepayments = [];
