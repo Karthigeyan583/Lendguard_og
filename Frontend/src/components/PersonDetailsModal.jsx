@@ -185,7 +185,7 @@ export const PersonDetailsModal = ({
 
         {/* 2. Scrollable Body Content */}
         <div style={{ padding: '1.75rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Financial Exposure KPI Bar */}
+          {/* Financial Exposure KPI Bar (Normalized in Base Reporting Currency) */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
@@ -201,10 +201,10 @@ export const PersonDetailsModal = ({
                 Total Lent
               </span>
               <div style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: '0.25rem' }}>
-                {borrowerSymbol}{Number(totalLent).toLocaleString()}
+                {reportingSymbol}{Number(totalLent).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
               </div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                Across {personLoans.length} total {personLoans.length === 1 ? 'loan' : 'loans'}
+                {reportingCurrency} Base • {personLoans.length} {personLoans.length === 1 ? 'loan' : 'loans'}
               </div>
             </div>
 
@@ -218,7 +218,7 @@ export const PersonDetailsModal = ({
                 Total Repaid
               </span>
               <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-emerald)', marginTop: '0.25rem' }}>
-                {borrowerSymbol}{Number(totalRepaid).toLocaleString()}
+                {reportingSymbol}{Number(totalRepaid).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
               </div>
               <div style={{ fontSize: '0.7rem', color: 'var(--accent-emerald)', marginTop: '0.2rem' }}>
                 {recoveryRate}% recovered
@@ -240,7 +240,7 @@ export const PersonDetailsModal = ({
                 color: outstanding > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)',
                 marginTop: '0.25rem'
               }}>
-                {borrowerSymbol}{Number(outstanding).toLocaleString()}
+                {reportingSymbol}{Number(outstanding).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
               </div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
                 {activeLoans.length} active {activeLoans.length === 1 ? 'record' : 'records'}
@@ -278,6 +278,51 @@ export const PersonDetailsModal = ({
                 {person.is_archived ? 'Archived Contact' : 'Active Borrower'}
               </div>
             </div>
+          </div>
+
+          {/* Multi-Currency Portfolio Breakdown Strip (if distinct currencies exist) */}
+          {isMultiCurrency && (
+            <div style={{
+              background: 'rgba(99, 102, 241, 0.08)',
+              border: '1px solid rgba(99, 102, 241, 0.25)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '0.85rem 1.1rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '0.65rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <Layers size={16} color="var(--accent-indigo)" />
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--accent-indigo)' }}>
+                  Multi-Currency Portfolio Breakdown
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {distinctCurrencies.map((curr) => {
+                  const currLoans = personLoans.filter(l => (l.currency || 'INR') === curr);
+                  const currLent = currLoans.reduce((acc, l) => l.status !== 'CANCELLED' ? acc + Number(l.principal_amount || 0) : acc, 0);
+                  const currOut = currLoans.reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + Number(l.balance?.outstanding || 0) : acc, 0);
+                  return (
+                    <span
+                      key={curr}
+                      className="badge"
+                      style={{
+                        fontSize: '0.72rem',
+                        background: 'var(--inner-card-bg)',
+                        color: 'var(--text-primary)',
+                        borderColor: 'var(--border-subtle)',
+                        padding: '0.25rem 0.6rem'
+                      }}
+                    >
+                      {getCurrencySymbol(curr)}{currLent.toLocaleString()} {curr} ({getCurrencySymbol(curr)}{currOut.toLocaleString()} owed)
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           </div>
 
           {/* Recovery Progress Bar */}
