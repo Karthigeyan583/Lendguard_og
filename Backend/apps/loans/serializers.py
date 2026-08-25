@@ -103,6 +103,19 @@ class LoanCreateSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id']
 
+    def validate(self, data):
+        date_given = data.get('date_given')
+        due_date = data.get('due_date')
+        purpose = data.get('purpose', '')
+
+        if not purpose or not purpose.strip():
+            raise serializers.ValidationError({"purpose": "Purpose / lending context is required."})
+
+        if due_date and date_given and due_date < date_given:
+            raise serializers.ValidationError({"due_date": "Agreed due date cannot be earlier than the date the money was given."})
+
+        return data
+
     def create(self, validated_data):
         request = self.context.get('request')
         if request and hasattr(request, 'user'):
