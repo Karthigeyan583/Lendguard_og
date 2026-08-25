@@ -21,6 +21,7 @@ class LoanSerializer(serializers.ModelSerializer):
     time_status = serializers.SerializerMethodField()
     days_overdue = serializers.SerializerMethodField()
     recent_payments = serializers.SerializerMethodField()
+    repayments = serializers.SerializerMethodField()
 
     class Meta:
         model = Loan
@@ -53,6 +54,7 @@ class LoanSerializer(serializers.ModelSerializer):
             'days_overdue',
             'balance',
             'recent_payments',
+            'repayments',
             'is_archived',
             'created_at',
             'updated_at'
@@ -98,17 +100,26 @@ class LoanSerializer(serializers.ModelSerializer):
         return status_info['days_overdue']
 
     def get_recent_payments(self, obj) -> list:
-        payments = obj.payments.filter(is_voided=False).order_by('-payment_date')[:5]
+        payments = obj.payments.filter(is_voided=False).order_by('-payment_date')
         return [{
             'id': p.id,
+            'loan_id': obj.id,
+            'loan_reference': obj.loan_reference,
+            'person_name': obj.person.name if obj.person else 'Borrower',
+            'person_mobile': obj.person.mobile if obj.person else '',
             'amount': float(p.amount),
-            'currency': getattr(p, 'currency', obj.currency),
-            'reporting_currency': getattr(p, 'reporting_currency', obj.reporting_currency),
+            'currency': getattr(p, 'currency', obj.currency) or 'INR',
+            'reporting_currency': getattr(p, 'reporting_currency', obj.reporting_currency) or 'INR',
+            'exchange_rate': float(getattr(p, 'exchange_rate', 1.0) or 1.0),
             'reporting_amount': float(getattr(p, 'reporting_amount', p.amount)),
             'payment_date': str(p.payment_date),
             'payment_method': p.payment_method,
-            'reference_number': p.reference_number
+            'reference_number': p.reference_number,
+            'notes': p.notes
         } for p in payments]
+
+    def get_repayments(self, obj) -> list:
+        return self.get_recent_payments(obj)
 
 
 class LoanCreateSerializer(serializers.ModelSerializer):
