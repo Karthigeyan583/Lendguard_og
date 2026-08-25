@@ -326,7 +326,9 @@ export const DashboardView = ({
               fontWeight: 900,
               color: singleStats.netOutstanding > 0 ? 'var(--accent-emerald)' : singleStats.netOutstanding < 0 ? 'var(--accent-rose)' : 'var(--text-primary)'
             }}>
-              {singleStats.netOutstanding >= 0 ? '+' : ''}{getCurrencySymbol(singleCurr)}{Number(singleStats.netOutstanding).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{singleCurr}</span>
+              {isMasked 
+                ? `${getCurrencySymbol(singleCurr)}••••••` 
+                : `${singleStats.netOutstanding >= 0 ? '+' : ''}${getCurrencySymbol(singleCurr)}${Number(singleStats.netOutstanding).toLocaleString()}`} <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{singleCurr}</span>
             </span>
             <span className="badge" style={{
               background: singleStats.netOutstanding > 0 ? 'rgba(16, 185, 129, 0.15)' : singleStats.netOutstanding < 0 ? 'rgba(244, 63, 94, 0.15)' : 'rgba(148, 163, 184, 0.15)',
@@ -338,7 +340,7 @@ export const DashboardView = ({
             </span>
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-            Receivables: <strong>{getCurrencySymbol(singleCurr)}{Number(singleStats.lentOutstanding).toLocaleString()}</strong> • Payables: <strong>{getCurrencySymbol(singleCurr)}{Number(singleStats.borrowedOutstanding).toLocaleString()}</strong>
+            Receivables: <strong>{getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.lentOutstanding).toLocaleString()}</strong> • Payables: <strong>{getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.borrowedOutstanding).toLocaleString()}</strong>
           </div>
         </div>
 
@@ -431,7 +433,7 @@ export const DashboardView = ({
                   {availableCurrencies.map(curr => (
                     <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
                       <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
-                        {getCurrencySymbol(curr)}{Number(totalsByCurrency[curr].lent).toLocaleString()}
+                        {getCurrencySymbol(curr)}{isMasked ? '••••••' : Number(totalsByCurrency[curr].lent).toLocaleString()}
                       </span>
                       <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-blue)' }}>{curr}</span>
                     </div>
@@ -439,7 +441,7 @@ export const DashboardView = ({
                 </div>
               ) : (
                 <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-                  {getCurrencySymbol(singleCurr)}{Number(singleStats.lent).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>{singleCurr}</span>
+                  {getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.lent).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>{singleCurr}</span>
                 </div>
               )}
 
@@ -467,7 +469,7 @@ export const DashboardView = ({
                   {availableCurrencies.map(curr => (
                     <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
                       <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, color: 'var(--accent-emerald)', letterSpacing: '-0.02em' }}>
-                        {getCurrencySymbol(curr)}{Number(totalsByCurrency[curr].lentRepaid).toLocaleString()}
+                        {getCurrencySymbol(curr)}{isMasked ? '••••••' : Number(totalsByCurrency[curr].lentRepaid).toLocaleString()}
                       </span>
                       <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-emerald)' }}>
                         {curr} ({totalsByCurrency[curr].lentRecovery}%)
@@ -477,7 +479,7 @@ export const DashboardView = ({
                 </div>
               ) : (
                 <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-                  {getCurrencySymbol(singleCurr)}{Number(singleStats.lentRepaid).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-emerald)' }}>{singleCurr}</span>
+                  {getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.lentRepaid).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-emerald)' }}>{singleCurr}</span>
                 </div>
               )}
 
@@ -505,7 +507,7 @@ export const DashboardView = ({
                   {availableCurrencies.map(curr => (
                     <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
                       <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, color: 'var(--accent-cyan)', letterSpacing: '-0.02em' }}>
-                        {getCurrencySymbol(curr)}{Number(totalsByCurrency[curr].lentOutstanding).toLocaleString()}
+                        {getCurrencySymbol(curr)}{isMasked ? '••••••' : Number(totalsByCurrency[curr].lentOutstanding).toLocaleString()}
                       </span>
                       <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>{curr}</span>
                     </div>
@@ -513,7 +515,7 @@ export const DashboardView = ({
                 </div>
               ) : (
                 <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-cyan)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-                  {getCurrencySymbol(singleCurr)}{Number(singleStats.lentOutstanding).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-cyan)' }}>{singleCurr}</span>
+                  {getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.lentOutstanding).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-cyan)' }}>{singleCurr}</span>
                 </div>
               )}
 
@@ -544,7 +546,7 @@ export const DashboardView = ({
                     availableCurrencies.filter(c => totalsByCurrency[c].lentOverdue > 0).map(curr => (
                       <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
                         <span style={{ fontSize: availableCurrencies.length > 2 ? '1.25rem' : '1.5rem', fontWeight: 800, color: 'var(--accent-rose)', letterSpacing: '-0.02em' }}>
-                          {getCurrencySymbol(curr)}{Number(totalsByCurrency[curr].lentOverdue).toLocaleString()}
+                          {getCurrencySymbol(curr)}{isMasked ? '••••••' : Number(totalsByCurrency[curr].lentOverdue).toLocaleString()}
                         </span>
                         <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-rose)' }}>
                           {curr} ({totalsByCurrency[curr].lentOverdueCount} overdue)
@@ -559,7 +561,7 @@ export const DashboardView = ({
                 </div>
               ) : (
                 <div style={{ fontSize: '1.85rem', fontWeight: 800, color: singleStats.lentOverdue > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-                  {getCurrencySymbol(singleCurr)}{Number(singleStats.lentOverdue).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{singleCurr}</span>
+                  {getCurrencySymbol(singleCurr)}{isMasked ? '••••••' : Number(singleStats.lentOverdue).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{singleCurr}</span>
                 </div>
               )}
 
