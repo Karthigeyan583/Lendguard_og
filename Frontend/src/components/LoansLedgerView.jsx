@@ -226,34 +226,43 @@ export const LoansLedgerView = ({
               >
                 {/* Main Card Header */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-                  {/* Left: Borrower & Loan Reference */}
+                  {/* Left: Borrower/Lender & Loan Reference */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{
                       width: 44,
                       height: 44,
                       borderRadius: '12px',
-                      background: loan.status === 'PAID' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                      background: loan.direction === 'borrowed' ? 'rgba(99, 102, 241, 0.15)' : loan.status === 'PAID' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontWeight: 800,
                       fontSize: '1rem',
-                      color: loan.status === 'PAID' ? 'var(--accent-emerald)' : 'var(--accent-blue)'
+                      color: loan.direction === 'borrowed' ? 'var(--accent-indigo)' : loan.status === 'PAID' ? 'var(--accent-emerald)' : 'var(--accent-blue)'
                     }}>
-                      {loan.person_name ? loan.person_name[0]?.toUpperCase() : 'B'}
+                      {loan.person_name ? loan.person_name[0]?.toUpperCase() : (loan.direction === 'borrowed' ? 'L' : 'B')}
                     </div>
 
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                         <span style={{ fontSize: '1.05rem', fontWeight: 700 }}>{loan.person_name}</span>
                         <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                           #{loan.loan_reference}
                         </span>
+                        {loan.direction === 'borrowed' ? (
+                          <span className="badge" style={{ background: 'rgba(99, 102, 241, 0.15)', color: 'var(--accent-indigo)', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
+                            📥 Borrowed
+                          </span>
+                        ) : (
+                          <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: 'var(--accent-emerald)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                            🤝 Lent
+                          </span>
+                        )}
                         {getStatusBadge(loan.status, loan.time_status)}
                       </div>
 
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'flex', gap: '0.85rem', marginTop: '0.2rem' }}>
-                        <span>Lent on: <strong>{loan.date_given}</strong></span>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'flex', gap: '0.85rem', marginTop: '0.2rem', flexWrap: 'wrap' }}>
+                        <span>{loan.direction === 'borrowed' ? 'Borrowed on:' : 'Lent on:'} <strong>{loan.date_given}</strong></span>
                         {loan.due_date ? (
                           <span>Due: <strong>{loan.due_date}</strong> {loan.days_overdue > 0 && <span style={{ color: 'var(--accent-rose)', fontWeight: 700 }}>({loan.days_overdue}d overdue)</span>}</span>
                         ) : (
@@ -267,16 +276,18 @@ export const LoansLedgerView = ({
                   {/* Middle: Financial Balance & Progress Bar */}
                   <div style={{ minWidth: 230 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontSize: '0.8rem', marginBottom: '0.3rem' }}>
-                      <span style={{ color: 'var(--text-muted)' }}>Outstanding:</span>
-                      <strong style={{ color: outstanding > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)', fontSize: '0.95rem' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>
+                        {loan.direction === 'borrowed' ? 'Outstanding Payable:' : 'Outstanding Receivable:'}
+                      </span>
+                      <strong style={{ color: outstanding > 0 ? (loan.direction === 'borrowed' ? 'var(--accent-indigo)' : 'var(--accent-cyan)') : 'var(--accent-emerald)', fontSize: '0.95rem' }}>
                         {getCurrencySymbol(loan.currency)}{outstanding.toLocaleString()} <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{loan.currency || 'INR'}</span>
                       </strong>
                     </div>
                     <div style={{ height: 6, background: 'var(--bg-surface)', borderRadius: 3, overflow: 'hidden', display: 'flex' }}>
-                      <div style={{ width: `${progressPercent}%`, background: 'var(--accent-emerald)' }} />
+                      <div style={{ width: `${progressPercent}%`, background: loan.direction === 'borrowed' ? 'var(--accent-indigo)' : 'var(--accent-emerald)' }} />
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                      <span>Repaid: {getCurrencySymbol(loan.currency)}{repaid.toLocaleString()} ({progressPercent}%)</span>
+                      <span>{loan.direction === 'borrowed' ? 'Repaid:' : 'Recovered:'} {getCurrencySymbol(loan.currency)}{repaid.toLocaleString()} ({progressPercent}%)</span>
                       <span>Principal: {getCurrencySymbol(loan.currency)}{principal.toLocaleString()}</span>
                     </div>
                   </div>
@@ -286,11 +297,16 @@ export const LoansLedgerView = ({
                     {loan.status !== 'PAID' && loan.status !== 'CANCELLED' && (
                       <button
                         className="btn btn-primary"
-                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.78rem' }}
+                        style={{
+                          padding: '0.4rem 0.8rem',
+                          fontSize: '0.78rem',
+                          background: loan.direction === 'borrowed' ? 'var(--accent-indigo)' : 'var(--accent-emerald)',
+                          borderColor: loan.direction === 'borrowed' ? 'var(--accent-indigo)' : 'var(--accent-emerald)'
+                        }}
                         onClick={() => onRecordPayment(loan)}
                       >
                         <ArrowDownLeft size={14} />
-                        <span>Record Payment</span>
+                        <span>{loan.direction === 'borrowed' ? 'Record Repayment' : 'Record Payment'}</span>
                       </button>
                     )}
 
