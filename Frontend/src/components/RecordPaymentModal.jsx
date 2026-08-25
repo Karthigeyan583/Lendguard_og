@@ -115,25 +115,25 @@ export const RecordPaymentModal = ({ isOpen, onClose, loan, onPaymentRecorded })
           }}>
             <div>
               <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Total Principal</span>
-              <strong style={{ fontSize: '0.95rem' }}>₹{Number(loan.principal_amount).toLocaleString()} {loan.currency}</strong>
+              <strong style={{ fontSize: '0.95rem' }}>{currencySymbol}{Number(loan.principal_amount).toLocaleString()} {loan.currency}</strong>
             </div>
             <div>
               <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Current Outstanding</span>
-              <strong style={{ fontSize: '1.05rem', color: 'var(--accent-cyan)' }}>₹{outstanding.toLocaleString()} {loan.currency}</strong>
+              <strong style={{ fontSize: '1.05rem', color: 'var(--accent-cyan)' }}>{currencySymbol}{outstanding.toLocaleString()} {loan.currency}</strong>
             </div>
           </div>
 
           {/* Amount & Date */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="form-group">
-              <label className="form-label">Repayment Amount (₹)</label>
+              <label className="form-label">Repayment Amount ({currencySymbol.trim() || loan.currency})</label>
               <input
                 type="number"
                 step="any"
                 min="0.01"
                 required
                 className="form-input"
-                placeholder="Enter repayment amount"
+                placeholder={`Enter repayment amount in ${loan.currency}`}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
               />
@@ -198,7 +198,7 @@ export const RecordPaymentModal = ({ isOpen, onClose, loan, onPaymentRecorded })
             </button>
             <button type="submit" className="btn btn-primary" disabled={submitting}>
               <ArrowDownLeft size={16} />
-              <span>{submitting ? 'Recording Repayment...' : `Confirm Repayment (₹${Number(amount || 0).toLocaleString()})`}</span>
+              <span>{submitting ? 'Recording Repayment...' : `Confirm Repayment (${currencySymbol}${Number(amount || 0).toLocaleString()})`}</span>
             </button>
           </div>
         </form>
