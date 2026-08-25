@@ -60,6 +60,11 @@ class Loan(models.Model):
 
     class Meta:
         ordering = ['-date_given', '-created_at']
+        indexes = [
+            models.Index(fields=['created_by', 'direction', 'status']),
+            models.Index(fields=['person', 'direction']),
+            models.Index(fields=['due_date']),
+        ]
 
     def __str__(self):
-        return f"{self.loan_reference} - {self.person.name}: {self.principal_amount} {self.currency} [{self.status}]"
+        return f"{self.loan_reference} - {self.person.name}: {self.principal_amount} {self.currency} [{self.status}] ({self.direction})"
