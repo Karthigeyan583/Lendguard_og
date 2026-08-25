@@ -1,11 +1,13 @@
 import random
 import string
+from decimal import Decimal
 from django.utils import timezone
 from rest_framework import serializers
 from .models import Loan
 from apps.loans.services.balance_engine import calculate_loan_balance
 from apps.loans.services.status_engine import evaluate_loan_status
 from apps.reminders.services.reminder_engine import generate_loan_reminders
+from apps.core.services.fx_engine import get_exchange_rate, convert_currency
 
 
 class LoanSerializer(serializers.ModelSerializer):
@@ -35,6 +37,10 @@ class LoanSerializer(serializers.ModelSerializer):
             'direction',
             'principal_amount',
             'currency',
+            'reporting_currency',
+            'exchange_rate',
+            'fx_rate_date',
+            'reporting_principal_amount',
             'date_given',
             'due_date',
             'interest_model',
@@ -51,18 +57,36 @@ class LoanSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at'
         ]
-        read_only_fields = ['id', 'loan_reference', 'status', 'created_by', 'created_at', 'updated_at']
+        read_only_fields = [
+            'id', 
+            'loan_reference', 
+            'status', 
+            'reporting_currency', 
+            'exchange_rate', 
+            'fx_rate_date', 
+            'reporting_principal_amount', 
+            'created_by', 
+            'created_at', 
+            'updated_at'
+        ]
 
     def get_balance(self, obj) -> dict:
         b = calculate_loan_balance(obj)
         return {
             'principal': float(b['principal']),
+            'currency': b['currency'],
             'interest_or_fee': float(b['interest_or_fee']),
             'total_payable': float(b['total_payable']),
             'total_repaid': float(b['total_repaid']),
             'outstanding': float(b['outstanding']),
+            'recovery_rate': b['recovery_rate'],
             'is_fully_paid': b['is_fully_paid'],
-            'payment_count': b['payment_count']
+            'payment_count': b['payment_count'],
+            'reporting_currency': b['reporting_currency'],
+            'exchange_rate': float(b['exchange_rate']),
+            'reporting_principal': float(b['reporting_principal']),
+            'reporting_total_repaid': float(b['reporting_total_repaid']),
+            'reporting_outstanding': float(b['reporting_outstanding'])
         }
 
     def get_time_status(self, obj) -> str:
@@ -78,6 +102,9 @@ class LoanSerializer(serializers.ModelSerializer):
         return [{
             'id': p.id,
             'amount': float(p.amount),
+            'currency': getattr(p, 'currency', obj.currency),
+            'reporting_currency': getattr(p, 'reporting_currency', obj.reporting_currency),
+            'reporting_amount': float(getattr(p, 'reporting_amount', p.amount)),
             'payment_date': str(p.payment_date),
             'payment_method': p.payment_method,
             'reference_number': p.reference_number
@@ -93,6 +120,9 @@ class LoanCreateSerializer(serializers.ModelSerializer):
             'direction',
             'principal_amount',
             'currency',
+            'reporting_currency',
+            'exchange_rate',
+            'reporting_principal_amount',
             'date_given',
             'due_date',
             'interest_model',
@@ -101,7 +131,7 @@ class LoanCreateSerializer(serializers.ModelSerializer):
             'purpose',
             'notes'
         ]
-        read_only_fields = ['id']
+        read_only_fields = ['id', 'reporting_currency', 'exchange_rate', 'reporting_principal_amount']
 
     def validate(self, data):
         date_given = data.get('date_given')
@@ -118,8 +148,9 @@ class LoanCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context.get('request')
-        if request and hasattr(request, 'user'):
-            validated_data['created_by'] = request.user
+        user = request.user if (request and hasattr(request, 'user')) else None
+        if user:
+            validated_data['created_by'] = user
 
         # Auto-generate unique loan reference
         year = timezone.now().year
@@ -127,6 +158,20 @@ class LoanCreateSerializer(serializers.ModelSerializer):
         count = Loan.objects.count() + 1
         validated_data['loan_reference'] = f"LG-{year}-{count:04d}-{rand_code}"
         validated_data['status'] = 'OPEN'
+
+        # Multi-Currency & Reporting Currency Initialization
+        reporting_currency = 'INR'
+        if user and hasattr(user, 'profile') and user.profile.base_currency:
+            reporting_currency = user.profile.base_currency
+
+        currency = validated_data.get('currency', 'INR')
+        rate = get_exchange_rate(currency, reporting_currency)
+        reporting_principal, _ = convert_currency(validated_data['principal_amount'], currency, reporting_currency, rate)
+
+        validated_data['reporting_currency'] = reporting_currency
+        validated_data['exchange_rate'] = rate
+        validated_data['reporting_principal_amount'] = reporting_principal
+        validated_data['fx_rate_date'] = timezone.now()
 
         loan = super().create(validated_data)
 
