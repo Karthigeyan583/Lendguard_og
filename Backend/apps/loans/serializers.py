@@ -131,6 +131,8 @@ class LoanSerializer(serializers.ModelSerializer):
 
 
 class LoanCreateSerializer(serializers.ModelSerializer):
+    balance = serializers.SerializerMethodField()
+
     class Meta:
         model = Loan
         fields = [
@@ -148,9 +150,19 @@ class LoanCreateSerializer(serializers.ModelSerializer):
             'interest_rate',
             'fixed_fee_amount',
             'purpose',
-            'notes'
+            'notes',
+            'status',
+            'balance'
         ]
-        read_only_fields = ['id', 'reporting_currency', 'exchange_rate', 'reporting_principal_amount']
+        read_only_fields = ['id', 'status', 'reporting_currency', 'exchange_rate', 'reporting_principal_amount']
+
+    def get_balance(self, obj) -> dict:
+        b = calculate_loan_balance(obj)
+        return {
+            'outstanding': float(b['outstanding']),
+            'total_repaid': float(b['total_repaid']),
+            'is_fully_paid': b['is_fully_paid']
+        }
 
     def validate(self, data):
         date_given = data.get('date_given')
