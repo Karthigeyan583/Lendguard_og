@@ -1,16 +1,17 @@
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
+from django.utils import timezone
 from rest_framework import serializers
 from .models import Payment
 from apps.loans.models import Loan
 from apps.loans.services.balance_engine import calculate_loan_balance
 from apps.loans.services.status_engine import evaluate_loan_status
 from apps.reminders.services.reminder_engine import suppress_future_reminders, create_in_app_notification
+from apps.core.services.fx_engine import get_exchange_rate, convert_currency
 
 
 class PaymentSerializer(serializers.ModelSerializer):
     loan_reference = serializers.CharField(source='loan.loan_reference', read_only=True)
     person_name = serializers.CharField(source='loan.person.name', read_only=True)
-    currency = serializers.CharField(source='loan.currency', read_only=True)
 
     class Meta:
         model = Payment
@@ -20,8 +21,12 @@ class PaymentSerializer(serializers.ModelSerializer):
             'loan',
             'loan_reference',
             'person_name',
-            'currency',
             'amount',
+            'currency',
+            'reporting_currency',
+            'exchange_rate',
+            'reporting_amount',
+            'fx_rate_date',
             'payment_date',
             'payment_method',
             'reference_number',
@@ -31,7 +36,18 @@ class PaymentSerializer(serializers.ModelSerializer):
             'created_by',
             'created_at'
         ]
-        read_only_fields = ['id', 'is_voided', 'void_reason', 'created_by', 'created_at']
+        read_only_fields = [
+            'id', 
+            'currency', 
+            'reporting_currency', 
+            'exchange_rate', 
+            'reporting_amount', 
+            'fx_rate_date', 
+            'is_voided', 
+            'void_reason', 
+            'created_by', 
+            'created_at'
+        ]
 
 
 class PaymentCreateSerializer(serializers.ModelSerializer):
@@ -68,11 +84,25 @@ class PaymentCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context.get('request')
-        if request and hasattr(request, 'user'):
-            validated_data['created_by'] = request.user
+        user = request.user if (request and hasattr(request, 'user')) else None
+        if user:
+            validated_data['created_by'] = user
+
+        loan = validated_data['loan']
+        
+        # Populate Multi-Currency FX Information
+        currency = loan.currency or 'INR'
+        reporting_currency = loan.reporting_currency or 'INR'
+        exchange_rate = loan.exchange_rate or Decimal('1.000000')
+        reporting_amount = (Decimal(str(validated_data['amount'])) * exchange_rate).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        validated_data['currency'] = currency
+        validated_data['reporting_currency'] = reporting_currency
+        validated_data['exchange_rate'] = exchange_rate
+        validated_data['reporting_amount'] = reporting_amount
+        validated_data['fx_rate_date'] = timezone.now()
 
         payment = super().create(validated_data)
-        loan = payment.loan
 
         # Recalculate status and balances
         status_info = evaluate_loan_status(loan)
@@ -92,3 +122,4 @@ class PaymentCreateSerializer(serializers.ModelSerializer):
 
 class PaymentVoidSerializer(serializers.Serializer):
     void_reason = serializers.CharField(required=True, min_length=3, help_text="Reason for reversing this transaction")
+
