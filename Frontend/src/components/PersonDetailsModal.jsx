@@ -225,6 +225,57 @@ export const PersonDetailsModal = ({
 
         {/* 2. Scrollable Body Content */}
         <div style={{ padding: '1.75rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Net Position Summary Banner */}
+          <div style={{
+            background: 'var(--inner-card-bg)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-md)',
+            padding: '1.25rem 1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '1rem'
+          }}>
+            <div>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>
+                Net Position with {person.name}
+              </span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginTop: '0.2rem' }}>
+                <span style={{
+                  fontSize: '1.5rem',
+                  fontWeight: 900,
+                  color: netExposure > 0 ? 'var(--accent-emerald)' : netExposure < 0 ? 'var(--accent-rose)' : 'var(--text-primary)'
+                }}>
+                  {netExposure >= 0 ? '+' : ''}{reportingSymbol}{Number(netExposure).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{reportingCurrency}</span>
+                </span>
+                <span className="badge" style={{
+                  background: netExposure > 0 ? 'rgba(16, 185, 129, 0.15)' : netExposure < 0 ? 'rgba(244, 63, 94, 0.15)' : 'rgba(148, 163, 184, 0.15)',
+                  color: netExposure > 0 ? 'var(--accent-emerald)' : netExposure < 0 ? 'var(--accent-rose)' : 'var(--text-muted)',
+                  fontSize: '0.72rem',
+                  fontWeight: 700
+                }}>
+                  {netExposure > 0 ? `${person.name} Owes You` : netExposure < 0 ? `You Owe ${person.name}` : 'Settled Net Position'}
+                </span>
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                Receivables: <strong>{reportingSymbol}{Number(lentOutstanding).toLocaleString()}</strong> • Payables: <strong>{reportingSymbol}{Number(borrowedOutstanding).toLocaleString()}</strong>
+              </div>
+            </div>
+
+            <button
+              className="btn btn-primary"
+              style={{ padding: '0.45rem 0.9rem', fontSize: '0.78rem' }}
+              onClick={() => {
+                onClose();
+                if (onOpenNewLoanForPerson) onOpenNewLoanForPerson(person);
+              }}
+            >
+              <Plus size={14} />
+              <span>New Transaction</span>
+            </button>
+          </div>
+
           {/* Financial Exposure KPI Bar (Split by actual loan currencies) */}
           <div style={{
             display: 'grid',
