@@ -60,7 +60,7 @@ export const DashboardView = ({
             </div>
           </div>
           <div style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-            ₹{Number(totalLent).toLocaleString()}
+            {currSymbol}{Number(totalLent).toLocaleString()}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
             Across {loans.length} total lending {loans.length === 1 ? 'record' : 'records'}
@@ -76,7 +76,7 @@ export const DashboardView = ({
             </div>
           </div>
           <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-            ₹{Number(totalRepaid).toLocaleString()}
+            {currSymbol}{Number(totalRepaid).toLocaleString()}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
             Recovery Rate: <strong>{recoveryRate}%</strong>
@@ -92,7 +92,7 @@ export const DashboardView = ({
             </div>
           </div>
           <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-cyan)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-            ₹{Number(totalOutstanding).toLocaleString()}
+            {currSymbol}{Number(totalOutstanding).toLocaleString()}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
             {activeDebtorsCount > 0 
@@ -110,7 +110,7 @@ export const DashboardView = ({
             </div>
           </div>
           <div style={{ fontSize: '1.85rem', fontWeight: 800, color: overdueCount > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-            ₹{Number(totalOverdue).toLocaleString()}
+            {currSymbol}{Number(totalOverdue).toLocaleString()}
           </div>
           {overdueCount > 0 ? (
             <div style={{ fontSize: '0.75rem', color: 'var(--accent-rose)' }}>
