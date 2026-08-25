@@ -16,7 +16,11 @@ import {
   FileText, 
   BarChart3,
   Sun,
-  Moon
+  Moon,
+  Layers,
+  FileCheck2,
+  BellRing,
+  Database
 } from 'lucide-react';
 
 export const LoginPage = () => {
@@ -91,7 +95,7 @@ export const LoginPage = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '2rem 1.5rem',
+      padding: '2.5rem 1.5rem',
       position: 'relative',
       overflow: 'hidden',
       transition: 'background 0.3s ease'
@@ -139,21 +143,21 @@ export const LoginPage = () => {
 
       <div style={{
         width: '100%',
-        maxWidth: 1040,
+        maxWidth: 1140,
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
         gap: '2.5rem',
         alignItems: 'center',
         zIndex: 1
       }}>
-        {/* Left Side: Brand Story & Feature Highlights */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem', padding: '1rem 0' }}>
+        {/* Left Side: Brand Story, Visual Artwork & Distinguished Feature Pillars */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '0.5rem 0' }}>
           {/* Brand Header */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '0.65rem' }}>
               <div style={{
-                width: 46,
-                height: 46,
+                width: 48,
+                height: 48,
                 borderRadius: '14px',
                 background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                 display: 'flex',
@@ -165,7 +169,7 @@ export const LoginPage = () => {
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <h1 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.03em', margin: 0, color: 'var(--text-primary)' }}>
+                  <h1 style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.03em', margin: 0, color: 'var(--text-primary)' }}>
                     LendGuard
                   </h1>
                   <span style={{
@@ -186,40 +190,185 @@ export const LoginPage = () => {
               </div>
             </div>
             
-            <p style={{ fontSize: '1.05rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginTop: '1rem' }}>
+            <p style={{ fontSize: '0.98rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: '0.5rem 0 0' }}>
               Know who owes you, how much, when due, what was repaid, and what remains — with cryptographic audit trail.
             </p>
           </div>
 
-          {/* Feature Badges */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem' }}>
-              <div style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <BookOpen size={16} color="var(--accent-emerald)" />
+          {/* Hero Visual Artwork Card */}
+          <div style={{
+            position: 'relative',
+            borderRadius: '18px',
+            overflow: 'hidden',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            boxShadow: '0 16px 36px rgba(0, 0, 0, 0.35)',
+            background: 'var(--inner-card-bg)'
+          }}>
+            <img
+              src="/assets/lendguard_hero.jpg"
+              alt="LendGuard Cryptographic Multi-Currency Lending Platform"
+              style={{
+                width: '100%',
+                height: 'auto',
+                display: 'block',
+                objectFit: 'cover',
+                maxHeight: '210px',
+                filter: 'brightness(1.03) contrast(1.05)'
+              }}
+            />
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(6, 9, 19, 0.9) 100%)',
+              display: 'flex',
+              alignItems: 'flex-end',
+              padding: '0.75rem 1rem'
+            }}>
+              <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+                <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  padding: '0.2rem 0.55rem',
+                  borderRadius: 'var(--radius-full)',
+                  background: 'rgba(16, 185, 129, 0.25)',
+                  color: '#34d399',
+                  border: '1px solid rgba(16, 185, 129, 0.4)',
+                  backdropFilter: 'blur(8px)'
+                }}>
+                  ● Cryptographic SHA-256
+                </span>
+                <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  padding: '0.2rem 0.55rem',
+                  borderRadius: 'var(--radius-full)',
+                  background: 'rgba(99, 102, 241, 0.25)',
+                  color: '#a5b4fc',
+                  border: '1px solid rgba(99, 102, 241, 0.4)',
+                  backdropFilter: 'blur(8px)'
+                }}>
+                  Multi-Currency Core (EUR • INR • USD)
+                </span>
               </div>
-              <div>
-                <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)', display: 'block' }}>Authoritative Lending Ledger</strong>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Keep track of principal, payment installments, and remaining balances.</span>
+            </div>
+          </div>
+
+          {/* Distinguished Feature Pillars */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            {/* Pointer 1 */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.85rem',
+              padding: '0.75rem 0.95rem',
+              borderRadius: '14px',
+              background: 'var(--inner-card-bg)',
+              border: '1px solid var(--border-subtle)',
+              transition: 'all 0.2s ease'
+            }}>
+              <div style={{
+                width: 36,
+                height: 36,
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2))',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                border: '1px solid rgba(16, 185, 129, 0.3)'
+              }}>
+                <BookOpen size={18} color="var(--accent-emerald)" />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                    Authoritative Multi-Currency Ledger
+                  </strong>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--accent-emerald)', fontWeight: 700 }}>
+                    CORE
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                  Maintains original transaction currencies (EUR, INR, USD) with zero artificial mixing and real-time balance calculations.
+                </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem' }}>
-              <div style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(6, 182, 212, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <FileText size={16} color="var(--accent-cyan)" />
+            {/* Pointer 2 */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.85rem',
+              padding: '0.75rem 0.95rem',
+              borderRadius: '14px',
+              background: 'var(--inner-card-bg)',
+              border: '1px solid var(--border-subtle)',
+              transition: 'all 0.2s ease'
+            }}>
+              <div style={{
+                width: 36,
+                height: 36,
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(99, 102, 241, 0.2))',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                border: '1px solid rgba(6, 182, 212, 0.3)'
+              }}>
+                <FileCheck2 size={18} color="var(--accent-cyan)" />
               </div>
-              <div>
-                <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)', display: 'block' }}>Verifiable Digital IOUs & Statements</strong>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Generate formal PDF/print statements with cryptographic SHA-256 seal.</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                    Verifiable Digital IOUs & PDF Statements
+                  </strong>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--accent-cyan)', fontWeight: 700 }}>
+                    VERIFIED
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                  Generates formal printable PDF statements with tamper-evident SHA-256 cryptographic verification seals.
+                </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem' }}>
-              <div style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(244, 63, 94, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <BarChart3 size={16} color="var(--accent-rose)" />
+            {/* Pointer 3 */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.85rem',
+              padding: '0.75rem 0.95rem',
+              borderRadius: '14px',
+              background: 'var(--inner-card-bg)',
+              border: '1px solid var(--border-subtle)',
+              transition: 'all 0.2s ease'
+            }}>
+              <div style={{
+                width: 36,
+                height: 36,
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(245, 158, 11, 0.2))',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                border: '1px solid rgba(244, 63, 94, 0.3)'
+              }}>
+                <BarChart3 size={18} color="var(--accent-rose)" />
               </div>
-              <div>
-                <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)', display: 'block' }}>Overdue Aging Analysis & Automated Reminders</strong>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Tiered aging buckets (0–7d, 8–30d, 31–60d, 60+d) with auto-suppression.</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                    Overdue Aging & Automated Reminders
+                  </strong>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--accent-rose)', fontWeight: 700 }}>
+                    AUTOMATED
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                  Deterministic overdue aging buckets (0–7d, 8–30d, 31–60d, 60+d) with smart suppression for settled debts.
+                </div>
               </div>
             </div>
           </div>
@@ -229,8 +378,8 @@ export const LoginPage = () => {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.5rem',
-            padding: '0.4rem 0.85rem',
-            background: 'var(--bg-card)',
+            padding: '0.45rem 0.95rem',
+            background: 'var(--inner-card-bg)',
             border: '1px solid var(--border-subtle)',
             borderRadius: 'var(--radius-full)',
             fontSize: '0.75rem',
@@ -238,7 +387,7 @@ export const LoginPage = () => {
             width: 'fit-content'
           }}>
             <span className={`status-dot ${backendOnline ? 'online' : 'offline'}`} />
-            <span>{backendOnline ? 'PostgreSQL Backend Connected (Port 8000)' : 'Standalone Offline Mode'}</span>
+            <span>{backendOnline ? 'PostgreSQL 16 Enterprise Backend Connected (Port 8000)' : 'Standalone Mode'}</span>
           </div>
         </div>
 
