@@ -173,7 +173,7 @@ export const DashboardView = ({
                         Loan: #{l.loan_reference} • Due: {l.due_date} (<strong style={{ color: 'var(--accent-rose)' }}>{l.days_overdue} days overdue</strong>)
                       </div>
                       <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-rose)', marginTop: '0.2rem' }}>
-                        ₹{Number(l.balance?.outstanding || l.principal_amount).toLocaleString()} Outstanding
+                        {getCurrencySymbol(l.currency)}{Number(l.balance?.outstanding || l.principal_amount).toLocaleString()} Outstanding
                       </div>
                     </div>
 
@@ -228,7 +228,7 @@ export const DashboardView = ({
                     <div>
                       <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{l.person_name}</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        Due on: {l.due_date} • Owed: ₹{Number(l.balance?.outstanding || l.principal_amount).toLocaleString()}
+                        Due on: {l.due_date} • Owed: {getCurrencySymbol(l.currency)}{Number(l.balance?.outstanding || l.principal_amount).toLocaleString()}
                       </div>
                     </div>
                     <button
