@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
   Bell, 
@@ -9,14 +9,17 @@ import {
   Menu,
   Check,
   Globe2,
-  ChevronDown
+  ChevronDown,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { CURRENCY_MAP, getDefaultCurrency, setDefaultCurrency, getCurrencySymbol } from '../utils/currency';
 
 const TAB_METADATA = {
-  dashboard: { title: 'Lending Dashboard', subtitle: 'Real-time portfolio overview, balance calculations, and urgent follow-ups' },
-  people: { title: 'People & Borrower Directory', subtitle: 'Manage borrower relationships, contact details, and financial exposure' },
-  loans: { title: 'Lending Ledger', subtitle: 'Authoritative source of truth for money lent, due dates, and settlement progress' },
+  dashboard: { title: 'LendGuard Dashboard', subtitle: 'Real-time financial position, active lending & borrowing portfolios' },
+  people: { title: 'People & Contacts Directory', subtitle: 'Manage borrower & lender relationships, contact details, and financial exposure' },
+  loans: { title: 'Lending Ledger', subtitle: 'Authoritative source of truth for money lent, due dates, and recovery progress' },
+  borrowing: { title: 'Borrowing Ledger', subtitle: 'Authoritative source of truth for money borrowed, due dates, and debt liabilities' },
   aging: { title: 'Overdue Aging Analysis', subtitle: 'Deterministic overdue balance distribution categorized by days past due date' },
   calculator: { title: 'Loan EMI & Repayment Calculator', subtitle: 'Simulate monthly repayment schedules, interest accrual, and terms' },
   'api-explorer': { title: 'API & OpenAPI 3.0 Documentation', subtitle: 'Interactive DRF Spectacular Swagger UI and endpoint schema' },
@@ -30,7 +33,9 @@ export const TopHeader = ({
   notifications = [],
   onMarkNotificationRead,
   onMarkAllNotificationsRead,
-  onToggleMobileSidebar
+  onToggleMobileSidebar,
+  isMasked = false,
+  onToggleMask
 }) => {
   const { backendOnline } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
@@ -60,27 +65,32 @@ export const TopHeader = ({
         </div>
       </div>
 
-      {/* Right: Status, Notifications, & Quick Actions */}
+      {/* Right: Number Mask Button, Notifications, & Quick Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-        {/* Backend Status Badge */}
-        <div
-          title={backendOnline ? 'PostgreSQL Database Connected (Port 8000)' : 'Standalone Offline Mode'}
+        {/* Number Mask Privacy Toggle Button */}
+        <button
+          type="button"
+          onClick={onToggleMask}
+          className={`btn ${isMasked ? 'btn-primary' : 'btn-secondary'}`}
           style={{
+            padding: '0.4rem 0.8rem',
+            fontSize: '0.75rem',
+            fontWeight: 700,
             display: 'flex',
             alignItems: 'center',
-            gap: '0.4rem',
-            padding: '0.3rem 0.65rem',
-            background: backendOnline ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-            border: `1px solid ${backendOnline ? 'rgba(16, 185, 129, 0.25)' : 'rgba(245, 158, 11, 0.25)'}`,
+            gap: '0.45rem',
             borderRadius: 'var(--radius-full)',
-            fontSize: '0.72rem',
-            fontWeight: 600,
-            color: backendOnline ? 'var(--accent-emerald)' : 'var(--accent-amber)'
+            background: isMasked ? 'rgba(99, 102, 241, 0.18)' : 'var(--inner-card-bg)',
+            borderColor: isMasked ? 'var(--accent-indigo)' : 'var(--border-subtle)',
+            color: isMasked ? 'var(--accent-indigo)' : 'var(--text-secondary)',
+            cursor: 'pointer',
+            transition: 'all 0.18s ease'
           }}
+          title={isMasked ? "Numbers are currently masked (Privacy ON) — Click to reveal" : "Click to mask financial numbers (Privacy Mode)"}
         >
-          <span className={`status-dot ${backendOnline ? 'online' : 'offline'}`} />
-          <span>{backendOnline ? 'PostgreSQL Active' : 'Offline'}</span>
-        </div>
+          {isMasked ? <EyeOff size={15} color="var(--accent-indigo)" /> : <Eye size={15} />}
+          <span>{isMasked ? 'Masked' : 'Mask Numbers'}</span>
+        </button>
 
         {/* Notification Bell Dropdown */}
         <div style={{ position: 'relative' }}>
