@@ -18,7 +18,7 @@ class LoanViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     queryset = Loan.objects.none()
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['status', 'person', 'currency', 'interest_model', 'is_archived']
+    filterset_fields = ['status', 'person', 'currency', 'interest_model', 'direction', 'is_archived']
     search_fields = ['loan_reference', 'purpose', 'notes', 'person__name', 'person__mobile', 'person__email']
     ordering_fields = ['date_given', 'due_date', 'principal_amount', 'created_at']
     ordering = ['-date_given', '-created_at']
@@ -29,7 +29,18 @@ class LoanViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if not user.is_authenticated:
             return Loan.objects.none()
-        return Loan.objects.filter(created_by=user).select_related('person', 'created_by')
+        qs = Loan.objects.filter(created_by=user).select_related('person', 'created_by')
+        
+        # Direction filter with alias support (lending/borrowing/lent/borrowed)
+        direction = self.request.query_params.get('direction')
+        if direction and direction.lower() != 'all':
+            d_lower = direction.strip().lower()
+            if d_lower in ['borrowed', 'borrowing']:
+                qs = qs.filter(direction='borrowed')
+            elif d_lower in ['lent', 'lending']:
+                qs = qs.filter(direction='lent')
+
+        return qs
 
     def get_serializer_class(self):
         if self.action == 'create':
