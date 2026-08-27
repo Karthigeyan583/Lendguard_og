@@ -57,6 +57,15 @@ export const PersonDetailsModal = ({
     setTimeout(() => setCopiedBankId(null), 2000);
   };
 
+  const getFontSizeForAmount = (valStr) => {
+    const len = String(valStr || '').length;
+    if (len >= 16) return '0.78rem';
+    if (len >= 13) return '0.84rem';
+    if (len >= 10) return '0.92rem';
+    if (len >= 8) return '1.02rem';
+    return '1.15rem';
+  };
+
   if (!isOpen || !person) return null;
 
   // Filter loans belonging to this person
