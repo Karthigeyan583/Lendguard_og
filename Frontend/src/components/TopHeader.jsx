@@ -14,7 +14,6 @@ import {
   EyeOff 
 } from 'lucide-react';
 import { CURRENCY_MAP, getDefaultCurrency, setDefaultCurrency, getCurrencySymbol } from '../utils/currency';
-import { CurrencySelector } from './CurrencySelector';
 import { CurrencyTicker } from './CurrencyTicker';
 
 const TAB_METADATA = {
@@ -67,11 +66,8 @@ export const TopHeader = ({
         </div>
       </div>
 
-      {/* Right: Currency Dropdown Selector, FX Ticker, Number Mask Button, Notifications, & Quick Actions */}
+      {/* Right: FX Ticker, Number Mask Button, Notifications, & Quick Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-        {/* Dynamic Interactive Reporting Currency Dropdown Selector */}
-        <CurrencySelector />
-
         {/* Dynamic FX Currency Ticker */}
         <CurrencyTicker />
 
