@@ -4,19 +4,20 @@ import { useTheme } from '../context/ThemeContext';
 import { 
   ShieldCheck, 
   Users, 
-  BookOpen, 
-  BarChart3, 
+  LayoutDashboard,
+  LineChart,
+  HandCoins,
+  Landmark,
+  Hourglass,
   Calculator, 
-  Terminal, 
   Plus, 
   LogOut, 
-  FileText,
-  Sun,
-  Moon,
-  ChevronRight,
-  TrendingUp,
-  Layers,
-  Settings
+  Sun, 
+  Moon, 
+  ChevronRight, 
+  Layers, 
+  Settings2,
+  Sparkles
 } from 'lucide-react';
 
 export const Sidebar = ({ 
@@ -30,17 +31,17 @@ export const Sidebar = ({
   const { theme, toggleTheme, isDark } = useTheme();
 
   const mainNavItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: BarChart3, description: 'Overview & Position' },
-    { id: 'analytics', label: 'Analytics & Reports', icon: FileText, description: 'Intelligence & Studio', badge: 'v2.0', badgeColor: 'var(--accent-emerald)' },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, description: 'Overview & Position' },
+    { id: 'analytics', label: 'Analytics & Reports', icon: LineChart, description: 'Intelligence & Studio', badge: 'v2.0', badgeColor: 'var(--accent-emerald)' },
     { id: 'people', label: 'People & Contacts', icon: Users, description: 'Borrowers & Lenders' },
-    { id: 'loans', label: 'Lending Ledger', icon: BookOpen, description: 'Money Lent (Receivables)' },
-    { id: 'borrowing', label: 'Borrowing Ledger', icon: TrendingUp, description: 'Money Borrowed (Payables)' },
-    { id: 'aging', label: 'Overdue Aging', icon: FileText, description: 'Recovery buckets', badge: overdueCount > 0 ? `${overdueCount}` : null, badgeColor: 'var(--accent-rose)' },
+    { id: 'loans', label: 'Lending Ledger', icon: HandCoins, description: 'Money Lent (Receivables)' },
+    { id: 'borrowing', label: 'Borrowing Ledger', icon: Landmark, description: 'Money Borrowed (Payables)' },
+    { id: 'aging', label: 'Overdue Aging', icon: Hourglass, description: 'Recovery buckets', badge: overdueCount > 0 ? `${overdueCount}` : null, badgeColor: 'var(--accent-rose)' },
   ];
 
   const toolsNavItems = [
     { id: 'calculator', label: 'Tools / EMI', icon: Calculator, description: 'Repayment calculator' },
-    { id: 'settings', label: 'Settings & Security', icon: Settings, description: 'P24-P30 Admin Hub' },
+    { id: 'settings', label: 'Settings & Security', icon: Settings2, description: 'P24-P30 Admin Hub' },
   ];
 
   return (
