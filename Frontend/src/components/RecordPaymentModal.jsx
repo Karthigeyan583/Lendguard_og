@@ -161,10 +161,24 @@ export const RecordPaymentModal = ({ isOpen, onClose, loan, onPaymentRecorded })
               <input
                 type="date"
                 required
+                min={loan?.date_given}
                 className="form-input"
                 value={paymentDate}
-                onChange={(e) => setPaymentDate(e.target.value)}
+                onChange={(e) => {
+                  const newDate = e.target.value;
+                  if (loan?.date_given && newDate && newDate < loan.date_given) {
+                    setError(`Repayment date cannot be earlier than the loan origination date (${loan.date_given}).`);
+                  } else {
+                    setError('');
+                  }
+                  setPaymentDate(newDate);
+                }}
               />
+              {loan?.date_given && (
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
+                  Must be on or after loan origination date ({loan.date_given})
+                </span>
+              )}
             </div>
           </div>
 
