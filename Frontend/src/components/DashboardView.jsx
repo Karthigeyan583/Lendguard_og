@@ -192,112 +192,83 @@ export const DashboardView = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Net Financial Position & Direction Switcher Bar */}
+      {/* Dashboard Direction Switcher & Base Currency Toolbar */}
       <div className="glass-panel" style={{
         position: 'relative',
-        zIndex: 60,
-        padding: '1.25rem 1.5rem',
+        zIndex: 5,
+        padding: '0.65rem 1rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '1rem',
+        gap: '0.75rem',
         background: 'var(--inner-card-bg)',
-        border: '1px solid var(--border-subtle)'
+        border: '1px solid var(--border-subtle)',
+        borderRadius: 'var(--radius-md)'
       }}>
-        {/* Left: Net Position Summary */}
-        <div>
-          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Authoritative Financial Position ({activeDisplayCurrency})
-          </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginTop: '0.2rem', flexWrap: 'wrap' }}>
-            <span style={{
-              fontSize: '1.5rem',
-              fontWeight: 900,
-              color: displayStats.netOutstanding > 0 ? 'var(--accent-emerald)' : displayStats.netOutstanding < 0 ? 'var(--accent-rose)' : 'var(--text-primary)'
-            }}>
-              {isMasked 
-                ? `${activeDisplaySymbol}••••••` 
-                : `${displayStats.netOutstanding >= 0 ? '+' : ''}${activeDisplaySymbol}${Number(Math.abs(displayStats.netOutstanding)).toLocaleString()}`} <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{activeDisplayCurrency}</span>
-            </span>
-            <span className="badge" style={{
-              background: displayStats.netOutstanding > 0 ? 'rgba(16, 185, 129, 0.15)' : displayStats.netOutstanding < 0 ? 'rgba(244, 63, 94, 0.15)' : 'rgba(148, 163, 184, 0.15)',
-              color: displayStats.netOutstanding > 0 ? 'var(--accent-emerald)' : displayStats.netOutstanding < 0 ? 'var(--accent-rose)' : 'var(--text-muted)',
-              fontSize: '0.75rem',
-              fontWeight: 700
-            }}>
-              {displayStats.netOutstanding > 0 ? 'Net Receivable (You are owed money)' : displayStats.netOutstanding < 0 ? 'Net Payable (You owe money)' : 'Even / Settled Net Position'}
-            </span>
-          </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-            Receivables: <strong>{activeDisplaySymbol}{isMasked ? '••••••' : Number(displayStats.lentOutstanding).toLocaleString()}</strong> • Payables: <strong>{activeDisplaySymbol}{isMasked ? '••••••' : Number(displayStats.borrowedOutstanding).toLocaleString()}</strong>
-          </div>
+        {/* Left: Direction Switcher Tabs */}
+        <div style={{
+          display: 'flex',
+          gap: '0.35rem',
+          background: 'var(--bg-surface)',
+          padding: '0.25rem',
+          borderRadius: 'var(--radius-md)',
+          border: '1px solid var(--border-subtle)'
+        }}>
+          <button
+            type="button"
+            onClick={() => setDashboardDirection('overview')}
+            style={{
+              padding: '0.45rem 0.95rem',
+              borderRadius: 'var(--radius-sm)',
+              border: 'none',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              background: dashboardDirection === 'overview' ? 'var(--bg-card)' : 'transparent',
+              color: dashboardDirection === 'overview' ? 'var(--text-primary)' : 'var(--text-muted)',
+              boxShadow: dashboardDirection === 'overview' ? '0 1px 4px rgba(0,0,0,0.1)' : 'none'
+            }}
+          >
+            ⚖️ Net Overview
+          </button>
+          <button
+            type="button"
+            onClick={() => setDashboardDirection('lent')}
+            style={{
+              padding: '0.45rem 0.95rem',
+              borderRadius: 'var(--radius-sm)',
+              border: 'none',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              background: dashboardDirection === 'lent' ? 'var(--accent-emerald)' : 'transparent',
+              color: dashboardDirection === 'lent' ? '#ffffff' : 'var(--text-muted)'
+            }}
+          >
+            🤝 Money Lent ({lentLoans.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setDashboardDirection('borrowed')}
+            style={{
+              padding: '0.45rem 0.95rem',
+              borderRadius: 'var(--radius-sm)',
+              border: 'none',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              background: dashboardDirection === 'borrowed' ? 'var(--accent-indigo)' : 'transparent',
+              color: dashboardDirection === 'borrowed' ? '#ffffff' : 'var(--text-muted)'
+            }}
+          >
+            📥 Money Borrowed ({borrowedLoans.length})
+          </button>
         </div>
 
-        {/* Right: Base Currency Selector Dropdown + Direction Switcher Tabs */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-          {/* Direct Base Currency Selector Dropdown */}
+        {/* Right: Base Currency Selector Dropdown */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <CurrencySelector />
-
-          {/* Dashboard View Direction Switcher */}
-          <div style={{
-            display: 'flex',
-            gap: '0.35rem',
-            background: 'var(--bg-surface)',
-            padding: '0.3rem',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-subtle)'
-          }}>
-            <button
-              type="button"
-              onClick={() => setDashboardDirection('overview')}
-              style={{
-                padding: '0.45rem 0.85rem',
-                borderRadius: 'var(--radius-sm)',
-                border: 'none',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                background: dashboardDirection === 'overview' ? 'var(--bg-card)' : 'transparent',
-                color: dashboardDirection === 'overview' ? 'var(--text-primary)' : 'var(--text-muted)',
-                boxShadow: dashboardDirection === 'overview' ? '0 1px 4px rgba(0,0,0,0.1)' : 'none'
-              }}
-            >
-              ⚖️ Net Overview
-            </button>
-            <button
-              type="button"
-              onClick={() => setDashboardDirection('lent')}
-              style={{
-                padding: '0.45rem 0.85rem',
-                borderRadius: 'var(--radius-sm)',
-                border: 'none',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                background: dashboardDirection === 'lent' ? 'var(--accent-emerald)' : 'transparent',
-                color: dashboardDirection === 'lent' ? '#ffffff' : 'var(--text-muted)'
-              }}
-            >
-              🤝 Money Lent ({lentLoans.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setDashboardDirection('borrowed')}
-              style={{
-                padding: '0.45rem 0.85rem',
-                borderRadius: 'var(--radius-sm)',
-                border: 'none',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                background: dashboardDirection === 'borrowed' ? 'var(--accent-indigo)' : 'transparent',
-                color: dashboardDirection === 'borrowed' ? '#ffffff' : 'var(--text-muted)'
-              }}
-            >
-              📥 Money Borrowed ({borrowedLoans.length})
-            </button>
-          </div>
         </div>
       </div>
 
