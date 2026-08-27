@@ -73,110 +73,115 @@ export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArc
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
-          {filtered.map((person) => (
-            <div
-              key={person.id}
-              className="glass-panel person-card"
-              style={{ padding: '1.35rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
-            >
-              <div>
-                {/* Person Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.85rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{
-                      width: 42,
-                      height: 42,
-                      borderRadius: '50%',
-                      background: 'linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan))',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 800,
-                      fontSize: '1rem',
-                      color: '#ffffff'
-                    }}>
-                      {person.name ? person.name.charAt(0).toUpperCase() : 'P'}
+          {filtered.map((person) => {
+            const pCurrs = person.currency_breakdown ? Object.keys(person.currency_breakdown) : [];
+            const pCurr = pCurrs.length === 1 ? pCurrs[0] : (person.reporting_currency || 'INR');
+            const pSym = getCurrencySymbol(pCurr);
+
+            return (
+              <div
+                key={person.id}
+                className="glass-panel person-card"
+                style={{ padding: '1.35rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+              >
+                <div>
+                  {/* Person Header */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.85rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div style={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan))',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 800,
+                        fontSize: '1rem',
+                        color: '#ffffff'
+                      }}>
+                        {person.name ? person.name.charAt(0).toUpperCase() : 'P'}
+                      </div>
+                      <div>
+                        <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>{person.name}</h4>
+                        <span className="badge-role" style={{ fontSize: '0.68rem', textTransform: 'capitalize', marginTop: '0.2rem', display: 'inline-block' }}>
+                          {person.relationship}
+                        </span>
+                      </div>
                     </div>
-                    <div>
-                      <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>{person.name}</h4>
-                      <span className="badge-role" style={{ fontSize: '0.68rem', textTransform: 'capitalize', marginTop: '0.2rem', display: 'inline-block' }}>
-                        {person.relationship}
+
+                    {person.is_archived && (
+                      <span className="badge badge-draft" style={{ fontSize: '0.65rem' }}>Archived</span>
+                    )}
+                  </div>
+
+                  {/* Contact Info */}
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.25rem' }}>
+                    {person.mobile && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <Phone size={13} color="var(--text-muted)" />
+                        <span>{person.mobile}</span>
+                      </div>
+                    )}
+                    {person.email && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <Mail size={13} color="var(--text-muted)" />
+                        <span>{person.email}</span>
+                      </div>
+                    )}
+                    {person.tags && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.15rem' }}>
+                        <Tag size={13} color="var(--text-muted)" />
+                        <span style={{ fontSize: '0.72rem', color: 'var(--accent-indigo)' }}>{person.tags}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Financial Exposure Card */}
+                  <div style={{
+                    background: 'var(--inner-card-bg)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.85rem 1rem',
+                    marginBottom: '1.25rem'
+                  }}>
+                    {/* Top Net Exposure Row */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.45rem' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+                        Net Exposure ({pCurr})
+                      </span>
+                      <span style={{
+                        fontSize: '0.85rem',
+                        fontWeight: 800,
+                        color: (person.net_exposure || 0) > 0 ? 'var(--accent-emerald)' : (person.net_exposure || 0) < 0 ? 'var(--accent-rose)' : 'var(--text-muted)'
+                      }}>
+                        {isMasked ? `${pSym}••••••` : `${(person.net_exposure || 0) >= 0 ? '+' : ''}${pSym}${Number(person.net_exposure || 0).toLocaleString()}`}
+                        <span style={{ fontSize: '0.68rem', fontWeight: 600, marginLeft: 4 }}>
+                          ({(person.net_exposure || 0) > 0 ? 'Owes You' : (person.net_exposure || 0) < 0 ? 'You Owe' : 'Even'})
+                        </span>
                       </span>
                     </div>
-                  </div>
 
-                  {person.is_archived && (
-                    <span className="badge badge-draft" style={{ fontSize: '0.65rem' }}>Archived</span>
-                  )}
-                </div>
+                    {/* Dual Columns: Lent vs Borrowed */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', textAlign: 'center' }}>
+                      <div style={{ padding: '0.35rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--accent-emerald)', display: 'block', fontWeight: 700 }}>🤝 Money Lent</span>
+                        <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
+                          {isMasked ? '••••••' : `${pSym}${Number(person.lent?.outstanding || person.outstanding_balance || 0).toLocaleString()}`}
+                        </strong>
+                        <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>owed to you</span>
+                      </div>
 
-                {/* Contact Info */}
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.25rem' }}>
-                  {person.mobile && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <Phone size={13} color="var(--text-muted)" />
-                      <span>{person.mobile}</span>
-                    </div>
-                  )}
-                  {person.email && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <Mail size={13} color="var(--text-muted)" />
-                      <span>{person.email}</span>
-                    </div>
-                  )}
-                  {person.tags && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.15rem' }}>
-                      <Tag size={13} color="var(--text-muted)" />
-                      <span style={{ fontSize: '0.72rem', color: 'var(--accent-indigo)' }}>{person.tags}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Financial Exposure Card */}
-                <div style={{
-                  background: 'var(--inner-card-bg)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-sm)',
-                  padding: '0.85rem 1rem',
-                  marginBottom: '1.25rem'
-                }}>
-                  {/* Top Net Exposure Row */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.45rem' }}>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
-                      Net Exposure
-                    </span>
-                    <span style={{
-                      fontSize: '0.85rem',
-                      fontWeight: 800,
-                      color: (person.net_exposure || 0) > 0 ? 'var(--accent-emerald)' : (person.net_exposure || 0) < 0 ? 'var(--accent-rose)' : 'var(--text-muted)'
-                    }}>
-                      {isMasked ? `${defSymbol}••••••` : `${(person.net_exposure || 0) >= 0 ? '+' : ''}${defSymbol}${Number(person.net_exposure || 0).toLocaleString()}`}
-                      <span style={{ fontSize: '0.68rem', fontWeight: 600, marginLeft: 4 }}>
-                        ({(person.net_exposure || 0) > 0 ? 'Owes You' : (person.net_exposure || 0) < 0 ? 'You Owe' : 'Even'})
-                      </span>
-                    </span>
-                  </div>
-
-                  {/* Dual Columns: Lent vs Borrowed */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', textAlign: 'center' }}>
-                    <div style={{ padding: '0.35rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)' }}>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--accent-emerald)', display: 'block', fontWeight: 700 }}>🤝 Money Lent</span>
-                      <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
-                        {isMasked ? '••••••' : `${defSymbol}${Number(person.lent?.outstanding || person.outstanding_balance || 0).toLocaleString()}`}
-                      </strong>
-                      <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>owed to you</span>
-                    </div>
-
-                    <div style={{ padding: '0.35rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)' }}>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--accent-indigo)', display: 'block', fontWeight: 700 }}>📥 Money Borrowed</span>
-                      <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
-                        {isMasked ? '••••••' : `${defSymbol}${Number(person.borrowed?.outstanding || 0).toLocaleString()}`}
-                      </strong>
-                      <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>you owe them</span>
+                      <div style={{ padding: '0.35rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--accent-indigo)', display: 'block', fontWeight: 700 }}>📥 Money Borrowed</span>
+                        <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
+                          {isMasked ? '••••••' : `${pSym}${Number(person.borrowed?.outstanding || 0).toLocaleString()}`}
+                        </strong>
+                        <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>you owe them</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
               {/* Action Buttons */}
               <div style={{ display: 'flex', gap: '0.5rem' }}>
