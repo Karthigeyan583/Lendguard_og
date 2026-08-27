@@ -4,6 +4,9 @@ from apps.loans.services.balance_engine import calculate_loan_balance
 
 
 class PersonSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    last_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    
     reporting_currency = serializers.SerializerMethodField()
     total_lent = serializers.SerializerMethodField()
     total_repaid = serializers.SerializerMethodField()
@@ -24,6 +27,8 @@ class PersonSerializer(serializers.ModelSerializer):
             'workspace',
             'created_by',
             'name',
+            'first_name',
+            'last_name',
             'mobile',
             'email',
             'relationship',
@@ -44,6 +49,17 @@ class PersonSerializer(serializers.ModelSerializer):
             'updated_at'
         ]
         read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
+
+    def validate(self, attrs):
+        first_name = attrs.pop('first_name', None)
+        last_name = attrs.pop('last_name', None)
+        if first_name is not None or last_name is not None:
+            full = f"{first_name or ''} {last_name or ''}".strip()
+            if full:
+                attrs['name'] = full
+        if not attrs.get('name'):
+            raise serializers.ValidationError({"first_name": "Contact first name is required."})
+        return attrs
 
     def _get_reporting_currency(self, obj) -> str:
         request = self.context.get('request')
