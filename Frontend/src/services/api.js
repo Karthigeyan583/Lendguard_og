@@ -85,6 +85,7 @@ export const api = {
   // Dashboard & Reports (Bible v2.0)
   getDashboardSummary: (params = '') => request(`/dashboard/summary/${params ? `?${params}` : ''}`),
   getAgingReport: (params = '') => request(`/reports/aging/${params ? `?${params}` : ''}`),
+  getCurrencyTicker: (reportingCurrency = '') => request(`/ticker/${reportingCurrency ? `?reporting_currency=${reportingCurrency}` : ''}`),
 
   // People / Contacts
   getPeople: (params = '') => request(`/people/${params ? `?${params}` : ''}`),
