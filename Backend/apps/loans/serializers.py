@@ -180,6 +180,11 @@ class LoanCreateSerializer(serializers.ModelSerializer):
         if not purpose or not purpose.strip():
             raise serializers.ValidationError({"purpose": "Purpose / lending context is required."})
 
+        if date_given:
+            today = timezone.localdate()
+            if date_given > today:
+                raise serializers.ValidationError({"date_given": f"Transaction disbursement date ({date_given}) cannot be in the future. Must be today ({today}) or a past date."})
+
         if due_date and date_given and due_date < date_given:
             raise serializers.ValidationError({"due_date": "Agreed due date cannot be earlier than the date the money was given."})
 
