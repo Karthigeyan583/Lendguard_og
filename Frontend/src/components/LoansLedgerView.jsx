@@ -2,15 +2,20 @@ import React, { useState } from 'react';
 import { 
   Search, 
   Plus, 
-  FileText, 
-  CheckCircle, 
+  FileCheck2, 
+  CheckCircle2, 
   Clock, 
   AlertTriangle, 
   ArrowDownLeft, 
+  ArrowUpRight,
+  ArrowDownToLine,
+  Send,
   Share2, 
   ChevronRight, 
   XOctagon, 
-  BookOpen,
+  HandCoins,
+  Landmark,
+  Layers,
   Calendar,
   DollarSign
 } from 'lucide-react';
