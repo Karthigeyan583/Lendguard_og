@@ -36,6 +36,26 @@ export const PersonDetailsModal = ({
   isMasked = false
 }) => {
   const [personTabFilter, setPersonTabFilter] = React.useState('all');
+  const [copiedBankId, setCopiedBankId] = React.useState(null);
+
+  const handleCopyBankDetails = (acc) => {
+    const details = [
+      `Beneficiary: ${acc.account_holder_name}`,
+      `Bank: ${acc.bank_name}`,
+      `Account No: ${acc.account_number}`,
+      acc.ifsc_code ? `IFSC: ${acc.ifsc_code}` : null,
+      acc.upi_id ? `UPI: ${acc.upi_id}` : null,
+      acc.sort_code ? `Sort Code: ${acc.sort_code}` : null,
+      acc.routing_number ? `Routing: ${acc.routing_number}` : null,
+      acc.iban ? `IBAN: ${acc.iban}` : null,
+      acc.swift_bic ? `SWIFT/BIC: ${acc.swift_bic}` : null,
+      acc.bsb_number ? `BSB: ${acc.bsb_number}` : null,
+    ].filter(Boolean).join('\n');
+
+    navigator.clipboard.writeText(details);
+    setCopiedBankId(acc.id || acc.account_number);
+    setTimeout(() => setCopiedBankId(null), 2000);
+  };
 
   if (!isOpen || !person) return null;
 
