@@ -6,14 +6,15 @@ import {
   Plus, 
   Users, 
   ShieldCheck, 
-  Menu,
-  Check,
-  Globe2,
-  ChevronDown,
-  Eye,
-  EyeOff
+  Menu, 
+  Check, 
+  Globe2, 
+  ChevronDown, 
+  Eye, 
+  EyeOff 
 } from 'lucide-react';
 import { CURRENCY_MAP, getDefaultCurrency, setDefaultCurrency, getCurrencySymbol } from '../utils/currency';
+import { CurrencyTicker } from './CurrencyTicker';
 
 const TAB_METADATA = {
   dashboard: { title: 'LendGuard Dashboard', subtitle: 'Real-time financial position, active lending & borrowing portfolios' },
