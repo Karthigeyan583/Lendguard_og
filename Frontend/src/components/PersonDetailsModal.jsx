@@ -71,7 +71,7 @@ export const PersonDetailsModal = ({
     const currOverdue = currLoans.filter(l => (l.time_status === 'OVERDUE' || l.days_overdue > 0) && l.status !== 'PAID');
     const lent = currLoans.filter(l => l.direction !== 'borrowed').reduce((acc, l) => acc + Number(l.principal_amount || 0), 0);
     const repaid = currLoans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
-    const out = currLoans.filter(l => l.direction !== 'borrowed').reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + Number(l.balance?.outstanding ?? l.principal_amount ?? 0), 0);
+    const out = currLoans.filter(l => l.direction !== 'borrowed').reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + Number(l.balance?.outstanding ?? l.principal_amount ?? 0) : acc, 0);
     const overdue = currOverdue.reduce((acc, l) => acc + Number(l.balance?.outstanding ?? l.principal_amount ?? 0), 0);
     const rec = lent > 0 ? Number(((repaid / lent) * 100).toFixed(1)) : 0;
     personTotalsByCurrency[curr] = {
