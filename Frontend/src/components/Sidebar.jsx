@@ -185,21 +185,36 @@ export const Sidebar = ({
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '0.5rem' }}>
           {/* User Info */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
-            <div style={{
-              width: 34,
-              height: 34,
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #10b981, #06b6d4)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 800,
-              fontSize: '0.8rem',
-              color: '#ffffff',
-              flexShrink: 0
-            }}>
-              {user?.first_name ? user.first_name[0] : (user?.username ? user.username[0].toUpperCase() : 'K')}
-            </div>
+            {user?.avatar || localStorage.getItem('lendguard_user_avatar') ? (
+              <img
+                src={user?.avatar || localStorage.getItem('lendguard_user_avatar')}
+                alt={user?.first_name || 'User'}
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  border: '2px solid var(--accent-emerald)',
+                  flexShrink: 0
+                }}
+              />
+            ) : (
+              <div style={{
+                width: 34,
+                height: 34,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #10b981, #06b6d4)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 800,
+                fontSize: '0.8rem',
+                color: '#ffffff',
+                flexShrink: 0
+              }}>
+                {user?.first_name ? user.first_name[0] : (user?.username ? user.username[0].toUpperCase() : 'K')}
+              </div>
+            )}
 
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '0.825rem', fontWeight: 700, color: 'var(--sidebar-footer-text, #ffffff)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
