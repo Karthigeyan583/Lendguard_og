@@ -65,29 +65,30 @@ export const CurrencySelector = ({ onCurrencyChange }) => {
   const currInfo = CURRENCY_MAP[selectedCurrency] || { symbol: selectedCurrency, name: selectedCurrency, flag: '🌐' };
 
   return (
-    <div ref={dropdownRef} style={{ position: 'relative' }}>
-      {/* Trigger Button */}
+    <div ref={dropdownRef} style={{ position: 'relative', zIndex: 100 }}>
+      {/* Trigger Button - Styled to match dashboard tab pills */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '0.4rem',
-          background: 'var(--inner-card-bg)',
+          gap: '0.45rem',
+          background: 'var(--bg-surface)',
           border: '1px solid var(--border-subtle)',
-          borderRadius: 'var(--radius-full)',
-          padding: '0.35rem 0.75rem',
+          borderRadius: 'var(--radius-md)',
+          padding: '0.42rem 0.85rem',
           fontSize: '0.78rem',
           fontWeight: 700,
           color: 'var(--text-primary)',
           cursor: 'pointer',
           transition: 'all 0.18s ease',
-          boxShadow: isOpen ? '0 0 10px var(--border-glow)' : 'none'
+          boxShadow: isOpen ? '0 0 12px var(--border-glow)' : 'none',
+          whiteSpace: 'nowrap'
         }}
-        title="Reporting Currency — Select base currency for the dashboard & calculations"
+        title="Reporting Currency — Click to select base currency for dashboard & calculations"
       >
-        <span style={{ fontSize: '0.9rem' }}>{currInfo.flag}</span>
+        <span style={{ fontSize: '0.92rem' }}>{currInfo.flag}</span>
         <span style={{ color: 'var(--accent-emerald)', fontWeight: 800 }}>{selectedCurrency}</span>
         <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>({currInfo.symbol})</span>
         <ChevronDown
@@ -101,32 +102,34 @@ export const CurrencySelector = ({ onCurrencyChange }) => {
         />
       </button>
 
-      {/* Dropdown Menu */}
+      {/* High Z-Index Dropdown Menu */}
       {isOpen && (
         <div
           style={{
             position: 'absolute',
             top: 'calc(100% + 6px)',
             right: 0,
-            width: '210px',
+            width: '230px',
+            maxHeight: '320px',
+            overflowY: 'auto',
             background: 'var(--bg-card)',
             border: '1px solid var(--border-subtle)',
             borderRadius: 'var(--radius-md)',
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.35), 0 0 15px rgba(16, 185, 129, 0.08)',
-            zIndex: 1100,
+            boxShadow: '0 16px 40px rgba(0, 0, 0, 0.45), 0 0 20px rgba(16, 185, 129, 0.15)',
+            zIndex: 99999,
             padding: '0.4rem',
             animation: 'fadeIn 0.12s ease-out'
           }}
         >
           <div style={{
-            padding: '0.35rem 0.6rem 0.4rem',
+            padding: '0.4rem 0.65rem 0.45rem',
             fontSize: '0.66rem',
             fontWeight: 800,
             color: 'var(--text-muted)',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
             borderBottom: '1px solid var(--border-subtle)',
-            marginBottom: '0.3rem'
+            marginBottom: '0.35rem'
           }}>
             Select Base Currency
           </div>
@@ -144,10 +147,10 @@ export const CurrencySelector = ({ onCurrencyChange }) => {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     width: '100%',
-                    padding: '0.45rem 0.6rem',
+                    padding: '0.5rem 0.65rem',
                     border: 'none',
                     borderRadius: 'var(--radius-sm)',
-                    background: isSelected ? 'rgba(16, 185, 129, 0.15)' : 'transparent',
+                    background: isSelected ? 'rgba(16, 185, 129, 0.16)' : 'transparent',
                     color: isSelected ? 'var(--accent-emerald)' : 'var(--text-primary)',
                     fontSize: '0.78rem',
                     fontWeight: isSelected ? 800 : 500,
@@ -162,16 +165,16 @@ export const CurrencySelector = ({ onCurrencyChange }) => {
                     if (!isSelected) e.currentTarget.style.background = 'transparent';
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '0.95rem' }}>{info.flag}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                    <span style={{ fontSize: '1rem' }}>{info.flag}</span>
                     <div>
                       <span style={{ fontWeight: 700 }}>{code}</span>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginLeft: '0.3rem' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginLeft: '0.35rem' }}>
                         ({info.symbol})
                       </span>
                     </div>
                   </div>
-                  {isSelected && <Check size={13} color="var(--accent-emerald)" />}
+                  {isSelected && <Check size={14} color="var(--accent-emerald)" />}
                 </button>
               );
             })}
