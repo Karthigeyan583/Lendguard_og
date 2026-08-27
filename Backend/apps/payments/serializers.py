@@ -72,10 +72,16 @@ class PaymentCreateSerializer(serializers.ModelSerializer):
         if loan.status in ['PAID', 'CANCELLED', 'WRITTEN_OFF']:
             raise serializers.ValidationError(f"Cannot record repayment against a loan that is {loan.status}.")
 
-        if payment_date and loan.date_given and payment_date < loan.date_given:
-            raise serializers.ValidationError({
-                "payment_date": f"Payment date ({payment_date}) cannot be earlier than loan origination / disbursement date ({loan.date_given})."
-            })
+        if payment_date:
+            today = timezone.localdate()
+            if payment_date > today:
+                raise serializers.ValidationError({
+                    "payment_date": f"Payment date ({payment_date}) cannot be in the future. Must be today ({today}) or a past date."
+                })
+            if loan.date_given and payment_date < loan.date_given:
+                raise serializers.ValidationError({
+                    "payment_date": f"Payment date ({payment_date}) cannot be earlier than loan origination / disbursement date ({loan.date_given})."
+                })
 
         # Overpayment Check
         balance = calculate_loan_balance(loan)
