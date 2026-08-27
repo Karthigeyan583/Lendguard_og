@@ -35,20 +35,20 @@
   --accent-rose-glow: rgba(244, 63, 94, 0.15);
   --accent-purple: #a855f7;
 
-  /* Dedicated Sidebar Palette - Night Mode (Distinct Dark Midnight Slate) */
-  --sidebar-bg: #0b111e;
-  --sidebar-brand-bg: #0b111e;
-  --sidebar-footer-bg: #080d17;
-  --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-pill-bg: #111a2e;
+  /* Dedicated Sidebar Palette - Night Mode (Distinct Dark Obsidian/Midnight Slate) */
+  --sidebar-bg: #070b14;
+  --sidebar-brand-bg: #070b14;
+  --sidebar-footer-bg: #05080f;
+  --sidebar-border: rgba(255, 255, 255, 0.07);
+  --sidebar-pill-bg: #0e1526;
   --sidebar-pill-border: rgba(255, 255, 255, 0.08);
   --sidebar-nav-hover: rgba(255, 255, 255, 0.05);
-  --sidebar-nav-active-bg: linear-gradient(90deg, rgba(16, 185, 129, 0.16) 0%, rgba(6, 182, 212, 0.08) 100%);
-  --sidebar-nav-active-border: rgba(16, 185, 129, 0.4);
+  --sidebar-nav-active-bg: linear-gradient(90deg, rgba(16, 185, 129, 0.18) 0%, rgba(6, 182, 212, 0.08) 100%);
+  --sidebar-nav-active-border: rgba(16, 185, 129, 0.45);
   --sidebar-nav-active-text: #ffffff;
   --sidebar-nav-inactive-text: #94a3b8;
   --sidebar-section-title: #64748b;
-  --sidebar-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
+  --sidebar-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -93,20 +93,20 @@
   --accent-rose-glow: rgba(225, 29, 72, 0.12);
   --accent-purple: #9333ea;
 
-  /* Dedicated Sidebar Palette - Day Mode (Crisp Studio Porcelain) */
-  --sidebar-bg: #ffffff;
-  --sidebar-brand-bg: #ffffff;
-  --sidebar-footer-bg: #f8fafc;
+  /* Dedicated Sidebar Palette - Day Mode (Distinct Soft Slate-Stone Surface) */
+  --sidebar-bg: #f1f5f9;
+  --sidebar-brand-bg: #f1f5f9;
+  --sidebar-footer-bg: #e8edf3;
   --sidebar-border: #e2e8f0;
-  --sidebar-pill-bg: #f1f5f9;
+  --sidebar-pill-bg: #ffffff;
   --sidebar-pill-border: #e2e8f0;
-  --sidebar-nav-hover: #f1f5f9;
-  --sidebar-nav-active-bg: linear-gradient(90deg, rgba(5, 150, 105, 0.12) 0%, rgba(8, 145, 178, 0.06) 100%);
-  --sidebar-nav-active-border: rgba(5, 150, 105, 0.45);
+  --sidebar-nav-hover: #e2e8f0;
+  --sidebar-nav-active-bg: #ffffff;
+  --sidebar-nav-active-border: rgba(5, 150, 105, 0.5);
   --sidebar-nav-active-text: #0f172a;
   --sidebar-nav-inactive-text: #475569;
   --sidebar-section-title: #64748b;
-  --sidebar-shadow: 4px 0 20px rgba(0, 0, 0, 0.04);
+  --sidebar-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
 
   --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
   --shadow-glow: 0 0 20px rgba(5, 150, 105, 0.1);
