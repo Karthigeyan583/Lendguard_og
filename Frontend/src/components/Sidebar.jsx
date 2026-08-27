@@ -85,23 +85,18 @@ export const Sidebar = ({
         {/* Workspace Pill */}
         <div style={{
           marginTop: '1rem',
-          padding: '0.45rem 0.65rem',
+          padding: '0.45rem 0.75rem',
           background: 'var(--bg-surface)',
           border: '1px solid var(--border-subtle)',
           borderRadius: 'var(--radius-sm)',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          fontSize: '0.75rem'
+          gap: '0.5rem',
+          fontSize: '0.78rem'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-            <Layers size={14} color="var(--accent-emerald)" />
-            <span style={{ fontWeight: 600, color: 'var(--text-primary)', maxWidth: 140, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {user?.first_name ? `${user.first_name}'s Ledger` : "My Ledger"}
-            </span>
-          </div>
-          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-            {CURRENCY_MAP[getDefaultCurrency()]?.label || `${getDefaultCurrency()} (${getCurrencySymbol(getDefaultCurrency())})`}
+          <Layers size={14} color="var(--accent-emerald)" />
+          <span style={{ fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {user?.first_name ? `${user.first_name}'s Ledger` : "My Ledger"}
           </span>
         </div>
       </div>
