@@ -242,26 +242,75 @@ export const PersonDetailsModal = ({
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>
                 Net Position with {person.name}
               </span>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginTop: '0.2rem' }}>
-                <span style={{
-                  fontSize: '1.5rem',
-                  fontWeight: 900,
-                  color: netExposure > 0 ? 'var(--accent-emerald)' : netExposure < 0 ? 'var(--accent-rose)' : 'var(--text-primary)'
-                }}>
-                  {isMasked ? `${primarySymbol}••••••` : `${netExposure >= 0 ? '+' : ''}${primarySymbol}${Number(netExposure).toLocaleString()}`} <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{primaryCurrency}</span>
-                </span>
-                <span className="badge" style={{
-                  background: netExposure > 0 ? 'rgba(16, 185, 129, 0.15)' : netExposure < 0 ? 'rgba(244, 63, 94, 0.15)' : 'rgba(148, 163, 184, 0.15)',
-                  color: netExposure > 0 ? 'var(--accent-emerald)' : netExposure < 0 ? 'var(--accent-rose)' : 'var(--text-muted)',
-                  fontSize: '0.72rem',
-                  fontWeight: 700
-                }}>
-                  {netExposure > 0 ? `${person.name} Owes You` : netExposure < 0 ? `You Owe ${person.name}` : 'Settled Net Position'}
-                </span>
-              </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                Receivables: <strong>{primarySymbol}{isMasked ? '••••••' : Number(lentOutstanding).toLocaleString()}</strong> • Payables: <strong>{primarySymbol}{isMasked ? '••••••' : Number(borrowedOutstanding).toLocaleString()}</strong>
-              </div>
+              {hasMultipleCurrencies ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.35rem' }}>
+                  <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    {distinctCurrencies.map(curr => {
+                      const s = personTotalsByCurrency[curr];
+                      const sym = getCurrencySymbol(curr);
+                      const net = s.outstanding;
+                      return (
+                        <div key={curr} style={{
+                          background: 'rgba(255, 255, 255, 0.04)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0.35rem 0.7rem',
+                          display: 'flex',
+                          alignItems: 'baseline',
+                          gap: '0.35rem'
+                        }}>
+                          <span style={{
+                            fontSize: '1.25rem',
+                            fontWeight: 900,
+                            color: net > 0 ? 'var(--accent-emerald)' : 'var(--text-primary)'
+                          }}>
+                            {isMasked ? `${sym}••••••` : `${net >= 0 ? '+' : ''}${sym}${Number(net).toLocaleString()}`}
+                          </span>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--accent-indigo)' }}>{curr}</span>
+                        </div>
+                      );
+                    })}
+                    <span className="badge" style={{
+                      background: 'rgba(16, 185, 129, 0.15)',
+                      color: 'var(--accent-emerald)',
+                      fontSize: '0.72rem',
+                      fontWeight: 700
+                    }}>
+                      {person.name} Owes You (Multi-Currency)
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
+                    {distinctCurrencies.map(curr => {
+                      const s = personTotalsByCurrency[curr];
+                      const sym = getCurrencySymbol(curr);
+                      return `${curr}: Receivables ${sym}${Number(s.outstanding).toLocaleString()} • Payables ${sym}0`;
+                    }).join(' | ')}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginTop: '0.2rem' }}>
+                    <span style={{
+                      fontSize: '1.5rem',
+                      fontWeight: 900,
+                      color: netExposure > 0 ? 'var(--accent-emerald)' : netExposure < 0 ? 'var(--accent-rose)' : 'var(--text-primary)'
+                    }}>
+                      {isMasked ? `${primarySymbol}••••••` : `${netExposure >= 0 ? '+' : ''}${primarySymbol}${Number(netExposure).toLocaleString()}`} <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{primaryCurrency}</span>
+                    </span>
+                    <span className="badge" style={{
+                      background: netExposure > 0 ? 'rgba(16, 185, 129, 0.15)' : netExposure < 0 ? 'rgba(244, 63, 94, 0.15)' : 'rgba(148, 163, 184, 0.15)',
+                      color: netExposure > 0 ? 'var(--accent-emerald)' : netExposure < 0 ? 'var(--accent-rose)' : 'var(--text-muted)',
+                      fontSize: '0.72rem',
+                      fontWeight: 700
+                    }}>
+                      {netExposure > 0 ? `${person.name} Owes You` : netExposure < 0 ? `You Owe ${person.name}` : 'Settled Net Position'}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                    Receivables: <strong>{primarySymbol}{isMasked ? '••••••' : Number(lentOutstanding).toLocaleString()}</strong> • Payables: <strong>{primarySymbol}{isMasked ? '••••••' : Number(borrowedOutstanding).toLocaleString()}</strong>
+                  </div>
+                </>
+              )}
             </div>
 
             <button
