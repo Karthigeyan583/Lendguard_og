@@ -24,7 +24,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 
 import { api } from './services/api';
 import { ShieldCheck } from 'lucide-react';
-import { isNumbersMasked, setNumbersMasked } from './utils/currency';
+import { isNumbersMasked, setNumbersMasked, getDefaultCurrency } from './utils/currency';
 
 function LendGuardApp() {
   const { user, token, loading, backendOnline } = useAuth();
