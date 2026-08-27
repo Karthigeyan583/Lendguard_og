@@ -76,6 +76,23 @@ export const convertCurrency = (amount, fromCurrency, toCurrency, customRate = n
   return num * rate;
 };
 
+// Masking utilities for privacy mode
+export const isNumbersMasked = () => {
+  return localStorage.getItem('lendguard_masked') === 'true';
+};
+
+export const setNumbersMasked = (val) => {
+  localStorage.setItem('lendguard_masked', val ? 'true' : 'false');
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('lendguard_mask_toggled', { detail: { isMasked: !!val } }));
+  }
+};
+
+export const maskValue = (val, isMasked) => {
+  if (isMasked) return '••••••';
+  return val;
+};
+
 export const formatMoney = (amount, currencyCode, isMasked = false) => {
   if (isMasked) return '••••••';
   const num = Number(amount || 0);
