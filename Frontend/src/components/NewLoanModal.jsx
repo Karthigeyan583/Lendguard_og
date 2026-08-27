@@ -196,21 +196,37 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
               <label className="form-label" style={{ margin: 0 }}>
                 {isBorrowing ? 'Lender (Contact)' : 'Borrower (Contact)'}
               </label>
-              <button
-                type="button"
-                onClick={onOpenAddPerson}
-                style={{ background: 'transparent', border: 'none', color: 'var(--accent-emerald)', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
-              >
-                + New Contact
-              </button>
+              {people.length > 0 && (
+                <button
+                  type="button"
+                  onClick={onOpenAddPerson}
+                  style={{ background: 'transparent', border: 'none', color: 'var(--accent-emerald)', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  + New Contact
+                </button>
+              )}
             </div>
 
             {people.length === 0 ? (
-              <div style={{ padding: '0.75rem', background: 'var(--inner-card-bg)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>No contacts found. Please add a contact.</span>
-                <button type="button" className="btn btn-secondary" onClick={onOpenAddPerson} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>
-                  Add Contact
-                </button>
+              <div 
+                onClick={onOpenAddPerson}
+                style={{ 
+                  padding: '0.75rem 1rem', 
+                  background: 'var(--inner-card-bg)', 
+                  border: '1px dashed var(--border-subtle)', 
+                  borderRadius: 'var(--radius-md)', 
+                  fontSize: '0.8rem', 
+                  color: 'var(--text-muted)', 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  cursor: 'pointer'
+                }}
+              >
+                <span>No contacts found in directory</span>
+                <span style={{ color: 'var(--accent-emerald)', fontWeight: 700, fontSize: '0.78rem' }}>
+                  + Add Contact
+                </span>
               </div>
             ) : (
               <select
