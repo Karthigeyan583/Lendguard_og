@@ -1,20 +1,51 @@
 import React, { useState } from 'react';
 import { X, Users, Plus, AlertCircle } from 'lucide-react';
 
+export const COUNTRY_PHONE_CONFIG = [
+  { code: '+91', country: 'IN', label: '🇮🇳 +91', name: 'India', digits: 10, placeholder: '98844 01234' },
+  { code: '+1', country: 'US', label: '🇺🇸 +1', name: 'USA / Canada', digits: 10, placeholder: '202 555 0123' },
+  { code: '+44', country: 'GB', label: '🇬🇧 +44', name: 'UK', digits: 10, placeholder: '7911 123456' },
+  { code: '+971', country: 'AE', label: '🇦🇪 +971', name: 'UAE', digits: 9, placeholder: '50 123 4567' },
+  { code: '+65', country: 'SG', label: '🇸🇬 +65', name: 'Singapore', digits: 8, placeholder: '8123 4567' },
+  { code: '+61', country: 'AU', label: '🇦🇺 +61', name: 'Australia', digits: 9, placeholder: '412 345 678' },
+  { code: '+41', country: 'CH', label: '🇨🇭 +41', name: 'Switzerland', digits: 9, placeholder: '79 123 45 67' },
+  { code: '+49', country: 'DE', label: '🇩🇪 +49', name: 'Germany', digits: 11, placeholder: '151 12345678' },
+  { code: '', country: 'OTHER', label: '🌐 Other', name: 'International', digits: 15, placeholder: 'Enter phone digits' },
+];
+
 export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     relationship: 'friend',
-    mobile: '',
     email: '',
     tags: '',
     notes: ''
   });
+  const [countryCode, setCountryCode] = useState('+91');
+  const [mobileDigits, setMobileDigits] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   if (!isOpen) return null;
+
+  const currentCountryConfig = COUNTRY_PHONE_CONFIG.find(c => c.code === countryCode) || COUNTRY_PHONE_CONFIG[0];
+
+  const handleMobileChange = (e) => {
+    // Strictly strip non-digit characters (no alphabets, no symbols, no spaces)
+    const rawDigits = e.target.value.replace(/\D/g, '');
+    const maxDigits = currentCountryConfig.digits || 10;
+    const trimmed = rawDigits.slice(0, maxDigits);
+    setMobileDigits(trimmed);
+  };
+
+  const handleCountryCodeChange = (e) => {
+    const newCode = e.target.value;
+    setCountryCode(newCode);
+    const newConfig = COUNTRY_PHONE_CONFIG.find(c => c.code === newCode) || COUNTRY_PHONE_CONFIG[0];
+    // Re-truncate existing digits to new country length
+    setMobileDigits(prev => prev.slice(0, newConfig.digits));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,7 +56,13 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
       return;
     }
 
+    if (mobileDigits && mobileDigits.length < (currentCountryConfig.digits - 2)) {
+      setError(`Please enter a valid ${currentCountryConfig.digits}-digit mobile number for ${currentCountryConfig.name}.`);
+      return;
+    }
+
     const fullName = `${formData.firstName.trim()} ${formData.lastName.trim()}`.trim();
+    const formattedMobile = mobileDigits ? (countryCode ? `${countryCode} ${mobileDigits}` : mobileDigits) : '';
 
     setSubmitting(true);
     try {
@@ -33,9 +70,11 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
         ...formData,
         name: fullName,
         first_name: formData.firstName.trim(),
-        last_name: formData.lastName.trim()
+        last_name: formData.lastName.trim(),
+        mobile: formattedMobile
       });
-      setFormData({ firstName: '', lastName: '', relationship: 'friend', mobile: '', email: '', tags: '', notes: '' });
+      setFormData({ firstName: '', lastName: '', relationship: 'friend', email: '', tags: '', notes: '' });
+      setMobileDigits('');
       onClose();
     } catch (err) {
       setError(err.message || 'Failed to add contact.');
@@ -125,14 +164,38 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Mobile Number</label>
-              <input
-                type="tel"
-                placeholder="+91 98844 01234"
-                className="form-input"
-                value={formData.mobile}
-                onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                <label className="form-label" style={{ margin: 0 }}>Mobile Number</label>
+                {mobileDigits && (
+                  <span style={{ fontSize: '0.68rem', color: mobileDigits.length === currentCountryConfig.digits ? 'var(--accent-emerald)' : 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                    {mobileDigits.length} / {currentCountryConfig.digits}
+                  </span>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: '0.4rem' }}>
+                <select
+                  className="form-select"
+                  style={{ width: '100px', flexShrink: 0, paddingLeft: '0.5rem', paddingRight: '1.25rem', fontSize: '0.78rem' }}
+                  value={countryCode}
+                  onChange={handleCountryCodeChange}
+                >
+                  {COUNTRY_PHONE_CONFIG.map(c => (
+                    <option key={c.country + c.code} value={c.code}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder={currentCountryConfig.placeholder}
+                  className="form-input"
+                  value={mobileDigits}
+                  onChange={handleMobileChange}
+                  maxLength={currentCountryConfig.digits}
+                />
+              </div>
             </div>
           </div>
 
