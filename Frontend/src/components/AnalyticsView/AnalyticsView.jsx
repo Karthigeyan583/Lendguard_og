@@ -8,6 +8,7 @@ import {
   Hourglass,
   Users,
   Coins,
+  Globe,
   ShieldCheck,
   FileSpreadsheet,
   LayoutGrid,
