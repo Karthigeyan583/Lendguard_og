@@ -5,7 +5,7 @@ from typing import Tuple, Optional, List, Dict, Any
 
 # Canonical Reference Parity Table (Base: INR values per unit of currency)
 # 1 EUR = 98.00 INR | 1 USD = 90.00 INR | 1 GBP = 115.00 INR | 1 CHF = 102.50 INR
-INR_PER_UNIT = {
+FALLBACK_INR_PER_UNIT = {
     'INR': Decimal('1.000000'),
     'USD': Decimal('90.000000'),
     'EUR': Decimal('98.000000'),
@@ -15,9 +15,72 @@ INR_PER_UNIT = {
     'AUD': Decimal('58.000000'),
     'AED': Decimal('24.500000'),
     'SGD': Decimal('68.000000'),
+    'JPY': Decimal('0.600000'),
 }
 
+INR_PER_UNIT = dict(FALLBACK_INR_PER_UNIT)
+
 SUPPORTED_TICKER_CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'AED', 'SGD', 'CHF', 'CAD', 'AUD']
+
+# In-memory live market rate cache
+_LIVE_CACHE = {
+    'last_fetched': None,
+    'rates': dict(FALLBACK_INR_PER_UNIT),
+    'source': 'Canonical Market Reference'
+}
+
+
+def refresh_live_market_rates():
+    """
+    Attempts to fetch live exchange rates from open exchange feeds with caching.
+    Gracefully falls back to canonical parity table if offline.
+    """
+    now = datetime.datetime.now(datetime.timezone.utc)
+    last_fetched = _LIVE_CACHE.get('last_fetched')
+
+    # Cache for 15 minutes
+    if last_fetched and (now - last_fetched).total_seconds() < 900:
+        return _LIVE_CACHE['rates'], _LIVE_CACHE['source']
+
+    try:
+        import urllib.request
+        import json
+        req = urllib.request.Request(
+            'https://open.er-api.com/v6/latest/USD',
+            headers={'User-Agent': 'LendGuard-FX-Engine/2.0'}
+        )
+        with urllib.request.urlopen(req, timeout=2.5) as response:
+            if response.status == 200:
+                data = json.loads(response.read().decode('utf-8'))
+                usd_rates = data.get('rates', {})
+                inr_rate = usd_rates.get('INR', 90.0)
+
+                updated_inr_per_unit = {}
+                for curr in SUPPORTED_TICKER_CURRENCIES:
+                    if curr == 'INR':
+                        updated_inr_per_unit['INR'] = Decimal('1.000000')
+                    elif curr == 'USD':
+                        updated_inr_per_unit['USD'] = Decimal(str(round(inr_rate, 4)))
+                    elif curr in usd_rates and usd_rates[curr] > 0:
+                        # 1 CURR in USD = 1 / usd_rates[curr]; 1 CURR in INR = inr_rate / usd_rates[curr]
+                        curr_in_inr = inr_rate / usd_rates[curr]
+                        updated_inr_per_unit[curr] = Decimal(str(round(curr_in_inr, 6)))
+                    else:
+                        updated_inr_per_unit[curr] = FALLBACK_INR_PER_UNIT.get(curr, Decimal('1.0'))
+
+                _LIVE_CACHE['rates'] = updated_inr_per_unit
+                _LIVE_CACHE['last_fetched'] = now
+                _LIVE_CACHE['source'] = 'Live Global Market Feed (ECB / OpenExchange)'
+                INR_PER_UNIT.update(updated_inr_per_unit)
+                return _LIVE_CACHE['rates'], _LIVE_CACHE['source']
+    except Exception:
+        # Fall back to canonical table silently
+        pass
+
+    _LIVE_CACHE['rates'] = dict(FALLBACK_INR_PER_UNIT)
+    _LIVE_CACHE['last_fetched'] = now
+    _LIVE_CACHE['source'] = 'Canonical Market Parity Reference'
+    return _LIVE_CACHE['rates'], _LIVE_CACHE['source']
 
 
 def get_exchange_rate(from_currency: str, to_currency: str, date: Optional[datetime.date] = None) -> Decimal:
