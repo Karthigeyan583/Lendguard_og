@@ -25,6 +25,10 @@ export const AuthProvider = ({ children }) => {
         if (currentToken) {
           try {
             const profile = await api.getProfile();
+            const localAvatar = localStorage.getItem('lendguard_user_avatar');
+            if (localAvatar) {
+              profile.avatar = localAvatar;
+            }
             setUser(profile);
           } catch (e) {
             console.warn('Session expired or invalid token, clearing session:', e);
