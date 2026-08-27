@@ -800,6 +800,7 @@ export const DashboardView = ({
                   }}
                 >
                   <div className="samsung-stack-wrapper">
+                    {activePeopleList.map((p, idx) => {
                       const offset = (idx - currentSafeIndex + activePeopleList.length) % activePeopleList.length;
                       const isVisible = offset < 3;
                       const translateY = offset === 0 ? 0 : offset === 1 ? 14 : offset === 2 ? 28 : 40;
