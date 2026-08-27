@@ -135,6 +135,17 @@ export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArc
                         <span style={{ fontSize: '0.72rem', color: 'var(--accent-indigo)' }}>{person.tags}</span>
                       </div>
                     )}
+                    {person.bank_accounts && person.bank_accounts.length > 0 && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.15rem' }}>
+                        <Building size={13} color="var(--text-muted)" />
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+                          {person.bank_accounts.find(a => a.is_primary)?.bank_name || person.bank_accounts[0]?.bank_name} 
+                          {' ••••'}
+                          {(person.bank_accounts.find(a => a.is_primary)?.account_number || person.bank_accounts[0]?.account_number || '').slice(-4)}
+                          {person.bank_accounts.length > 1 && ` (+${person.bank_accounts.length - 1})`}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Financial Exposure Card */}
