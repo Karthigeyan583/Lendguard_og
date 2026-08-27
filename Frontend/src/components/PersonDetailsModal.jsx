@@ -584,6 +584,100 @@ export const PersonDetailsModal = ({
             </div>
           )}
 
+          {/* Verified Bank Accounts Section */}
+          {person.bank_accounts && person.bank_accounts.length > 0 && (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                <Building size={16} color="var(--accent-indigo)" />
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0 }}>
+                  Verified Settlement Bank Accounts ({person.bank_accounts.length})
+                </h3>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.75rem' }}>
+                {person.bank_accounts.map((acc, idx) => {
+                  const mandate = COUNTRY_BANK_MANDATES.find(m => m.code === acc.country) || COUNTRY_BANK_MANDATES[0];
+                  const isCopied = copiedBankId === (acc.id || acc.account_number);
+
+                  return (
+                    <div
+                      key={acc.id || idx}
+                      style={{
+                        background: 'var(--inner-card-bg)',
+                        border: acc.is_primary ? '1.5px solid var(--accent-indigo)' : '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0.9rem 1.1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        gap: '0.6rem'
+                      }}
+                    >
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.35rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                            <span style={{ fontSize: '1rem' }}>{mandate.flag}</span>
+                            <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{acc.bank_name}</strong>
+                          </div>
+
+                          {acc.is_primary ? (
+                            <span className="badge" style={{ fontSize: '0.65rem', background: 'rgba(16, 185, 129, 0.15)', color: 'var(--accent-emerald)', fontWeight: 700 }}>
+                              Primary Account
+                            </span>
+                          ) : (
+                            <span className="badge" style={{ fontSize: '0.65rem', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-muted)' }}>
+                              Secondary Account
+                            </span>
+                          )}
+                        </div>
+
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                          <div>Holder: <strong style={{ color: 'var(--text-primary)' }}>{acc.account_holder_name}</strong></div>
+                          <div>
+                            A/C: <strong style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
+                              {isMasked ? '••••••••' : acc.account_number}
+                            </strong>
+                          </div>
+
+                          {acc.ifsc_code && (
+                            <div>IFSC: <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-indigo)', fontWeight: 700 }}>{acc.ifsc_code}</span></div>
+                          )}
+                          {acc.upi_id && (
+                            <div>UPI: <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-emerald)' }}>{acc.upi_id}</span></div>
+                          )}
+                          {acc.sort_code && (
+                            <div>Sort Code: <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700 }}>{acc.sort_code}</span></div>
+                          )}
+                          {acc.routing_number && (
+                            <div>ABA Routing: <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700 }}>{acc.routing_number}</span></div>
+                          )}
+                          {acc.iban && (
+                            <div>IBAN: <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700 }}>{isMasked ? '••••••••' : acc.iban}</span></div>
+                          )}
+                          {acc.bsb_number && (
+                            <div>BSB: <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700 }}>{acc.bsb_number}</span></div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.45rem' }}>
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          style={{ padding: '0.25rem 0.55rem', fontSize: '0.72rem', gap: '0.3rem' }}
+                          onClick={() => handleCopyBankDetails(acc)}
+                        >
+                          {isCopied ? <Check size={12} color="var(--accent-emerald)" /> : <Copy size={12} />}
+                          <span>{isCopied ? 'Copied Details' : 'Copy Bank Details'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* 3. Transaction Agreements Section with Filter Tabs */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
