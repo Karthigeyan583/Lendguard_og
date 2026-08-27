@@ -202,14 +202,14 @@ export const LoansLedgerView = ({
       {/* Ledger Cards / Rows */}
       {filtered.length === 0 ? (
         <div className="glass-panel" style={{ padding: '3.5rem', textAlign: 'center' }}>
-          <BookOpen size={44} color="var(--text-muted)" style={{ marginBottom: '1rem', opacity: 0.5 }} />
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.35rem' }}>No Lending Records Found</h3>
+          <HandCoins size={44} color="var(--text-muted)" style={{ marginBottom: '1rem', opacity: 0.5 }} />
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.35rem' }}>No Ledger Records Found</h3>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: 400, margin: '0 auto 1.25rem' }}>
-            There are no loans matching your selected filter.
+            There are no records matching your selected filter.
           </p>
           <button className="btn btn-primary" onClick={onOpenNewLoan}>
             <Plus size={16} />
-            <span>Record Money Lent</span>
+            <span>Record Transaction</span>
           </button>
         </div>
       ) : (
@@ -312,7 +312,7 @@ export const LoansLedgerView = ({
                         }}
                         onClick={() => onRecordPayment(loan)}
                       >
-                        <ArrowDownLeft size={14} />
+                        {loan.direction === 'borrowed' ? <Send size={14} /> : <ArrowDownToLine size={14} />}
                         <span>{loan.direction === 'borrowed' ? 'Record Repayment' : 'Record Collection'}</span>
                       </button>
                     )}
@@ -323,7 +323,7 @@ export const LoansLedgerView = ({
                       title="Digital Statement"
                       onClick={() => onGenerateStatement(loan)}
                     >
-                      <FileText size={14} />
+                      <FileCheck2 size={14} />
                     </button>
 
                     <button
