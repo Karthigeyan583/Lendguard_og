@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   X,
   User,
@@ -17,9 +17,13 @@ import {
   Clock,
   CreditCard,
   ChevronRight,
-  Layers
+  Layers,
+  Building,
+  Copy,
+  Check
 } from 'lucide-react';
 import { getCurrencySymbol, formatMoney, convertCurrency, getDefaultCurrency } from '../utils/currency';
+import { COUNTRY_BANK_MANDATES } from '../utils/bankValidation';
 
 export const PersonDetailsModal = ({
   isOpen,
