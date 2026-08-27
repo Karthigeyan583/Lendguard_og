@@ -111,6 +111,7 @@ class BankAccountSerializer(serializers.ModelSerializer):
 
 
 class PersonSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(required=False, allow_blank=True)
     first_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
     last_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
     bank_accounts = BankAccountSerializer(many=True, required=False)
