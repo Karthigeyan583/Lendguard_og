@@ -4,17 +4,16 @@ import { useTheme } from '../context/ThemeContext';
 import { 
   ShieldCheck, 
   Users, 
-  BookOpen, 
-  BarChart3, 
+  LayoutDashboard,
+  HandCoins,
+  Hourglass,
   Calculator, 
-  Terminal, 
   Bell, 
   Plus, 
   LogOut, 
   User, 
   Sparkles, 
   Check, 
-  FileText,
   Sun,
   Moon
 } from 'lucide-react';
@@ -36,10 +35,10 @@ export const Navbar = ({
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'people', label: 'People & Contacts', icon: Users },
-    { id: 'loans', label: 'Lending Ledger', icon: BookOpen },
-    { id: 'aging', label: 'Overdue Aging', icon: FileText },
+    { id: 'loans', label: 'Lending Ledger', icon: HandCoins },
+    { id: 'aging', label: 'Overdue Aging', icon: Hourglass },
     { id: 'calculator', label: 'Tools / EMI', icon: Calculator },
   ];
 
