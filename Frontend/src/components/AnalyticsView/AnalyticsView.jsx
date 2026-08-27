@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   LineChart,
+  BarChart3,
   HandCoins,
   Landmark,
   CreditCard,
