@@ -86,8 +86,8 @@ export const Sidebar = ({
         <div style={{
           marginTop: '1rem',
           padding: '0.45rem 0.75rem',
-          background: 'var(--bg-surface)',
-          border: '1px solid var(--border-subtle)',
+          background: 'var(--sidebar-pill-bg)',
+          border: '1px solid var(--sidebar-pill-border)',
           borderRadius: 'var(--radius-sm)',
           display: 'flex',
           alignItems: 'center',
