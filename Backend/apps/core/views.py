@@ -12,6 +12,7 @@ from apps.people.models import Person
 from apps.payments.models import Payment
 from apps.loans.services.balance_engine import calculate_loan_balance
 from apps.loans.services.status_engine import evaluate_loan_status
+from apps.core.services.fx_engine import get_live_ticker_rates, get_exchange_rate, convert_currency
 
 
 class HealthCheckView(APIView):
