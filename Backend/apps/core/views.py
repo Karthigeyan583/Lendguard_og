@@ -458,3 +458,32 @@ class DataPurgeView(APIView):
             "message": f"Successfully reset ledger. Cleared {loans_count} loans and {people_count} contacts.",
             "status": "cleared"
         }, status=status.HTTP_200_OK)
+
+
+class CurrencyTickerAPIView(APIView):
+    """
+    Dynamic FX Currency Ticker (Bible Section 34, Header Reference Bar):
+    Returns real-time exchange rates converted to the user's reporting currency.
+    Prioritizes currencies actively used across the user's ledger records.
+    """
+    permission_classes = [AllowAny]
+    serializer_class = None
+
+    @extend_schema(
+        summary="Dynamic FX Currency Ticker Rates",
+        description="Returns live reference exchange rates converted to the user's target reporting currency.",
+        tags=["Currency Engine"]
+    )
+    def get(self, request):
+        reporting_curr = request.query_params.get('reporting_currency')
+        user = request.user if request.user.is_authenticated else None
+
+        if not reporting_curr and user and hasattr(user, 'profile'):
+            reporting_curr = user.profile.base_currency
+
+        if not reporting_curr:
+            reporting_curr = 'INR'
+
+        data = get_live_ticker_rates(reporting_currency=reporting_curr, user=user)
+        return Response(data, status=status.HTTP_200_OK)
+
