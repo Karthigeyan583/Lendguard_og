@@ -23,16 +23,20 @@ import {
   Check,
   RefreshCw,
   Eye,
-  EyeOff
+  EyeOff,
+  Camera,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react';
 import { api, getToken } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 export const SettingsView = ({ onDataPurged }) => {
-  const { user, login } = useAuth();
+  const { user, login, setUser } = useAuth();
   const [activeTab, setActiveTab] = useState('general');
 
   // General Profile State
+  const [avatar, setAvatar] = useState(localStorage.getItem('lendguard_user_avatar') || user?.avatar || '');
   const [firstName, setFirstName] = useState(user?.first_name || '');
   const [lastName, setLastName] = useState(user?.last_name || '');
   const [email, setEmail] = useState(user?.email || '');
