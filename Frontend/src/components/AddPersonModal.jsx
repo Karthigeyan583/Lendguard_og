@@ -45,8 +45,23 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
       return;
     }
 
-    if (mobileDigits && mobileDigits.length < (currentCountryConfig.digits - 2)) {
+    if (!formData.lastName.trim()) {
+      setError('Please enter contact last name.');
+      return;
+    }
+
+    if (!mobileDigits.trim()) {
+      setError(`Please enter contact mobile number.`);
+      return;
+    }
+
+    if (mobileDigits.length < (currentCountryConfig.digits - 2)) {
       setError(`Please enter a valid ${currentCountryConfig.digits}-digit mobile number for ${currentCountryConfig.name}.`);
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      setError('Please enter contact email address.');
       return;
     }
 
@@ -112,7 +127,9 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
           {/* First Name & Last Name */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="form-group">
-              <label className="form-label">First Name</label>
+              <label className="form-label">
+                First Name <span style={{ color: 'var(--accent-rose)', fontWeight: 800 }}>*</span>
+              </label>
               <input
                 type="text"
                 required
@@ -124,9 +141,12 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Last Name</label>
+              <label className="form-label">
+                Last Name <span style={{ color: 'var(--accent-rose)', fontWeight: 800 }}>*</span>
+              </label>
               <input
                 type="text"
+                required
                 placeholder="e.g. Sharma"
                 className="form-input"
                 value={formData.lastName}
@@ -138,9 +158,12 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
           {/* Relationship & Mobile */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.25rem' }}>
             <div className="form-group">
-              <label className="form-label">Relationship</label>
+              <label className="form-label">
+                Relationship <span style={{ color: 'var(--accent-rose)', fontWeight: 800 }}>*</span>
+              </label>
               <select
                 className="form-select"
+                required
                 value={formData.relationship}
                 onChange={(e) => setFormData({ ...formData, relationship: e.target.value })}
               >
@@ -154,7 +177,9 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
 
             <div className="form-group">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                <label className="form-label" style={{ margin: 0 }}>Mobile Number</label>
+                <label className="form-label" style={{ margin: 0 }}>
+                  Mobile Number <span style={{ color: 'var(--accent-rose)', fontWeight: 800 }}>*</span>
+                </label>
                 {mobileDigits && (
                   <span style={{ fontSize: '0.68rem', color: mobileDigits.length === currentCountryConfig.digits ? 'var(--accent-emerald)' : 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                     {mobileDigits.length} / {currentCountryConfig.digits}
@@ -176,6 +201,7 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
                 </select>
                 <input
                   type="text"
+                  required
                   inputMode="numeric"
                   pattern="[0-9]*"
                   placeholder={currentCountryConfig.placeholder}
@@ -191,9 +217,12 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
           {/* Email & Tags */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.25rem' }}>
             <div className="form-group">
-              <label className="form-label">Email Address (Optional)</label>
+              <label className="form-label">
+                Email Address <span style={{ color: 'var(--accent-rose)', fontWeight: 800 }}>*</span>
+              </label>
               <input
                 type="email"
+                required
                 placeholder="rahul@example.com"
                 className="form-input"
                 value={formData.email}
@@ -202,7 +231,7 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Tags (Comma-separated)</label>
+              <label className="form-label">Tags (Optional, Comma-separated)</label>
               <input
                 type="text"
                 placeholder="e.g. work, emergency, close_friend"
