@@ -64,7 +64,7 @@ export const Sidebar = ({
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-primary)' }}>
+              <span style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--sidebar-brand-text, #ffffff)' }}>
                 LendGuard
               </span>
               <span style={{
@@ -76,7 +76,7 @@ export const Sidebar = ({
                 textTransform: 'uppercase'
               }}>v2.0</span>
             </div>
-            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+            <div style={{ fontSize: '0.68rem', color: 'var(--sidebar-subtitle-text, #94a3b8)' }}>
               Lending & Borrowing Ledger
             </div>
           </div>
@@ -95,7 +95,7 @@ export const Sidebar = ({
           fontSize: '0.78rem'
         }}>
           <Layers size={14} color="var(--accent-emerald)" />
-          <span style={{ fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <span style={{ fontWeight: 600, color: 'var(--sidebar-pill-text, #ffffff)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {user?.first_name ? `${user.first_name}'s Ledger` : "My Ledger"}
           </span>
         </div>
@@ -128,9 +128,9 @@ export const Sidebar = ({
                 onClick={() => setActiveTab(item.id)}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <Icon size={17} color={isActive ? 'var(--accent-emerald)' : 'var(--text-secondary)'} />
+                  <Icon size={17} color={isActive ? 'var(--accent-emerald)' : 'var(--sidebar-nav-inactive-text, #94a3b8)'} />
                   <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--sidebar-nav-active-text, #ffffff)' : 'var(--sidebar-nav-inactive-text, #94a3b8)' }}>
                       {item.label}
                     </div>
                   </div>
@@ -167,9 +167,9 @@ export const Sidebar = ({
                 onClick={() => setActiveTab(item.id)}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <Icon size={17} color={isActive ? 'var(--accent-emerald)' : 'var(--text-secondary)'} />
+                  <Icon size={17} color={isActive ? 'var(--accent-emerald)' : 'var(--sidebar-nav-inactive-text, #94a3b8)'} />
                   <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--sidebar-nav-active-text, #ffffff)' : 'var(--sidebar-nav-inactive-text, #94a3b8)' }}>
                       {item.label}
                     </div>
                   </div>
@@ -202,10 +202,10 @@ export const Sidebar = ({
             </div>
 
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: '0.825rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div style={{ fontSize: '0.825rem', fontWeight: 700, color: 'var(--sidebar-footer-text, #ffffff)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {user?.first_name ? `${user.first_name} ${user.last_name || ''}`.trim() : (user?.username || 'Karthik')}
               </div>
-              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div style={{ fontSize: '0.68rem', color: 'var(--sidebar-footer-muted, #94a3b8)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {user?.email || 'karthik@lendguard.io'}
               </div>
             </div>
