@@ -347,7 +347,11 @@ function LendGuardApp() {
                 onOpenNewLoan={() => { setNewLoanPrefill(null); setIsNewLoanOpen(true); }}
                 onOpenAddPerson={() => setIsAddPersonOpen(true)}
                 onOpenPersonDetails={(p) => { setSelectedPersonForDetails(p); setIsPersonDetailsOpen(true); }}
-                onOpenDrilldown={(type) => { setDrilldownType(type); setIsDrilldownOpen(true); }}
+                onOpenDrilldown={(type, curr) => {
+                  setDrilldownType(type);
+                  setDrilldownCurrency(curr || getDefaultCurrency());
+                  setIsDrilldownOpen(true);
+                }}
               />
             )}
 
@@ -487,6 +491,7 @@ function LendGuardApp() {
         isOpen={isDrilldownOpen}
         onClose={() => setIsDrilldownOpen(false)}
         type={drilldownType}
+        currency={drilldownCurrency}
         loans={loans}
         people={people}
         summary={summary}
