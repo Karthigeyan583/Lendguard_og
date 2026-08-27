@@ -247,7 +247,7 @@ export const PersonDetailsModal = ({
                   fontWeight: 900,
                   color: netExposure > 0 ? 'var(--accent-emerald)' : netExposure < 0 ? 'var(--accent-rose)' : 'var(--text-primary)'
                 }}>
-                  {isMasked ? `${reportingSymbol}••••••` : `${netExposure >= 0 ? '+' : ''}${reportingSymbol}${Number(netExposure).toLocaleString()}`} <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{reportingCurrency}</span>
+                  {isMasked ? `${primarySymbol}••••••` : `${netExposure >= 0 ? '+' : ''}${primarySymbol}${Number(netExposure).toLocaleString()}`} <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{primaryCurrency}</span>
                 </span>
                 <span className="badge" style={{
                   background: netExposure > 0 ? 'rgba(16, 185, 129, 0.15)' : netExposure < 0 ? 'rgba(244, 63, 94, 0.15)' : 'rgba(148, 163, 184, 0.15)',
@@ -259,7 +259,7 @@ export const PersonDetailsModal = ({
                 </span>
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                Receivables: <strong>{reportingSymbol}{isMasked ? '••••••' : Number(lentOutstanding).toLocaleString()}</strong> • Payables: <strong>{reportingSymbol}{isMasked ? '••••••' : Number(borrowedOutstanding).toLocaleString()}</strong>
+                Receivables: <strong>{primarySymbol}{isMasked ? '••••••' : Number(lentOutstanding).toLocaleString()}</strong> • Payables: <strong>{primarySymbol}{isMasked ? '••••••' : Number(borrowedOutstanding).toLocaleString()}</strong>
               </div>
             </div>
 
