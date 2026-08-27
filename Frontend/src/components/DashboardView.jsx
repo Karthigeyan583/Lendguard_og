@@ -800,13 +800,12 @@ export const DashboardView = ({
                   }}
                 >
                   <div className="samsung-stack-wrapper">
-                    {activePeopleList.map((p, idx) => {
                       const offset = (idx - currentSafeIndex + activePeopleList.length) % activePeopleList.length;
                       const isVisible = offset < 3;
-                      const translateY = offset * 14;
-                      const scale = 1 - offset * 0.05;
-                      const opacity = offset === 0 ? 1 : offset === 1 ? 0.82 : offset === 2 ? 0.55 : 0;
-                      const zIndex = 10 - offset;
+                      const translateY = offset === 0 ? 0 : offset === 1 ? 14 : offset === 2 ? 28 : 40;
+                      const scale = offset === 0 ? 1 : offset === 1 ? 0.96 : offset === 2 ? 0.92 : 0.88;
+                      const opacity = offset === 0 ? 1 : offset === 1 ? 0.85 : offset === 2 ? 0.55 : 0;
+                      const zIndex = offset === 0 ? 20 : offset === 1 ? 15 : offset === 2 ? 10 : 0;
 
                       const pLoans = activeLoans.filter((l) => {
                         if (l.person === p.id) return true;
