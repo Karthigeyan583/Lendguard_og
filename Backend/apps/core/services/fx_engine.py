@@ -137,8 +137,9 @@ def get_live_ticker_rates(reporting_currency: str = 'INR', user=None) -> Dict[st
     Generates dynamic live FX ticker rates relative to the workspace's target Reporting Currency.
     Prioritizes currencies actively used across the user's loan and borrowing records.
     """
+    rates_dict, source = refresh_live_market_rates()
     target = str(reporting_currency or 'INR').upper().strip()
-    if target not in INR_PER_UNIT:
+    if target not in rates_dict:
         target = 'INR'
 
     used_currencies = set()
@@ -181,7 +182,7 @@ def get_live_ticker_rates(reporting_currency: str = 'INR', user=None) -> Dict[st
     now_utc = datetime.datetime.now(datetime.timezone.utc)
     return {
         'reporting_currency': target,
-        'data_source': 'ECB & Open Market Reference',
+        'data_source': source,
         'timestamp': now_utc.strftime('%Y-%m-%d %H:%M:%S UTC'),
         'timestamp_iso': now_utc.isoformat(),
         'is_live': True,
@@ -189,4 +190,5 @@ def get_live_ticker_rates(reporting_currency: str = 'INR', user=None) -> Dict[st
         'rates': rates_list,
         'used_currencies': sorted(list(used_currencies))
     }
+
 
