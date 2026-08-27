@@ -66,8 +66,11 @@ export const TopHeader = ({
         </div>
       </div>
 
-      {/* Right: Number Mask Button, Notifications, & Quick Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      {/* Right: Currency Ticker, Number Mask Button, Notifications, & Quick Actions */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+        {/* Dynamic FX Currency Ticker */}
+        <CurrencyTicker />
+
         {/* Number Mask Privacy Toggle Button */}
         <button
           type="button"
