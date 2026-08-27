@@ -95,8 +95,52 @@ export const SettingsView = ({ onDataPurged }) => {
       setLastName(user.last_name || '');
       setEmail(user.email || '');
       setPhone(user.phone_number || user.profile?.phone_number || '');
+      if (user.avatar) {
+        setAvatar(user.avatar);
+      }
     }
   }, [user]);
+
+  // Handle Photo / Avatar Upload
+  const handleAvatarUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setProfileError('Please upload a valid image file (JPG, PNG, WebP).');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setProfileError('Image size exceeds 5MB limit. Please choose a smaller photo.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target.result;
+      setAvatar(dataUrl);
+      localStorage.setItem('lendguard_user_avatar', dataUrl);
+      if (setUser && user) {
+        setUser({ ...user, avatar: dataUrl });
+      }
+      setProfileSuccess('Profile picture updated successfully!');
+      setTimeout(() => setProfileSuccess(''), 4000);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatar('');
+    localStorage.removeItem('lendguard_user_avatar');
+    if (setUser && user) {
+      const updatedUser = { ...user };
+      delete updatedUser.avatar;
+      setUser(updatedUser);
+    }
+    setProfileSuccess('Profile picture removed.');
+    setTimeout(() => setProfileSuccess(''), 4000);
+  };
 
   // Handle Save Profile
   const handleSaveProfile = async (e) => {
