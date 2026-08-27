@@ -208,15 +208,16 @@ export const ReportsAgingView = ({ agingData, loans = [], onRecordPayment, onGen
                         }}
                         onClick={() => onRecordPayment(l)}
                       >
-                        <ArrowDownLeft size={14} />
+                        {isBorrowing ? <Send size={14} /> : <ArrowDownToLine size={14} />}
                         <span>{isBorrowing ? 'Pay' : 'Collect'}</span>
                       </button>
                       <button
                         className="btn btn-secondary"
                         style={{ padding: '0.4rem 0.7rem', fontSize: '0.78rem' }}
+                        title="Digital Statement"
                         onClick={() => onGenerateStatement(l)}
                       >
-                        <FileText size={14} />
+                        <FileCheck2 size={14} />
                       </button>
                     </div>
                   </div>
