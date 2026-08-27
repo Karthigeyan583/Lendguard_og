@@ -60,6 +60,12 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
       return;
     }
 
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (formData.date_given && formData.date_given > todayStr) {
+      setError('Transaction / disbursement date cannot be in the future. Please select today or a past date.');
+      return;
+    }
+
     if (formData.due_date && formData.date_given && formData.due_date < formData.date_given) {
       setError('Agreed due date cannot be earlier than the date the money was given.');
       return;
