@@ -555,9 +555,15 @@ export const SettingsView = ({ onDataPurged }) => {
                 <label className="form-label">Phone / Mobile Number</label>
                 <input
                   type="text"
+                  inputMode="numeric"
                   className="form-input"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    // Allow leading plus and digits only
+                    const cleaned = raw.replace(/[^\d+\s-]/g, '');
+                    setPhone(cleaned.slice(0, 16));
+                  }}
                   placeholder="+91 98765 43210"
                 />
               </div>
