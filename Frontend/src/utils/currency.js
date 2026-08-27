@@ -1,14 +1,15 @@
 // Currency Formatting & Conversion Utilities for LendGuard v2.0
 
 export const CURRENCY_MAP = {
-  INR: { symbol: '₹', name: 'Indian Rupee', label: 'INR (₹)' },
-  USD: { symbol: '$', name: 'US Dollar', label: 'USD ($)' },
-  EUR: { symbol: '€', name: 'Euro', label: 'EUR (€)' },
-  GBP: { symbol: '£', name: 'British Pound', label: 'GBP (£)' },
-  CAD: { symbol: 'CA$', name: 'Canadian Dollar', label: 'CAD (CA$)' },
-  AUD: { symbol: 'AU$', name: 'Australian Dollar', label: 'AUD (AU$)' },
-  AED: { symbol: 'AED ', name: 'UAE Dirham', label: 'AED (AED)' },
-  SGD: { symbol: 'S$', name: 'Singapore Dollar', label: 'SGD (S$)' }
+  INR: { symbol: '₹', name: 'Indian Rupee', label: 'INR (₹)', flag: '🇮🇳' },
+  USD: { symbol: '$', name: 'US Dollar', label: 'USD ($)', flag: '🇺🇸' },
+  EUR: { symbol: '€', name: 'Euro', label: 'EUR (€)', flag: '🇪🇺' },
+  GBP: { symbol: '£', name: 'British Pound', label: 'GBP (£)', flag: '🇬🇧' },
+  AED: { symbol: 'AED ', name: 'UAE Dirham', label: 'AED (د.إ)', flag: '🇦🇪' },
+  SGD: { symbol: 'S$', name: 'Singapore Dollar', label: 'SGD (S$)', flag: '🇸🇬' },
+  CHF: { symbol: 'Fr ', name: 'Swiss Franc', label: 'CHF (Fr)', flag: '🇨🇭' },
+  CAD: { symbol: 'CA$', name: 'Canadian Dollar', label: 'CAD (CA$)', flag: '🇨🇦' },
+  AUD: { symbol: 'AU$', name: 'Australian Dollar', label: 'AUD (AU$)', flag: '🇦🇺' },
 };
 
 // Canonical Parity Reference (Base: INR per unit of currency)
@@ -17,6 +18,7 @@ export const INR_PER_UNIT = {
   USD: 90.0,
   EUR: 98.0,
   GBP: 115.0,
+  CHF: 102.5,
   CAD: 65.0,
   AUD: 58.0,
   AED: 24.5,
@@ -29,7 +31,11 @@ export const getDefaultCurrency = () => {
 
 export const setDefaultCurrency = (code) => {
   if (code) {
-    localStorage.setItem('lendguard_currency', String(code).toUpperCase());
+    const formatted = String(code).toUpperCase().trim();
+    localStorage.setItem('lendguard_currency', formatted);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('lendguard_currency_changed', { detail: { currency: formatted } }));
+    }
   }
 };
 
@@ -62,36 +68,21 @@ export const convertCurrency = (amount, fromCurrency, toCurrency, customRate = n
 
   if (src === dst) return num;
 
-  const rate = customRate != null && Number(customRate) > 0
-    ? Number(customRate)
-    : getExchangeRate(src, dst);
+  if (customRate && !isNaN(customRate) && Number(customRate) > 0) {
+    return num * Number(customRate);
+  }
 
-  return Number((num * rate).toFixed(2));
-};
-
-export const isNumbersMasked = () => {
-  return localStorage.getItem('lendguard_mask_numbers') === 'true';
-};
-
-export const setNumbersMasked = (masked) => {
-  localStorage.setItem('lendguard_mask_numbers', masked ? 'true' : 'false');
+  const rate = getExchangeRate(src, dst);
+  return num * rate;
 };
 
 export const formatMoney = (amount, currencyCode, isMasked = false) => {
-  const symbol = getCurrencySymbol(currencyCode);
-  if (isMasked) {
-    return `${symbol}••••••`;
-  }
+  if (isMasked) return '••••••';
   const num = Number(amount || 0);
-  return `${symbol}${num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
-};
-
-export const maskValue = (formattedString, isMasked = true) => {
-  if (isMasked === false) return formattedString;
-  const str = String(formattedString == null ? '' : formattedString);
-  const match = str.match(/^([^0-9\s]+)\s*/);
-  if (match) {
-    return `${match[1]}••••••`;
-  }
-  return '••••••';
+  const symbol = getCurrencySymbol(currencyCode);
+  const formatted = num.toLocaleString('en-US', {
+    minimumFractionDigits: num % 1 !== 0 ? 2 : 0,
+    maximumFractionDigits: 2
+  });
+  return `${symbol}${formatted}`;
 };
