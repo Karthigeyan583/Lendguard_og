@@ -339,7 +339,7 @@ export const DashboardView = ({
         {/* Left: Net Position Summary */}
         <div>
           <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Authoritative Financial Position {isConsolidated ? `(Consolidated in ${reportingCurrency})` : `(${activeDisplayCurrency})`}
+            Authoritative Financial Position ({activeDisplayCurrency})
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginTop: '0.2rem', flexWrap: 'wrap' }}>
             <span style={{
