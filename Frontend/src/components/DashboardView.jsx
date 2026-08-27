@@ -574,10 +574,7 @@ export const DashboardView = ({
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
           <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Overall Portfolio Recovery Progress</span>
           <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>
-            {isConsolidated && isMulti
-              ? `${recoveryRate}% Settled (${availableCurrencies.map(c => `${c}: ${totalsByCurrency[c]?.recovery || 0}%`).join(' • ')})`
-              : `${recoveryRate}% Settled`
-            }
+            {recoveryRate}% Settled
           </span>
         </div>
         <div style={{ height: 10, background: 'var(--bg-surface)', borderRadius: 5, overflow: 'hidden', display: 'flex' }}>
