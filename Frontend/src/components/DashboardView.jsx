@@ -364,6 +364,8 @@ export const DashboardView = ({
 
       {/* Net Financial Position & Direction Switcher Bar */}
       <div className="glass-panel" style={{
+        position: 'relative',
+        zIndex: 60,
         padding: '1.25rem 1.5rem',
         display: 'flex',
         alignItems: 'center',
