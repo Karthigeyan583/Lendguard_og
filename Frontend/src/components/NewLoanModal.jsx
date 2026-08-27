@@ -280,7 +280,14 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
                 required
                 className="form-input"
                 value={formData.date_given}
-                onChange={(e) => setFormData({ ...formData, date_given: e.target.value })}
+                onChange={(e) => {
+                  const newDate = e.target.value;
+                  setFormData(prev => ({
+                    ...prev,
+                    date_given: newDate,
+                    due_date: (prev.due_date && prev.due_date < newDate) ? newDate : prev.due_date
+                  }));
+                }}
               />
             </div>
 
@@ -291,9 +298,21 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
               <input
                 type="date"
                 className="form-input"
+                min={formData.date_given}
                 value={formData.due_date}
-                onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                onChange={(e) => {
+                  const newDueDate = e.target.value;
+                  if (newDueDate && formData.date_given && newDueDate < formData.date_given) {
+                    setError(`Repayment target due date cannot be earlier than the disbursement date (${formData.date_given}).`);
+                  } else {
+                    setError('');
+                  }
+                  setFormData({ ...formData, due_date: newDueDate });
+                }}
               />
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
+                Must be on or after {isBorrowing ? 'borrowing date' : 'disbursement date'}
+              </span>
             </div>
           </div>
 
