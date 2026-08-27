@@ -314,7 +314,7 @@ export const DashboardView = ({
             <div
               className="glass-panel kpi-card kpi-lent"
               style={{ padding: '1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
-              onClick={() => onOpenDrilldown && onOpenDrilldown('lent')}
+              onClick={() => onOpenDrilldown && onOpenDrilldown('lent', selectedCurr)}
               title="Click to view full breakdown of capital lent"
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
@@ -337,7 +337,7 @@ export const DashboardView = ({
             <div
               className="glass-panel kpi-card kpi-repaid"
               style={{ padding: '1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
-              onClick={() => onOpenDrilldown && onOpenDrilldown('repaid')}
+              onClick={() => onOpenDrilldown && onOpenDrilldown('repaid', selectedCurr)}
               title="Click to view total repayments and collection ledger"
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
@@ -360,7 +360,7 @@ export const DashboardView = ({
             <div
               className="glass-panel kpi-card kpi-outstanding"
               style={{ padding: '1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
-              onClick={() => onOpenDrilldown && onOpenDrilldown('outstanding')}
+              onClick={() => onOpenDrilldown && onOpenDrilldown('outstanding', selectedCurr)}
               title="Click to view outstanding receivables"
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
@@ -385,7 +385,7 @@ export const DashboardView = ({
             <div
               className="glass-panel kpi-card kpi-overdue"
               style={{ padding: '1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
-              onClick={() => onOpenDrilldown && onOpenDrilldown('overdue')}
+              onClick={() => onOpenDrilldown && onOpenDrilldown('overdue', selectedCurr)}
               title="Click to view overdue lending report"
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
@@ -426,7 +426,7 @@ export const DashboardView = ({
             <div
               className="glass-panel kpi-card"
               style={{ padding: '1.5rem', borderLeft: '3px solid var(--accent-indigo)', cursor: 'pointer', transition: 'all 0.18s ease' }}
-              onClick={() => onOpenDrilldown && onOpenDrilldown('borrowed')}
+              onClick={() => onOpenDrilldown && onOpenDrilldown('borrowed', selectedCurr)}
               title="Click to view breakdown of capital borrowed"
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
@@ -447,7 +447,7 @@ export const DashboardView = ({
             <div
               className="glass-panel kpi-card"
               style={{ padding: '1.5rem', borderLeft: '3px solid var(--accent-emerald)', cursor: 'pointer', transition: 'all 0.18s ease' }}
-              onClick={() => onOpenDrilldown && onOpenDrilldown('borrowed_repaid')}
+              onClick={() => onOpenDrilldown && onOpenDrilldown('borrowed_repaid', selectedCurr)}
               title="Click to view repayments made to lenders"
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
@@ -468,7 +468,7 @@ export const DashboardView = ({
             <div
               className="glass-panel kpi-card"
               style={{ padding: '1.5rem', borderLeft: '3px solid var(--accent-amber)', cursor: 'pointer', transition: 'all 0.18s ease' }}
-              onClick={() => onOpenDrilldown && onOpenDrilldown('borrowed_outstanding')}
+              onClick={() => onOpenDrilldown && onOpenDrilldown('borrowed_outstanding', selectedCurr)}
               title="Click to view outstanding payable debt liabilities"
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
@@ -489,7 +489,7 @@ export const DashboardView = ({
             <div
               className="glass-panel kpi-card"
               style={{ padding: '1.5rem', borderLeft: '3px solid var(--accent-rose)', cursor: 'pointer', transition: 'all 0.18s ease' }}
-              onClick={() => onOpenDrilldown && onOpenDrilldown('borrowed_overdue')}
+              onClick={() => onOpenDrilldown && onOpenDrilldown('borrowed_overdue', selectedCurr)}
               title="Click to view overdue debt obligations"
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
