@@ -273,14 +273,15 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
                 value={formData.currency}
                 onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
               >
-                <option value="INR">INR (₹)</option>
-                <option value="USD">USD ($)</option>
-                <option value="EUR">EUR (€)</option>
-                <option value="GBP">GBP (£)</option>
-                <option value="CAD">CAD (CA$)</option>
-                <option value="AUD">AUD (AU$)</option>
-                <option value="AED">AED (AED)</option>
-                <option value="SGD">SGD (S$)</option>
+                <option value="INR">INR (₹) - Indian Rupee</option>
+                <option value="USD">USD ($) - US Dollar</option>
+                <option value="EUR">EUR (€) - Euro</option>
+                <option value="GBP">GBP (£) - British Pound</option>
+                <option value="AED">AED (د.إ) - UAE Dirham</option>
+                <option value="SGD">SGD (S$) - Singapore Dollar</option>
+                <option value="CHF">CHF (Fr) - Swiss Franc</option>
+                <option value="CAD">CAD (CA$) - Canadian Dollar</option>
+                <option value="AUD">AUD (AU$) - Australian Dollar</option>
               </select>
             </div>
           </div>
