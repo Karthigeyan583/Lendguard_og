@@ -3,7 +3,8 @@ import { X, Users, Plus, AlertCircle } from 'lucide-react';
 
 export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     relationship: 'friend',
     mobile: '',
     email: '',
@@ -19,15 +20,22 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
     e.preventDefault();
     setError('');
 
-    if (!formData.name.trim()) {
-      setError('Please enter contact name.');
+    if (!formData.firstName.trim()) {
+      setError('Please enter contact first name.');
       return;
     }
 
+    const fullName = `${formData.firstName.trim()} ${formData.lastName.trim()}`.trim();
+
     setSubmitting(true);
     try {
-      await onPersonAdded(formData);
-      setFormData({ name: '', relationship: 'friend', mobile: '', email: '', tags: '', notes: '' });
+      await onPersonAdded({
+        ...formData,
+        name: fullName,
+        first_name: formData.firstName.trim(),
+        last_name: formData.lastName.trim()
+      });
+      setFormData({ firstName: '', lastName: '', relationship: 'friend', mobile: '', email: '', tags: '', notes: '' });
       onClose();
     } catch (err) {
       setError(err.message || 'Failed to add contact.');
@@ -73,20 +81,34 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
             </div>
           )}
 
-          {/* Name & Relationship */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1rem' }}>
+          {/* First Name & Last Name */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="form-group">
-              <label className="form-label">Full Name</label>
+              <label className="form-label">First Name</label>
               <input
                 type="text"
                 required
-                placeholder="e.g. Rahul Sharma"
+                placeholder="e.g. Rahul"
                 className="form-input"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                value={formData.firstName}
+                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
               />
             </div>
 
+            <div className="form-group">
+              <label className="form-label">Last Name</label>
+              <input
+                type="text"
+                placeholder="e.g. Sharma"
+                className="form-input"
+                value={formData.lastName}
+                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {/* Relationship & Mobile */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.25rem' }}>
             <div className="form-group">
               <label className="form-label">Relationship</label>
               <select
@@ -101,10 +123,7 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
                 <option value="other">Other</option>
               </select>
             </div>
-          </div>
 
-          {/* Mobile & Email */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="form-group">
               <label className="form-label">Mobile Number</label>
               <input
@@ -115,7 +134,10 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
                 onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
               />
             </div>
+          </div>
 
+          {/* Email & Tags */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.25rem' }}>
             <div className="form-group">
               <label className="form-label">Email Address (Optional)</label>
               <input
@@ -126,18 +148,17 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
             </div>
-          </div>
 
-          {/* Tags */}
-          <div className="form-group">
-            <label className="form-label">Tags (Comma-separated)</label>
-            <input
-              type="text"
-              placeholder="e.g. work, emergency, close_friend"
-              className="form-input"
-              value={formData.tags}
-              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-            />
+            <div className="form-group">
+              <label className="form-label">Tags (Comma-separated)</label>
+              <input
+                type="text"
+                placeholder="e.g. work, emergency, close_friend"
+                className="form-input"
+                value={formData.tags}
+                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+              />
+            </div>
           </div>
 
           {/* Private Notes */}
