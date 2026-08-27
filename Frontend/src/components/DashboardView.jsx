@@ -537,7 +537,7 @@ export const DashboardView = ({
                 Multi-Currency Portfolio Breakdown
               </span>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginLeft: 6 }}>
-                (Normalized into {reportingCurrency} Base Currency)
+                (Native Breakdown by Currency)
               </span>
             </div>
           </div>
