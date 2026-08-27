@@ -38,11 +38,24 @@ export const DashboardView = ({
   const [activeCurrencyFilter, setActiveCurrencyFilter] = useState('ALL');
   const [showCurrencySplitDropdown, setShowCurrencySplitDropdown] = useState(false);
   const [dashboardDirection, setDashboardDirection] = useState('overview'); // 'overview', 'lent', 'borrowed'
+  const [activeCurrency, setActiveCurrency] = useState(getDefaultCurrency());
+
+  useEffect(() => {
+    const handleCurrencyChange = (e) => {
+      if (e.detail?.currency) {
+        setActiveCurrency(e.detail.currency);
+      } else {
+        setActiveCurrency(getDefaultCurrency());
+      }
+    };
+    window.addEventListener('lendguard_currency_changed', handleCurrencyChange);
+    return () => window.removeEventListener('lendguard_currency_changed', handleCurrencyChange);
+  }, []);
 
   // Identify distinct currencies used across loans
   const availableCurrencies = Array.from(new Set(loans.map(l => l.currency || 'INR')));
   const isMulti = availableCurrencies.length > 1;
-  const reportingCurrency = summary?.reporting_currency || getDefaultCurrency();
+  const reportingCurrency = activeCurrency || getDefaultCurrency();
   const currSymbol = getCurrencySymbol(reportingCurrency);
 
   // Filter urgent active loans
