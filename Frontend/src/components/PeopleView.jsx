@@ -213,9 +213,10 @@ export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArc
                   </button>
                 )}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
+      </div>
       )}
     </div>
   );
