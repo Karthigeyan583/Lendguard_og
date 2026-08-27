@@ -277,27 +277,31 @@ export const PersonDetailsModal = ({
               </span>
               {hasMultipleCurrencies ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.35rem' }}>
-                  <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                     {distinctCurrencies.map(curr => {
                       const s = personTotalsByCurrency[curr];
                       const sym = getCurrencySymbol(curr);
                       const net = s.outstanding;
+                      const netFormatted = `${net >= 0 ? '+' : ''}${sym}${Number(net).toLocaleString()}`;
                       return (
                         <div key={curr} style={{
                           background: 'rgba(255, 255, 255, 0.04)',
                           border: '1px solid var(--border-subtle)',
                           borderRadius: 'var(--radius-sm)',
-                          padding: '0.35rem 0.7rem',
+                          padding: '0.3rem 0.6rem',
                           display: 'flex',
                           alignItems: 'baseline',
-                          gap: '0.35rem'
+                          gap: '0.35rem',
+                          maxWidth: '100%',
+                          minWidth: 0
                         }}>
                           <span style={{
-                            fontSize: '1.25rem',
+                            fontSize: getFontSizeForAmount(netFormatted),
                             fontWeight: 900,
-                            color: net > 0 ? 'var(--accent-emerald)' : 'var(--text-primary)'
+                            color: net > 0 ? 'var(--accent-emerald)' : 'var(--text-primary)',
+                            whiteSpace: 'nowrap'
                           }}>
-                            {isMasked ? `${sym}••••••` : `${net >= 0 ? '+' : ''}${sym}${Number(net).toLocaleString()}`}
+                            {isMasked ? `${sym}••••••` : netFormatted}
                           </span>
                           <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--accent-indigo)' }}>{curr}</span>
                         </div>
@@ -324,7 +328,7 @@ export const PersonDetailsModal = ({
                 <>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginTop: '0.2rem' }}>
                     <span style={{
-                      fontSize: '1.5rem',
+                      fontSize: getFontSizeForAmount(`${primarySymbol}${Number(netExposure).toLocaleString()}`),
                       fontWeight: 900,
                       color: netExposure > 0 ? 'var(--accent-emerald)' : netExposure < 0 ? 'var(--accent-rose)' : 'var(--text-primary)'
                     }}>
@@ -362,7 +366,7 @@ export const PersonDetailsModal = ({
           {/* Financial Exposure KPI Bar */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
             gap: '0.85rem'
           }}>
             {/* Total Lent */}
@@ -370,25 +374,54 @@ export const PersonDetailsModal = ({
               background: 'var(--inner-card-bg)',
               border: '1px solid var(--border-subtle)',
               borderRadius: 'var(--radius-md)',
-              padding: '1rem'
+              padding: '1rem',
+              minWidth: 0,
+              overflow: 'hidden'
             }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Total Lent
               </span>
 
               {hasMultipleCurrencies ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginTop: '0.35rem' }}>
-                  {distinctCurrencies.map(curr => (
-                    <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: '1.15rem', fontWeight: 800 }}>
-                        {getCurrencySymbol(curr)}{isMasked ? '••••••' : Number(personTotalsByCurrency[curr].lent).toLocaleString()}
-                      </span>
-                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-blue)' }}>{curr}</span>
-                    </div>
-                  ))}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', marginTop: '0.35rem' }}>
+                  {distinctCurrencies.map(curr => {
+                    const val = Number(personTotalsByCurrency[curr].lent || 0);
+                    const valFormatted = `${getCurrencySymbol(curr)}${isMasked ? '••••••' : val.toLocaleString()}`;
+                    return (
+                      <div key={curr} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.35rem', minWidth: 0 }}>
+                        <span
+                          title={`${getCurrencySymbol(curr)}${val.toLocaleString()} ${curr}`}
+                          style={{
+                            fontSize: getFontSizeForAmount(valFormatted),
+                            fontWeight: 800,
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            minWidth: 0,
+                            flex: 1
+                          }}
+                        >
+                          {valFormatted}
+                        </span>
+                        <span className="badge" style={{ fontSize: '0.62rem', padding: '0.1rem 0.35rem', fontWeight: 700, color: 'var(--accent-blue)', background: 'rgba(59, 130, 246, 0.1)', flexShrink: 0 }}>
+                          {curr}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: '0.25rem' }}>
+                <div
+                  title={`${getCurrencySymbol(singleBorrowerCurr)}${Number(singleBorrowerStats.lent).toLocaleString()} ${singleBorrowerCurr}`}
+                  style={{
+                    fontSize: getFontSizeForAmount(`${getCurrencySymbol(singleBorrowerCurr)}${Number(singleBorrowerStats.lent).toLocaleString()}`),
+                    fontWeight: 800,
+                    marginTop: '0.25rem',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
                   {getCurrencySymbol(singleBorrowerCurr)}{isMasked ? '••••••' : Number(singleBorrowerStats.lent).toLocaleString()} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{singleBorrowerCurr}</span>
                 </div>
               )}
@@ -403,27 +436,57 @@ export const PersonDetailsModal = ({
               background: 'var(--inner-card-bg)',
               border: '1px solid var(--border-subtle)',
               borderRadius: 'var(--radius-md)',
-              padding: '1rem'
+              padding: '1rem',
+              minWidth: 0,
+              overflow: 'hidden'
             }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Total Repaid
               </span>
 
               {hasMultipleCurrencies ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginTop: '0.35rem' }}>
-                  {distinctCurrencies.map(curr => (
-                    <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>
-                        {getCurrencySymbol(curr)}{isMasked ? '••••••' : Number(personTotalsByCurrency[curr].repaid).toLocaleString()}
-                      </span>
-                      <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent-emerald)' }}>
-                        {curr} ({personTotalsByCurrency[curr].recovery}%)
-                      </span>
-                    </div>
-                  ))}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', marginTop: '0.35rem' }}>
+                  {distinctCurrencies.map(curr => {
+                    const val = Number(personTotalsByCurrency[curr].repaid || 0);
+                    const valFormatted = `${getCurrencySymbol(curr)}${isMasked ? '••••••' : val.toLocaleString()}`;
+                    const rec = personTotalsByCurrency[curr].recovery;
+                    return (
+                      <div key={curr} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.35rem', minWidth: 0 }}>
+                        <span
+                          title={`${getCurrencySymbol(curr)}${val.toLocaleString()} (${rec}%)`}
+                          style={{
+                            fontSize: getFontSizeForAmount(valFormatted),
+                            fontWeight: 800,
+                            color: 'var(--accent-emerald)',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            minWidth: 0,
+                            flex: 1
+                          }}
+                        >
+                          {valFormatted}
+                        </span>
+                        <span className="badge" style={{ fontSize: '0.62rem', padding: '0.1rem 0.35rem', fontWeight: 700, color: 'var(--accent-emerald)', background: 'rgba(16, 185, 129, 0.1)', flexShrink: 0 }}>
+                          {rec}%
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-emerald)', marginTop: '0.25rem' }}>
+                <div
+                  title={`${getCurrencySymbol(singleBorrowerCurr)}${Number(singleBorrowerStats.repaid).toLocaleString()}`}
+                  style={{
+                    fontSize: getFontSizeForAmount(`${getCurrencySymbol(singleBorrowerCurr)}${Number(singleBorrowerStats.repaid).toLocaleString()}`),
+                    fontWeight: 800,
+                    color: 'var(--accent-emerald)',
+                    marginTop: '0.25rem',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
                   {getCurrencySymbol(singleBorrowerCurr)}{isMasked ? '••••••' : Number(singleBorrowerStats.repaid).toLocaleString()} <span style={{ fontSize: '0.75rem' }}>{singleBorrowerCurr}</span>
                 </div>
               )}
@@ -438,30 +501,56 @@ export const PersonDetailsModal = ({
               background: 'var(--inner-card-bg)',
               border: '1px solid var(--border-subtle)',
               borderRadius: 'var(--radius-md)',
-              padding: '1rem'
+              padding: '1rem',
+              minWidth: 0,
+              overflow: 'hidden'
             }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Outstanding
               </span>
 
               {hasMultipleCurrencies ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginTop: '0.35rem' }}>
-                  {distinctCurrencies.map(curr => (
-                    <div key={curr} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--accent-cyan)' }}>
-                        {getCurrencySymbol(curr)}{isMasked ? '••••••' : Number(personTotalsByCurrency[curr].outstanding).toLocaleString()}
-                      </span>
-                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>{curr}</span>
-                    </div>
-                  ))}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', marginTop: '0.35rem' }}>
+                  {distinctCurrencies.map(curr => {
+                    const val = Number(personTotalsByCurrency[curr].outstanding || 0);
+                    const valFormatted = `${getCurrencySymbol(curr)}${isMasked ? '••••••' : val.toLocaleString()}`;
+                    return (
+                      <div key={curr} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.35rem', minWidth: 0 }}>
+                        <span
+                          title={`${getCurrencySymbol(curr)}${val.toLocaleString()} ${curr}`}
+                          style={{
+                            fontSize: getFontSizeForAmount(valFormatted),
+                            fontWeight: 800,
+                            color: 'var(--accent-cyan)',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            minWidth: 0,
+                            flex: 1
+                          }}
+                        >
+                          {valFormatted}
+                        </span>
+                        <span className="badge" style={{ fontSize: '0.62rem', padding: '0.1rem 0.35rem', fontWeight: 700, color: 'var(--accent-cyan)', background: 'rgba(6, 182, 212, 0.1)', flexShrink: 0 }}>
+                          {curr}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
-                <div style={{
-                  fontSize: '1.25rem',
-                  fontWeight: 800,
-                  color: singleBorrowerStats.outstanding > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)',
-                  marginTop: '0.25rem'
-                }}>
+                <div
+                  title={`${getCurrencySymbol(singleBorrowerCurr)}${Number(singleBorrowerStats.outstanding).toLocaleString()} ${singleBorrowerCurr}`}
+                  style={{
+                    fontSize: getFontSizeForAmount(`${getCurrencySymbol(singleBorrowerCurr)}${Number(singleBorrowerStats.outstanding).toLocaleString()}`),
+                    fontWeight: 800,
+                    color: singleBorrowerStats.outstanding > 0 ? 'var(--accent-cyan)' : 'var(--accent-emerald)',
+                    marginTop: '0.25rem',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
                   {getCurrencySymbol(singleBorrowerCurr)}{isMasked ? '••••••' : Number(singleBorrowerStats.outstanding).toLocaleString()} <span style={{ fontSize: '0.75rem' }}>{singleBorrowerCurr}</span>
                 </div>
               )}
@@ -476,7 +565,9 @@ export const PersonDetailsModal = ({
               background: 'var(--inner-card-bg)',
               border: '1px solid var(--border-subtle)',
               borderRadius: 'var(--radius-md)',
-              padding: '1rem'
+              padding: '1rem',
+              minWidth: 0,
+              overflow: 'hidden'
             }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Status
