@@ -301,10 +301,17 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
               <input
                 type="date"
                 required
+                max={new Date().toISOString().split('T')[0]}
                 className="form-input"
                 value={formData.date_given}
                 onChange={(e) => {
                   const newDate = e.target.value;
+                  const today = new Date().toISOString().split('T')[0];
+                  if (newDate > today) {
+                    setError('Transaction / disbursement date cannot be in the future. Please select today or a past date.');
+                  } else {
+                    setError('');
+                  }
                   setFormData(prev => ({
                     ...prev,
                     date_given: newDate,
@@ -312,6 +319,9 @@ export const NewLoanModal = ({ isOpen, onClose, people = [], onLoanCreated, onOp
                   }));
                 }}
               />
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
+                Must be today or a past date
+              </span>
             </div>
 
             <div className="form-group">
