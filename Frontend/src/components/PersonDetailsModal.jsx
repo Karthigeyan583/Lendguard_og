@@ -110,7 +110,7 @@ export const PersonDetailsModal = ({
         allRepayments.push({
           ...r,
           loan_reference: l.loan_reference,
-          currency: r.currency || l.currency || reportingCurrency,
+          currency: r.currency || l.currency || primaryCurrency,
           direction: l.direction
         });
       });
