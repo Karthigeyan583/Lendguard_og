@@ -402,64 +402,70 @@ export const DashboardView = ({
           </div>
         </div>
 
-        {/* Right: Dashboard View Direction Switcher */}
-        <div style={{
-          display: 'flex',
-          gap: '0.35rem',
-          background: 'var(--bg-surface)',
-          padding: '0.3rem',
-          borderRadius: 'var(--radius-md)',
-          border: '1px solid var(--border-subtle)'
-        }}>
-          <button
-            type="button"
-            onClick={() => setDashboardDirection('overview')}
-            style={{
-              padding: '0.45rem 0.85rem',
-              borderRadius: 'var(--radius-sm)',
-              border: 'none',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              background: dashboardDirection === 'overview' ? 'var(--bg-card)' : 'transparent',
-              color: dashboardDirection === 'overview' ? 'var(--text-primary)' : 'var(--text-muted)',
-              boxShadow: dashboardDirection === 'overview' ? '0 1px 4px rgba(0,0,0,0.1)' : 'none'
-            }}
-          >
-            ⚖️ Net Overview
-          </button>
-          <button
-            type="button"
-            onClick={() => setDashboardDirection('lent')}
-            style={{
-              padding: '0.45rem 0.85rem',
-              borderRadius: 'var(--radius-sm)',
-              border: 'none',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              background: dashboardDirection === 'lent' ? 'var(--accent-emerald)' : 'transparent',
-              color: dashboardDirection === 'lent' ? '#ffffff' : 'var(--text-muted)'
-            }}
-          >
-            🤝 Money Lent ({lentLoans.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setDashboardDirection('borrowed')}
-            style={{
-              padding: '0.45rem 0.85rem',
-              borderRadius: 'var(--radius-sm)',
-              border: 'none',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              background: dashboardDirection === 'borrowed' ? 'var(--accent-indigo)' : 'transparent',
-              color: dashboardDirection === 'borrowed' ? '#ffffff' : 'var(--text-muted)'
-            }}
-          >
-            📥 Money Borrowed ({borrowedLoans.length})
-          </button>
+        {/* Right: Base Currency Selector Dropdown + Direction Switcher Tabs */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+          {/* Direct Base Currency Selector Dropdown */}
+          <CurrencySelector />
+
+          {/* Dashboard View Direction Switcher */}
+          <div style={{
+            display: 'flex',
+            gap: '0.35rem',
+            background: 'var(--bg-surface)',
+            padding: '0.3rem',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border-subtle)'
+          }}>
+            <button
+              type="button"
+              onClick={() => setDashboardDirection('overview')}
+              style={{
+                padding: '0.45rem 0.85rem',
+                borderRadius: 'var(--radius-sm)',
+                border: 'none',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                background: dashboardDirection === 'overview' ? 'var(--bg-card)' : 'transparent',
+                color: dashboardDirection === 'overview' ? 'var(--text-primary)' : 'var(--text-muted)',
+                boxShadow: dashboardDirection === 'overview' ? '0 1px 4px rgba(0,0,0,0.1)' : 'none'
+              }}
+            >
+              ⚖️ Net Overview
+            </button>
+            <button
+              type="button"
+              onClick={() => setDashboardDirection('lent')}
+              style={{
+                padding: '0.45rem 0.85rem',
+                borderRadius: 'var(--radius-sm)',
+                border: 'none',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                background: dashboardDirection === 'lent' ? 'var(--accent-emerald)' : 'transparent',
+                color: dashboardDirection === 'lent' ? '#ffffff' : 'var(--text-muted)'
+              }}
+            >
+              🤝 Money Lent ({lentLoans.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setDashboardDirection('borrowed')}
+              style={{
+                padding: '0.45rem 0.85rem',
+                borderRadius: 'var(--radius-sm)',
+                border: 'none',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                background: dashboardDirection === 'borrowed' ? 'var(--accent-indigo)' : 'transparent',
+                color: dashboardDirection === 'borrowed' ? '#ffffff' : 'var(--text-muted)'
+              }}
+            >
+              📥 Money Borrowed ({borrowedLoans.length})
+            </button>
+          </div>
         </div>
       </div>
 
