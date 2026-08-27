@@ -167,7 +167,7 @@ export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArc
                             const stats = person.currency_breakdown ? person.currency_breakdown[c] : null;
                             const out = stats ? stats.outstanding : 0;
                             return (
-                              <span key={c} className="badge" style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', background: 'var(--bg-surface)' }}>
+                              <span key={c} className="badge" title={`${getCurrencySymbol(c)}${Number(out).toLocaleString()} ${c}`} style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', background: 'var(--bg-surface)', whiteSpace: 'nowrap', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 <strong>{getCurrencySymbol(c)}{isMasked ? '••••••' : Number(out).toLocaleString()} {c}</strong>
                               </span>
                             );
