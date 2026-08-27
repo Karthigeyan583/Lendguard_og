@@ -1,17 +1,6 @@
 import React, { useState } from 'react';
 import { X, Users, Plus, AlertCircle } from 'lucide-react';
-
-export const COUNTRY_PHONE_CONFIG = [
-  { code: '+91', country: 'IN', label: '🇮🇳 +91', name: 'India', digits: 10, placeholder: '98844 01234' },
-  { code: '+1', country: 'US', label: '🇺🇸 +1', name: 'USA / Canada', digits: 10, placeholder: '202 555 0123' },
-  { code: '+44', country: 'GB', label: '🇬🇧 +44', name: 'UK', digits: 10, placeholder: '7911 123456' },
-  { code: '+971', country: 'AE', label: '🇦🇪 +971', name: 'UAE', digits: 9, placeholder: '50 123 4567' },
-  { code: '+65', country: 'SG', label: '🇸🇬 +65', name: 'Singapore', digits: 8, placeholder: '8123 4567' },
-  { code: '+61', country: 'AU', label: '🇦🇺 +61', name: 'Australia', digits: 9, placeholder: '412 345 678' },
-  { code: '+41', country: 'CH', label: '🇨🇭 +41', name: 'Switzerland', digits: 9, placeholder: '79 123 45 67' },
-  { code: '+49', country: 'DE', label: '🇩🇪 +49', name: 'Germany', digits: 11, placeholder: '151 12345678' },
-  { code: '', country: 'OTHER', label: '🌐 Other', name: 'International', digits: 15, placeholder: 'Enter phone digits' },
-];
+import { GLOBAL_COUNTRY_PHONE_CONFIG } from '../utils/countries';
 
 export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
   const [formData, setFormData] = useState({
@@ -29,7 +18,7 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
 
   if (!isOpen) return null;
 
-  const currentCountryConfig = COUNTRY_PHONE_CONFIG.find(c => c.code === countryCode) || COUNTRY_PHONE_CONFIG[0];
+  const currentCountryConfig = GLOBAL_COUNTRY_PHONE_CONFIG.find(c => c.code === countryCode) || GLOBAL_COUNTRY_PHONE_CONFIG[0];
 
   const handleMobileChange = (e) => {
     // Strictly strip non-digit characters (no alphabets, no symbols, no spaces)
