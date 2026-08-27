@@ -168,7 +168,6 @@ export const RecordPaymentModal = ({ isOpen, onClose, loan, onPaymentRecorded })
               <input
                 type="date"
                 required
-                min={loan?.date_given}
                 max={todayStr}
                 className="form-input"
                 value={paymentDate}
@@ -176,8 +175,6 @@ export const RecordPaymentModal = ({ isOpen, onClose, loan, onPaymentRecorded })
                   const newDate = e.target.value;
                   if (newDate > todayStr) {
                     setError('Repayment date cannot be in the future. Please select today or a past date.');
-                  } else if (loan?.date_given && newDate && newDate < loan.date_given) {
-                    setError(`Repayment date cannot be earlier than the loan origination date (${loan.date_given}).`);
                   } else {
                     setError('');
                   }
@@ -185,7 +182,7 @@ export const RecordPaymentModal = ({ isOpen, onClose, loan, onPaymentRecorded })
                 }}
               />
               <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
-                Must be between {loan?.date_given || 'origination date'} and today ({todayStr})
+                Must be today ({todayStr}) or a past date
               </span>
             </div>
           </div>
