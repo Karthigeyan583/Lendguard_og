@@ -146,40 +146,56 @@ export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArc
                     marginBottom: '1.25rem'
                   }}>
                     {/* Top Net Exposure Row */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.45rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.45rem', flexWrap: 'wrap', gap: '0.4rem' }}>
                       <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
-                        Net Exposure ({pCurr})
+                        {pCurrs.length > 1 ? 'Multi-Currency Exposure' : `Net Exposure (${pCurr})`}
                       </span>
-                      <span style={{
-                        fontSize: '0.85rem',
-                        fontWeight: 800,
-                        color: (person.net_exposure || 0) > 0 ? 'var(--accent-emerald)' : (person.net_exposure || 0) < 0 ? 'var(--accent-rose)' : 'var(--text-muted)'
-                      }}>
-                        {isMasked ? `${pSym}••••••` : `${(person.net_exposure || 0) >= 0 ? '+' : ''}${pSym}${Number(person.net_exposure || 0).toLocaleString()}`}
-                        <span style={{ fontSize: '0.68rem', fontWeight: 600, marginLeft: 4 }}>
-                          ({(person.net_exposure || 0) > 0 ? 'Owes You' : (person.net_exposure || 0) < 0 ? 'You Owe' : 'Even'})
+                      {pCurrs.length > 1 ? (
+                        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                          {pCurrs.map(c => {
+                            const stats = person.currency_breakdown ? person.currency_breakdown[c] : null;
+                            const out = stats ? stats.outstanding : 0;
+                            return (
+                              <span key={c} className="badge" style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', background: 'var(--bg-surface)' }}>
+                                <strong>{getCurrencySymbol(c)}{isMasked ? '••••••' : Number(out).toLocaleString()} {c}</strong>
+                              </span>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <span style={{
+                          fontSize: '0.85rem',
+                          fontWeight: 800,
+                          color: (person.net_exposure || 0) > 0 ? 'var(--accent-emerald)' : (person.net_exposure || 0) < 0 ? 'var(--accent-rose)' : 'var(--text-muted)'
+                        }}>
+                          {isMasked ? `${pSym}••••••` : `${(person.net_exposure || 0) >= 0 ? '+' : ''}${pSym}${Number(person.net_exposure || 0).toLocaleString()}`}
+                          <span style={{ fontSize: '0.68rem', fontWeight: 600, marginLeft: 4 }}>
+                            ({(person.net_exposure || 0) > 0 ? 'Owes You' : (person.net_exposure || 0) < 0 ? 'You Owe' : 'Even'})
+                          </span>
                         </span>
-                      </span>
+                      )}
                     </div>
 
                     {/* Dual Columns: Lent vs Borrowed */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', textAlign: 'center' }}>
-                      <div style={{ padding: '0.35rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)' }}>
-                        <span style={{ fontSize: '0.65rem', color: 'var(--accent-emerald)', display: 'block', fontWeight: 700 }}>🤝 Money Lent</span>
-                        <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
-                          {isMasked ? '••••••' : `${pSym}${Number(person.lent?.outstanding || person.outstanding_balance || 0).toLocaleString()}`}
-                        </strong>
-                        <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>owed to you</span>
-                      </div>
+                    {pCurrs.length <= 1 && (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', textAlign: 'center' }}>
+                        <div style={{ padding: '0.35rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)' }}>
+                          <span style={{ fontSize: '0.65rem', color: 'var(--accent-emerald)', display: 'block', fontWeight: 700 }}>🤝 Money Lent</span>
+                          <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
+                            {isMasked ? '••••••' : `${pSym}${Number(person.lent?.outstanding || person.outstanding_balance || 0).toLocaleString()}`}
+                          </strong>
+                          <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>owed to you</span>
+                        </div>
 
-                      <div style={{ padding: '0.35rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)' }}>
-                        <span style={{ fontSize: '0.65rem', color: 'var(--accent-indigo)', display: 'block', fontWeight: 700 }}>📥 Money Borrowed</span>
-                        <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
-                          {isMasked ? '••••••' : `${pSym}${Number(person.borrowed?.outstanding || 0).toLocaleString()}`}
-                        </strong>
-                        <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>you owe them</span>
+                        <div style={{ padding: '0.35rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)' }}>
+                          <span style={{ fontSize: '0.65rem', color: 'var(--accent-indigo)', display: 'block', fontWeight: 700 }}>📥 Money Borrowed</span>
+                          <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
+                            {isMasked ? '••••••' : `${pSym}${Number(person.borrowed?.outstanding || 0).toLocaleString()}`}
+                          </strong>
+                          <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>you owe them</span>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
