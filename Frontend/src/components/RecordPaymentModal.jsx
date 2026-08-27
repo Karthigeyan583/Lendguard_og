@@ -40,6 +40,11 @@ export const RecordPaymentModal = ({ isOpen, onClose, loan, onPaymentRecorded })
       return;
     }
 
+    if (loan?.date_given && paymentDate && paymentDate < loan.date_given) {
+      setError(`Repayment date (${paymentDate}) cannot be earlier than the loan origination / disbursement date (${loan.date_given}).`);
+      return;
+    }
+
     setSubmitting(true);
     try {
       await onPaymentRecorded({
