@@ -852,9 +852,9 @@ export const DashboardView = ({
 
         {/* Row 2 Right: Samsung Stack Deck (Direction-Aware Exposure) */}
         {(() => {
-          // Calculate filtered contacts for Stack Deck based on active dashboardDirection
-          const filteredStackPeople = people.filter((p) => {
-            const pLoans = loans.filter((l) => {
+          // Calculate filtered contacts for Stack Deck based on active dashboardDirection & selected currency
+          const filteredStackPeople = currencyPeople.filter((p) => {
+            const pLoans = activeLoans.filter((l) => {
               if (l.person === p.id) return true;
               if (typeof l.person === 'object' && l.person?.id === p.id) return true;
               if (l.person_name && p.name && l.person_name.toLowerCase() === p.name.toLowerCase()) return true;
@@ -869,7 +869,7 @@ export const DashboardView = ({
             return true;
           });
 
-          const activePeopleList = filteredStackPeople.length > 0 ? filteredStackPeople : people;
+          const activePeopleList = filteredStackPeople;
           const currentSafeIndex = activeStackIndex % (activePeopleList.length || 1);
 
           const stackTitle = dashboardDirection === 'borrowed'
@@ -896,7 +896,7 @@ export const DashboardView = ({
                     boxShadow: `0 0 8px ${dashboardDirection === 'borrowed' ? 'var(--accent-indigo)' : 'var(--accent-emerald)'}`
                   }} />
                   <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>
-                    {stackTitle}
+                    {stackTitle} ({selectedCurr})
                   </h3>
                   <span className="badge badge-approved" style={{
                     fontSize: '0.65rem',
@@ -935,7 +935,7 @@ export const DashboardView = ({
               {/* Stack Deck Body */}
               {activePeopleList.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                  No contacts found matching the active filter. Click "Add Contact" above to get started!
+                  No contacts found with {selectedCurr} transactions.
                 </div>
               ) : (
                 <div
@@ -971,23 +971,22 @@ export const DashboardView = ({
                       const opacity = offset === 0 ? 1 : offset === 1 ? 0.82 : offset === 2 ? 0.55 : 0;
                       const zIndex = 10 - offset;
 
-                      const pLoans = loans.filter((l) => {
+                      const pLoans = activeLoans.filter((l) => {
                         if (l.person === p.id) return true;
                         if (typeof l.person === 'object' && l.person?.id === p.id) return true;
                         if (l.person_name && p.name && l.person_name.toLowerCase() === p.name.toLowerCase()) return true;
                         return false;
                       });
 
-                      const pCurrs = Array.from(new Set(pLoans.map(l => l.currency || 'INR')));
                       const pLentLoans = pLoans.filter(l => l.direction !== 'borrowed' && l.status !== 'CANCELLED');
                       const pBorrowedLoans = pLoans.filter(l => l.direction === 'borrowed' && l.status !== 'CANCELLED');
 
-                      const pLentOut = pLentLoans.filter(l => l.status === 'OPEN' || l.status === 'PARTIALLY_PAID').reduce((acc, l) => acc + Number(l.balance?.outstanding || 0), 0);
+                      const pLentOut = pLentLoans.filter(l => l.status === 'OPEN' || l.status === 'PARTIALLY_PAID').reduce((acc, l) => acc + Number(l.balance?.outstanding ?? l.principal_amount ?? 0), 0);
                       const pLentTotal = pLentLoans.reduce((acc, l) => acc + Number(l.principal_amount || 0), 0);
                       const pLentRepaid = pLentLoans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
                       const pLentRecRate = pLentTotal > 0 ? Math.min(100, Math.round((pLentRepaid / pLentTotal) * 100)) : 100;
 
-                      const pBorrowedOut = pBorrowedLoans.filter(l => l.status === 'OPEN' || l.status === 'PARTIALLY_PAID').reduce((acc, l) => acc + Number(l.balance?.outstanding || 0), 0);
+                      const pBorrowedOut = pBorrowedLoans.filter(l => l.status === 'OPEN' || l.status === 'PARTIALLY_PAID').reduce((acc, l) => acc + Number(l.balance?.outstanding ?? l.principal_amount ?? 0), 0);
                       const pBorrowedTotal = pBorrowedLoans.reduce((acc, l) => acc + Number(l.principal_amount || 0), 0);
                       const pBorrowedRepaid = pBorrowedLoans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
                       const pBorrowedRepayRate = pBorrowedTotal > 0 ? Math.min(100, Math.round((pBorrowedRepaid / pBorrowedTotal) * 100)) : 100;
@@ -1081,19 +1080,19 @@ export const DashboardView = ({
 
                             <div style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: '0.2rem', color: isBorrowingMode ? 'var(--accent-indigo)' : (isLendingMode ? 'var(--accent-cyan)' : (netPosition >= 0 ? 'var(--accent-emerald)' : 'var(--accent-rose)')) }}>
                               {isMasked ? (
-                                `${getCurrencySymbol(pCurrs[0] || 'INR')}••••••`
+                                `${activeDisplaySymbol}••••••`
                               ) : isBorrowingMode ? (
-                                `${getCurrencySymbol(pCurrs[0] || 'INR')}${pBorrowedOut.toLocaleString()}`
+                                `${activeDisplaySymbol}${pBorrowedOut.toLocaleString()}`
                               ) : isLendingMode ? (
-                                `${getCurrencySymbol(pCurrs[0] || 'INR')}${pLentOut.toLocaleString()}`
+                                `${activeDisplaySymbol}${pLentOut.toLocaleString()}`
                               ) : (
-                                `${netPosition >= 0 ? '+' : ''}${getCurrencySymbol(pCurrs[0] || 'INR')}${netPosition.toLocaleString()}`
-                              )} <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>{pCurrs[0] || 'INR'}</span>
+                                `${netPosition >= 0 ? '+' : ''}${activeDisplaySymbol}${netPosition.toLocaleString()}`
+                              )} <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>{selectedCurr}</span>
                             </div>
 
                             {!isBorrowingMode && !isLendingMode && (
                               <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                                Receivable: {isMasked ? '••••••' : `${getCurrencySymbol(pCurrs[0] || 'INR')}${pLentOut.toLocaleString()}`} • Payable: {isMasked ? '••••••' : `${getCurrencySymbol(pCurrs[0] || 'INR')}${pBorrowedOut.toLocaleString()}`}
+                                Receivable: {isMasked ? '••••••' : `${activeDisplaySymbol}${pLentOut.toLocaleString()}`} • Payable: {isMasked ? '••••••' : `${activeDisplaySymbol}${pBorrowedOut.toLocaleString()}`}
                               </div>
                             )}
                           </div>
