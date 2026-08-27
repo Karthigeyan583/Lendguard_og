@@ -57,6 +57,7 @@ function LendGuardApp() {
   const [selectedPersonForDetails, setSelectedPersonForDetails] = useState(null);
   const [isDrilldownOpen, setIsDrilldownOpen] = useState(false);
   const [drilldownType, setDrilldownType] = useState('lent');
+  const [drilldownCurrency, setDrilldownCurrency] = useState(getDefaultCurrency());
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   // Sync data strictly from Backend
