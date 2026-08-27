@@ -53,136 +53,97 @@ export const DashboardView = ({
     return () => window.removeEventListener('lendguard_currency_changed', handleCurrencyChange);
   }, []);
 
-  // Identify distinct currencies used across loans
-  const availableCurrencies = Array.from(new Set(loans.map(l => l.currency || 'INR')));
-  const isMulti = availableCurrencies.length > 1;
-  const reportingCurrency = activeCurrency || getDefaultCurrency();
-  const currSymbol = getCurrencySymbol(reportingCurrency);
+  // Selected Native Currency Scope (No cross-currency artificial conversion)
+  const selectedCurr = activeCurrency || getDefaultCurrency();
+  const activeDisplayCurrency = selectedCurr;
+  const activeDisplaySymbol = getCurrencySymbol(selectedCurr);
 
-  // Filter urgent active loans
-  const overdueLoans = loans.filter(
-    l => (l.time_status === 'OVERDUE' || l.days_overdue > 0) &&
-         l.status !== 'PAID' && l.status !== 'CANCELLED' && l.status !== 'WRITTEN_OFF'
-  );
-  const dueSoonLoans = loans.filter(
-    l => (l.time_status === 'DUE_SOON' || l.time_status === 'DUE_TODAY') &&
-         l.status !== 'PAID' && l.status !== 'CANCELLED' && l.status !== 'WRITTEN_OFF'
+  // 1. Strict Native Currency Filter: Only include loans created in this currency!
+  const activeLoans = loans.filter(l => 
+    (l.currency || 'INR').toUpperCase() === selectedCurr.toUpperCase() && 
+    l.status !== 'CANCELLED' && 
+    l.status !== 'WRITTEN_OFF'
   );
 
   // Separate lending vs borrowing
-  const lentLoans = loans.filter(l => l.direction !== 'borrowed');
-  const borrowedLoans = loans.filter(l => l.direction === 'borrowed');
+  const lentLoans = activeLoans.filter(l => l.direction !== 'borrowed');
+  const borrowedLoans = activeLoans.filter(l => l.direction === 'borrowed');
 
-  // 1. Consolidated Portfolio Normalized in Reporting Base Currency
-  const consolidatedLent = lentLoans.reduce((acc, l) => acc + convertCurrency(l.principal_amount || 0, l.currency, reportingCurrency), 0);
-  const consolidatedLentRepaid = lentLoans.reduce((acc, l) => acc + convertCurrency(l.balance?.total_repaid || 0, l.currency, reportingCurrency), 0);
-  const consolidatedLentOutstanding = lentLoans.filter(l => l.status === 'OPEN' || l.status === 'PARTIALLY_PAID').reduce((acc, l) => acc + convertCurrency(l.balance?.outstanding || l.principal_amount || 0, l.currency, reportingCurrency), 0);
-  const consolidatedLentOverdue = lentLoans.filter(l => (l.time_status === 'OVERDUE' || l.days_overdue > 0) && l.status !== 'PAID').reduce((acc, l) => acc + convertCurrency(l.balance?.outstanding || l.principal_amount || 0, l.currency, reportingCurrency), 0);
-  const consolidatedLentRecovery = consolidatedLent > 0 ? Number(((consolidatedLentRepaid / consolidatedLent) * 100).toFixed(1)) : 0;
+  // Filter urgent loans strictly for this currency
+  const overdueLoans = activeLoans.filter(
+    l => (l.time_status === 'OVERDUE' || l.days_overdue > 0) && l.status !== 'PAID'
+  );
+  const dueSoonLoans = activeLoans.filter(
+    l => (l.time_status === 'DUE_SOON' || l.time_status === 'DUE_TODAY') && l.status !== 'PAID'
+  );
 
-  const consolidatedBorrowed = borrowedLoans.reduce((acc, l) => acc + convertCurrency(l.principal_amount || 0, l.currency, reportingCurrency), 0);
-  const consolidatedBorrowedRepaid = borrowedLoans.reduce((acc, l) => acc + convertCurrency(l.balance?.total_repaid || 0, l.currency, reportingCurrency), 0);
-  const consolidatedBorrowedOutstanding = borrowedLoans.filter(l => l.status === 'OPEN' || l.status === 'PARTIALLY_PAID').reduce((acc, l) => acc + convertCurrency(l.balance?.outstanding || l.principal_amount || 0, l.currency, reportingCurrency), 0);
-  const consolidatedBorrowedOverdue = borrowedLoans.filter(l => (l.time_status === 'OVERDUE' || l.days_overdue > 0) && l.status !== 'PAID').reduce((acc, l) => acc + convertCurrency(l.balance?.outstanding || l.principal_amount || 0, l.currency, reportingCurrency), 0);
-  const consolidatedBorrowedRepaymentRate = consolidatedBorrowed > 0 ? Number(((consolidatedBorrowedRepaid / consolidatedBorrowed) * 100).toFixed(1)) : 0;
+  // 2. Exact Raw Unmixed Totals for the Selected Currency
+  const totalLent = lentLoans.reduce((acc, l) => acc + Number(l.principal_amount || 0), 0);
+  const totalLentRepaid = lentLoans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
+  const totalLentOutstanding = lentLoans.filter(l => l.status === 'OPEN' || l.status === 'PARTIALLY_PAID').reduce((acc, l) => acc + Number(l.balance?.outstanding ?? l.principal_amount ?? 0), 0);
+  const totalLentOverdue = lentLoans.filter(l => (l.time_status === 'OVERDUE' || l.days_overdue > 0) && l.status !== 'PAID').reduce((acc, l) => acc + Number(l.balance?.outstanding ?? l.principal_amount ?? 0), 0);
+  const totalLentRecovery = totalLent > 0 ? Number(((totalLentRepaid / totalLent) * 100).toFixed(1)) : 0;
 
-  const consolidatedNetOutstanding = consolidatedLentOutstanding - consolidatedBorrowedOutstanding;
+  const totalBorrowed = borrowedLoans.reduce((acc, l) => acc + Number(l.principal_amount || 0), 0);
+  const totalBorrowedRepaid = borrowedLoans.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
+  const totalBorrowedOutstanding = borrowedLoans.filter(l => l.status === 'OPEN' || l.status === 'PARTIALLY_PAID').reduce((acc, l) => acc + Number(l.balance?.outstanding ?? l.principal_amount ?? 0), 0);
+  const totalBorrowedOverdue = borrowedLoans.filter(l => (l.time_status === 'OVERDUE' || l.days_overdue > 0) && l.status !== 'PAID').reduce((acc, l) => acc + Number(l.balance?.outstanding ?? l.principal_amount ?? 0), 0);
+  const totalBorrowedRepaymentRate = totalBorrowed > 0 ? Number(((totalBorrowedRepaid / totalBorrowed) * 100).toFixed(1)) : 0;
 
-  // 2. Group raw unmixed totals per currency directly from transaction records
-  const totalsByCurrency = {};
-  availableCurrencies.forEach((curr) => {
-    const currLoans = loans.filter(l => (l.currency || 'INR') === curr && l.status !== 'CANCELLED' && l.status !== 'WRITTEN_OFF');
-    const currLent = currLoans.filter(l => l.direction !== 'borrowed');
-    const currBorrowed = currLoans.filter(l => l.direction === 'borrowed');
-    const currOverdueLent = currLent.filter(l => (l.time_status === 'OVERDUE' || l.days_overdue > 0) && l.status !== 'PAID');
-    const currOverdueBorr = currBorrowed.filter(l => (l.time_status === 'OVERDUE' || l.days_overdue > 0) && l.status !== 'PAID');
+  const netOutstanding = totalLentOutstanding - totalBorrowedOutstanding;
 
-    const lent = currLent.reduce((acc, l) => acc + Number(l.principal_amount || 0), 0);
-    const lentRepaid = currLent.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
-    const lentOutstanding = currLent.reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + Number(l.balance?.outstanding || 0) : acc, 0);
-    const lentOverdue = currOverdueLent.reduce((acc, l) => acc + Number(l.balance?.outstanding || 0), 0);
-    const lentRecovery = lent > 0 ? Number(((lentRepaid / lent) * 100).toFixed(1)) : 0;
+  const displayStats = {
+    currency: selectedCurr,
+    lent: totalLent,
+    lentRepaid: totalLentRepaid,
+    lentOutstanding: totalLentOutstanding,
+    lentOverdue: totalLentOverdue,
+    lentRecovery: totalLentRecovery,
+    lentCount: lentLoans.length,
+    lentOverdueCount: overdueLoans.filter(l => l.direction !== 'borrowed').length,
 
-    const borrowed = currBorrowed.reduce((acc, l) => acc + Number(l.principal_amount || 0), 0);
-    const borrowedRepaid = currBorrowed.reduce((acc, l) => acc + Number(l.balance?.total_repaid || 0), 0);
-    const borrowedOutstanding = currBorrowed.reduce((acc, l) => (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID') ? acc + Number(l.balance?.outstanding || 0) : acc, 0);
-    const borrowedOverdue = currOverdueBorr.reduce((acc, l) => acc + Number(l.balance?.outstanding || 0), 0);
-    const borrowedRepaymentRate = borrowed > 0 ? Number(((borrowedRepaid / borrowed) * 100).toFixed(1)) : 0;
+    borrowed: totalBorrowed,
+    borrowedRepaid: totalBorrowedRepaid,
+    borrowedOutstanding: totalBorrowedOutstanding,
+    borrowedOverdue: totalBorrowedOverdue,
+    borrowedRepaymentRate: totalBorrowedRepaymentRate,
+    borrowedCount: borrowedLoans.length,
+    borrowedOverdueCount: overdueLoans.filter(l => l.direction === 'borrowed').length,
 
-    const netOutstanding = lentOutstanding - borrowedOutstanding;
+    netOutstanding: netOutstanding,
+    repaid: totalLentRepaid,
+    outstanding: totalLentOutstanding,
+    overdue: totalLentOverdue,
+    recovery: totalLentRecovery,
+    loansCount: activeLoans.length,
+    overdueCount: overdueLoans.length
+  };
 
-    totalsByCurrency[curr] = {
-      currency: curr,
-      lent,
-      lentRepaid,
-      lentOutstanding,
-      lentOverdue,
-      lentRecovery,
-      lentCount: currLent.length,
-      lentOverdueCount: currOverdueLent.length,
-
-      borrowed,
-      borrowedRepaid,
-      borrowedOutstanding,
-      borrowedOverdue,
-      borrowedRepaymentRate,
-      borrowedCount: currBorrowed.length,
-      borrowedOverdueCount: currOverdueBorr.length,
-
-      netOutstanding,
-
-      // Aliases
-      repaid: lentRepaid,
-      outstanding: lentOutstanding,
-      overdue: lentOverdue,
-      recovery: lentRecovery,
-      loansCount: currLoans.length,
-      overdueCount: currOverdueLent.length + currOverdueBorr.length
+  // Contacts / Debtors specific to this currency
+  const currencyPeople = people.filter((p) => {
+    return activeLoans.some(l => {
+      if (l.person === p.id) return true;
+      if (typeof l.person === 'object' && l.person?.id === p.id) return true;
+      if (l.person_name && p.name && l.person_name.toLowerCase() === p.name.toLowerCase()) return true;
+      return false;
+    });
+  }).map(p => {
+    const pLoans = activeLoans.filter(l => {
+      if (l.person === p.id) return true;
+      if (typeof l.person === 'object' && l.person?.id === p.id) return true;
+      if (l.person_name && p.name && l.person_name.toLowerCase() === p.name.toLowerCase()) return true;
+      return false;
+    });
+    const pLentOut = pLoans.filter(l => l.direction !== 'borrowed' && (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID')).reduce((acc, l) => acc + Number(l.balance?.outstanding ?? l.principal_amount ?? 0), 0);
+    const pBorrOut = pLoans.filter(l => l.direction === 'borrowed' && (l.status === 'OPEN' || l.status === 'PARTIALLY_PAID')).reduce((acc, l) => acc + Number(l.balance?.outstanding ?? l.principal_amount ?? 0), 0);
+    return {
+      ...p,
+      outstanding_balance: pLentOut - pBorrOut,
+      active_loans_count: pLoans.length
     };
   });
 
-  // Selected view data: ALL means Consolidated Portfolio; otherwise single native currency
-  const isConsolidated = activeCurrencyFilter === 'ALL';
-  const activeDisplayCurrency = isConsolidated ? reportingCurrency : activeCurrencyFilter;
-  const activeDisplaySymbol = getCurrencySymbol(activeDisplayCurrency);
-
-  const displayStats = isConsolidated
-    ? {
-        currency: reportingCurrency,
-        lent: consolidatedLent,
-        lentRepaid: consolidatedLentRepaid,
-        lentOutstanding: consolidatedLentOutstanding,
-        lentOverdue: consolidatedLentOverdue,
-        lentRecovery: consolidatedLentRecovery,
-        lentCount: lentLoans.length,
-        lentOverdueCount: lentLoans.filter(l => (l.time_status === 'OVERDUE' || l.days_overdue > 0) && l.status !== 'PAID').length,
-
-        borrowed: consolidatedBorrowed,
-        borrowedRepaid: consolidatedBorrowedRepaid,
-        borrowedOutstanding: consolidatedBorrowedOutstanding,
-        borrowedOverdue: consolidatedBorrowedOverdue,
-        borrowedRepaymentRate: consolidatedBorrowedRepaymentRate,
-        borrowedCount: borrowedLoans.length,
-        borrowedOverdueCount: borrowedLoans.filter(l => (l.time_status === 'OVERDUE' || l.days_overdue > 0) && l.status !== 'PAID').length,
-
-        netOutstanding: consolidatedNetOutstanding,
-        repaid: consolidatedLentRepaid,
-        outstanding: consolidatedLentOutstanding,
-        overdue: consolidatedLentOverdue,
-        recovery: consolidatedLentRecovery,
-        loansCount: loans.length,
-        overdueCount: overdueLoans.length
-      }
-    : totalsByCurrency[activeCurrencyFilter] || {
-        lent: 0, lentRepaid: 0, lentOutstanding: 0, lentOverdue: 0, lentRecovery: 0, lentCount: 0, lentOverdueCount: 0,
-        borrowed: 0, borrowedRepaid: 0, borrowedOutstanding: 0, borrowedOverdue: 0, borrowedRepaymentRate: 0, borrowedCount: 0, borrowedOverdueCount: 0,
-        netOutstanding: 0, repaid: 0, outstanding: 0, overdue: 0, recovery: 0, loansCount: 0, overdueCount: 0
-      };
-
-  const totalLoansCount = isConsolidated ? loans.length : (totalsByCurrency[activeCurrencyFilter]?.loansCount || 0);
-  const overdueCount = isConsolidated ? overdueLoans.length : (totalsByCurrency[activeCurrencyFilter]?.overdueCount || 0);
-  const dueSoonCount = dueSoonLoans.length;
-  const activeDebtorsCount = people.filter(p => Number(p.outstanding_balance || 0) > 0).length;
+  const activeDebtorsCount = currencyPeople.filter(p => Number(p.outstanding_balance || 0) > 0).length;
   const recoveryRate = displayStats.lentRecovery || 0;
 
   // Samsung One UI Stacked Card Deck state & gesture handling
@@ -191,13 +152,13 @@ export const DashboardView = ({
   const lastWheelTime = React.useRef(0);
 
   const nextStack = () => {
-    if (people.length <= 1) return;
-    setActiveStackIndex(prev => (prev + 1) % people.length);
+    if (currencyPeople.length <= 1) return;
+    setActiveStackIndex(prev => (prev + 1) % currencyPeople.length);
   };
 
   const prevStack = () => {
-    if (people.length <= 1) return;
-    setActiveStackIndex(prev => (prev - 1 + people.length) % people.length);
+    if (currencyPeople.length <= 1) return;
+    setActiveStackIndex(prev => (prev - 1 + currencyPeople.length) % currencyPeople.length);
   };
 
   const handleStackWheel = (e) => {
