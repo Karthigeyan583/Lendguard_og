@@ -12,12 +12,14 @@ import {
   ChevronRight,
   ExternalLink,
   Sparkles,
-  X
+  X,
+  ArrowRightLeft,
+  Check
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
-// Default fallback reference table in case of initial load or network delay
+// Canonical fallback reference table (Base: INR values)
 const FALLBACK_PARITY = {
   INR: 1.0,
   USD: 90.0,
@@ -30,10 +32,26 @@ const FALLBACK_PARITY = {
   SGD: 68.0,
 };
 
-const ALL_CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'AED', 'SGD', 'CHF', 'CAD', 'AUD'];
+const CURRENCY_SYMBOLS = {
+  INR: '₹',
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  AED: 'د.إ',
+  SGD: 'S$',
+  CHF: 'Fr',
+  CAD: 'C$',
+  AUD: 'A$',
+};
+
+const ALL_CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'SGD', 'CHF', 'CAD', 'AUD'];
 
 export const CurrencyTicker = () => {
   const { user } = useAuth();
+  const [selectedCurrency, setSelectedCurrency] = useState(() => {
+    return localStorage.getItem('lendguard_currency') || user?.profile?.base_currency || 'INR';
+  });
+
   const [tickerData, setTickerData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showInspector, setShowInspector] = useState(false);
@@ -48,28 +66,25 @@ export const CurrencyTicker = () => {
 
   const inspectorRef = useRef(null);
 
-  // Active reporting currency
-  const reportingCurrency = localStorage.getItem('lendguard_currency') || user?.profile?.base_currency || 'INR';
-
-  // Fetch Ticker Data from backend FX engine
-  const fetchRates = async () => {
+  // Fetch Ticker Data for currently chosen currency
+  const fetchRates = async (curr) => {
+    const target = curr || selectedCurrency;
     try {
       setLoading(true);
-      const data = await api.getCurrencyTicker(reportingCurrency);
+      const data = await api.getCurrencyTicker(target);
       setTickerData(data);
     } catch (err) {
       console.warn('Live FX Ticker fallback used:', err);
-      // Construct fallback reference rates
-      const targetRateInr = FALLBACK_PARITY[reportingCurrency] || 1.0;
+      const targetRateInr = FALLBACK_PARITY[target] || 1.0;
       const rates = ALL_CURRENCIES
-        .filter(c => c !== reportingCurrency)
-        .map(curr => {
-          const srcRateInr = FALLBACK_PARITY[curr] || 1.0;
+        .filter(c => c !== target)
+        .map(c => {
+          const srcRateInr = FALLBACK_PARITY[c] || 1.0;
           const rate = srcRateInr / targetRateInr;
           return {
-            pair: `${curr}/${reportingCurrency}`,
-            from_currency: curr,
-            to_currency: reportingCurrency,
+            pair: `${c}/${target}`,
+            from_currency: c,
+            to_currency: target,
             rate: rate,
             display_rate: rate >= 100 ? rate.toFixed(2) : rate.toFixed(4),
             is_used_in_ledger: false,
@@ -77,8 +92,8 @@ export const CurrencyTicker = () => {
         });
 
       setTickerData({
-        reporting_currency: reportingCurrency,
-        data_source: 'ECB & Open Market Parity (Reference)',
+        reporting_currency: target,
+        data_source: 'Canonical Market Parity (Reference)',
         timestamp: new Date().toUTCString(),
         is_live: true,
         rates: rates,
@@ -90,10 +105,10 @@ export const CurrencyTicker = () => {
   };
 
   useEffect(() => {
-    fetchRates();
-    const interval = setInterval(fetchRates, 60000); // 60s live refresh
+    fetchRates(selectedCurrency);
+    const interval = setInterval(() => fetchRates(selectedCurrency), 60000); // 60s live refresh
     return () => clearInterval(interval);
-  }, [reportingCurrency]);
+  }, [selectedCurrency]);
 
   // Click outside listener for inspector popover
   useEffect(() => {
@@ -107,6 +122,17 @@ export const CurrencyTicker = () => {
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showInspector]);
+
+  const handleSelectCurrency = (curr) => {
+    setSelectedCurrency(curr);
+    fetchRates(curr);
+  };
+
+  const handleSetAsDefault = (curr) => {
+    setSelectedCurrency(curr);
+    localStorage.setItem('lendguard_currency', curr);
+    fetchRates(curr);
+  };
 
   const togglePin = (pair) => {
     let updated;
@@ -134,7 +160,6 @@ export const CurrencyTicker = () => {
     return false;
   });
 
-  // Fallback to top 3 pairs if no pinned or ledger-used pairs exist
   const visiblePills = displayRates.length > 0 ? displayRates : tickerData.rates.slice(0, 3);
 
   return (
@@ -142,7 +167,7 @@ export const CurrencyTicker = () => {
       {/* 1. Top Header Pill / Strip */}
       <div
         onClick={() => setShowInspector(!showInspector)}
-        title="Live FX Currency Reference Ticker — Click to customize & view all pairs"
+        title="Live FX Currency Reference Ticker — Click to switch base currency & view all responding rates"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -175,18 +200,18 @@ export const CurrencyTicker = () => {
             color: 'var(--accent-emerald)',
             textTransform: 'uppercase'
           }}>
-            FX
+            {selectedCurrency}
           </span>
         </div>
 
         <div style={{ width: '1px', height: '12px', background: 'var(--border-subtle)' }} />
 
-        {/* Currency Pairs */}
+        {/* Currency Pairs with Responding Values */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           {visiblePills.slice(0, 3).map((item) => (
             <div key={item.pair} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.74rem' }}>
               <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
-                {item.pair}
+                {item.from_currency}
               </span>
               <span style={{ 
                 fontWeight: 600, 
@@ -194,7 +219,7 @@ export const CurrencyTicker = () => {
                 color: item.is_used_in_ledger ? 'var(--accent-emerald)' : 'var(--text-secondary)',
                 fontSize: '0.72rem'
               }}>
-                {item.display_rate}
+                {CURRENCY_SYMBOLS[selectedCurrency] || ''}{item.display_rate}
               </span>
               {item.is_used_in_ledger && (
                 <span style={{ 
@@ -211,7 +236,7 @@ export const CurrencyTicker = () => {
         <ChevronDown size={12} color="var(--text-muted)" style={{ transform: showInspector ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
       </div>
 
-      {/* 2. Interactive Inspector Popover */}
+      {/* 2. Interactive Inspector & Currency Selector Popover */}
       {showInspector && (
         <div
           ref={inspectorRef}
@@ -219,8 +244,8 @@ export const CurrencyTicker = () => {
             position: 'absolute',
             top: 'calc(100% + 8px)',
             left: 0,
-            width: '360px',
-            maxWidth: '90vw',
+            width: '390px',
+            maxWidth: '92vw',
             background: 'var(--bg-card)',
             border: '1px solid var(--border-subtle)',
             borderRadius: 'var(--radius-md)',
@@ -230,7 +255,7 @@ export const CurrencyTicker = () => {
             animation: 'fadeIn 0.15s ease-out'
           }}
         >
-          {/* Header */}
+          {/* Header with Title & Close */}
           <div style={{
             padding: '0.85rem 1rem',
             background: 'var(--inner-card-bg)',
@@ -243,10 +268,10 @@ export const CurrencyTicker = () => {
               <Globe2 size={16} color="var(--accent-emerald)" />
               <div>
                 <div style={{ fontSize: '0.84rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                  Live FX Reference Ticker
+                  Live FX Currency Reference Ticker
                 </div>
                 <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
-                  Target Base: <strong style={{ color: 'var(--accent-emerald)' }}>{reportingCurrency}</strong> (Reporting Currency)
+                  Select any target currency to see all responding values
                 </div>
               </div>
             </div>
@@ -267,10 +292,60 @@ export const CurrencyTicker = () => {
             </button>
           </div>
 
-          {/* Currency Pairs Grid */}
-          <div style={{ padding: '0.75rem 1rem', maxHeight: '260px', overflowY: 'auto' }}>
-            <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              All Currency Pairs ({tickerData.rates.length})
+          {/* Interactive Currency Selector Tabs */}
+          <div style={{
+            padding: '0.75rem 1rem',
+            background: 'var(--bg-card)',
+            borderBottom: '1px solid var(--border-subtle)'
+          }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Choose Target Base Currency:
+            </div>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.35rem'
+            }}>
+              {ALL_CURRENCIES.map((curr) => {
+                const isSelected = selectedCurrency === curr;
+                return (
+                  <button
+                    key={curr}
+                    type="button"
+                    onClick={() => handleSelectCurrency(curr)}
+                    style={{
+                      padding: '0.3rem 0.55rem',
+                      borderRadius: 'var(--radius-sm)',
+                      border: isSelected ? '1px solid var(--accent-emerald)' : '1px solid var(--border-subtle)',
+                      background: isSelected ? 'rgba(16, 185, 129, 0.16)' : 'var(--inner-card-bg)',
+                      color: isSelected ? 'var(--accent-emerald)' : 'var(--text-secondary)',
+                      fontWeight: isSelected ? 800 : 600,
+                      fontSize: '0.74rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <span>{curr}</span>
+                    <span style={{ fontSize: '0.65rem', opacity: 0.8 }}>({CURRENCY_SYMBOLS[curr]})</span>
+                    {isSelected && <Check size={11} />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Responding Currency Rates List */}
+          <div style={{ padding: '0.75rem 1rem', maxHeight: '250px', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Responding Rates in {selectedCurrency} ({tickerData.rates.length})
+              </span>
+              {loading && (
+                <RefreshCw size={11} color="var(--accent-emerald)" className="spin" />
+              )}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
@@ -311,14 +386,18 @@ export const CurrencyTicker = () => {
 
                       <div>
                         <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                          <span>{item.pair}</span>
+                          <span>1 {item.from_currency}</span>
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>=</span>
+                          <span style={{ color: 'var(--accent-emerald)', fontFamily: 'var(--font-mono)' }}>
+                            {CURRENCY_SYMBOLS[selectedCurrency] || ''}{item.display_rate} {selectedCurrency}
+                          </span>
                           {item.is_used_in_ledger && (
                             <span style={{
-                              fontSize: '0.58rem',
+                              fontSize: '0.56rem',
                               fontWeight: 700,
                               background: 'rgba(16, 185, 129, 0.18)',
                               color: 'var(--accent-emerald)',
-                              padding: '0.1rem 0.35rem',
+                              padding: '0.08rem 0.3rem',
                               borderRadius: 'var(--radius-full)',
                               border: '1px solid rgba(16, 185, 129, 0.3)'
                             }}>
@@ -327,7 +406,7 @@ export const CurrencyTicker = () => {
                           )}
                         </div>
                         <div style={{ fontSize: '0.64rem', color: 'var(--text-muted)' }}>
-                          1 {item.from_currency} = {item.display_rate} {item.to_currency}
+                          Pair: {item.pair}
                         </div>
                       </div>
                     </div>
@@ -363,7 +442,7 @@ export const CurrencyTicker = () => {
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.35rem', color: 'var(--text-muted)', lineHeight: '1.3' }}>
               <ShieldCheck size={12} color="var(--accent-emerald)" style={{ flexShrink: 0, marginTop: 1 }} />
               <span>
-                <strong>Reference Only:</strong> Historical transactions permanently retain locked exchange rates. Ticker rates never mutate stored records.
+                <strong>Reference Only:</strong> Historical transactions permanently retain locked exchange rates.
               </span>
             </div>
           </div>
