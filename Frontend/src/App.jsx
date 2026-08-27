@@ -60,15 +60,16 @@ function LendGuardApp() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   // Sync data strictly from Backend
-  const refreshData = async () => {
+  const refreshData = async (overrideCurrency = null) => {
     if (!backendOnline || !token || !user) return;
+    const activeCurr = overrideCurrency || getDefaultCurrency();
     setDataLoading(true);
     try {
       const [pRes, lRes, sRes, aRes, nRes] = await Promise.all([
         api.getPeople().catch(() => null),
         api.getLoans().catch(() => null),
-        api.getDashboardSummary().catch(() => null),
-        api.getAgingReport().catch(() => null),
+        api.getDashboardSummary(`reporting_currency=${activeCurr}`).catch(() => null),
+        api.getAgingReport(`reporting_currency=${activeCurr}`).catch(() => null),
         api.getNotifications().catch(() => null),
       ]);
 
@@ -103,6 +104,15 @@ function LendGuardApp() {
       setAgingData(null);
       setNotifications([]);
     }
+  }, [backendOnline, token, user]);
+
+  useEffect(() => {
+    const handleCurrencyChange = (e) => {
+      const newCurr = e.detail?.currency || getDefaultCurrency();
+      refreshData(newCurr);
+    };
+    window.addEventListener('lendguard_currency_changed', handleCurrencyChange);
+    return () => window.removeEventListener('lendguard_currency_changed', handleCurrencyChange);
   }, [backendOnline, token, user]);
 
   // 1. Loading Splash
