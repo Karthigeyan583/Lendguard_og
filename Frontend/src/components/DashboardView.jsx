@@ -568,7 +568,7 @@ export const DashboardView = ({
       <div
         className="glass-panel dashboard-item-card"
         style={{ padding: '1.25rem 1.5rem', cursor: 'pointer', transition: 'all 0.18s ease' }}
-        onClick={() => onOpenDrilldown && onOpenDrilldown('repaid')}
+        onClick={() => onOpenDrilldown && onOpenDrilldown('repaid', selectedCurr)}
         title="Click to view repayment ledger"
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
