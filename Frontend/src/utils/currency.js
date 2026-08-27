@@ -10,6 +10,21 @@ export const CURRENCY_MAP = {
   CHF: { symbol: 'Fr ', name: 'Swiss Franc', label: 'CHF (Fr)', flag: '🇨🇭' },
   CAD: { symbol: 'CA$', name: 'Canadian Dollar', label: 'CAD (CA$)', flag: '🇨🇦' },
   AUD: { symbol: 'AU$', name: 'Australian Dollar', label: 'AUD (AU$)', flag: '🇦🇺' },
+  SAR: { symbol: 'SAR ', name: 'Saudi Riyal', label: 'SAR (﷼)', flag: '🇸🇦' },
+  QAR: { symbol: 'QAR ', name: 'Qatari Riyal', label: 'QAR (ر.ق)', flag: '🇶🇦' },
+  KWD: { symbol: 'KWD ', name: 'Kuwaiti Dinar', label: 'KWD (د.ك)', flag: '🇰🇼' },
+  JPY: { symbol: '¥', name: 'Japanese Yen', label: 'JPY (¥)', flag: '🇯🇵' },
+  NZD: { symbol: 'NZ$', name: 'New Zealand Dollar', label: 'NZD (NZ$)', flag: '🇳🇿' },
+  ZAR: { symbol: 'R ', name: 'South African Rand', label: 'ZAR (R)', flag: '🇿🇦' },
+  MYR: { symbol: 'RM ', name: 'Malaysian Ringgit', label: 'MYR (RM)', flag: '🇲🇾' },
+  PHP: { symbol: '₱', name: 'Philippine Peso', label: 'PHP (₱)', flag: '🇵🇭' },
+  THB: { symbol: '฿', name: 'Thai Baht', label: 'THB (฿)', flag: '🇹🇭' },
+  IDR: { symbol: 'Rp ', name: 'Indonesian Rupiah', label: 'IDR (Rp)', flag: '🇮🇩' },
+  BRL: { symbol: 'R$', name: 'Brazilian Real', label: 'BRL (R$)', flag: '🇧🇷' },
+  MXN: { symbol: 'Mex$', name: 'Mexican Peso', label: 'MXN (Mex$)', flag: '🇲🇽' },
+  NOK: { symbol: 'kr ', name: 'Norwegian Krone', label: 'NOK (kr)', flag: '🇳🇴' },
+  SEK: { symbol: 'kr ', name: 'Swedish Krona', label: 'SEK (kr)', flag: '🇸🇪' },
+  DKK: { symbol: 'kr ', name: 'Danish Krone', label: 'DKK (kr)', flag: '🇩🇰' },
 };
 
 // Canonical Parity Reference (Base: INR per unit of currency)
@@ -22,7 +37,22 @@ export const INR_PER_UNIT = {
   CAD: 65.0,
   AUD: 58.0,
   AED: 24.5,
-  SGD: 68.0
+  SGD: 68.0,
+  SAR: 24.0,
+  QAR: 24.7,
+  KWD: 295.0,
+  JPY: 0.60,
+  NZD: 53.0,
+  ZAR: 5.0,
+  MYR: 20.5,
+  PHP: 1.6,
+  THB: 2.6,
+  IDR: 0.0056,
+  BRL: 16.5,
+  MXN: 4.8,
+  NOK: 8.5,
+  SEK: 8.5,
+  DKK: 13.0
 };
 
 export const getDefaultCurrency = () => {
