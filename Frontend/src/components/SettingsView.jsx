@@ -407,6 +407,114 @@ export const SettingsView = ({ onDataPurged }) => {
           )}
 
           <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {/* Profile Photo & Avatar Section */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1.5rem',
+              padding: '1.25rem',
+              background: 'var(--inner-card-bg)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-md)',
+              marginBottom: '0.5rem',
+              flexWrap: 'wrap'
+            }}>
+              {/* Avatar Preview */}
+              <div style={{ position: 'relative' }}>
+                {avatar ? (
+                  <img
+                    src={avatar}
+                    alt="Profile"
+                    style={{
+                      width: 72,
+                      height: 72,
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '3px solid var(--accent-emerald)',
+                      boxShadow: '0 4px 14px rgba(16, 185, 129, 0.25)',
+                      display: 'block'
+                    }}
+                  />
+                ) : (
+                  <div style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 800,
+                    fontSize: '1.75rem',
+                    color: '#ffffff',
+                    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.25)'
+                  }}>
+                    {firstName ? firstName[0].toUpperCase() : (user?.username ? user.username[0].toUpperCase() : 'K')}
+                  </div>
+                )}
+
+                <label
+                  htmlFor="avatar-file-input"
+                  style={{
+                    position: 'absolute',
+                    bottom: -2,
+                    right: -2,
+                    width: 26,
+                    height: 26,
+                    borderRadius: '50%',
+                    background: 'var(--accent-emerald)',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                  }}
+                  title="Change Profile Photo"
+                >
+                  <Camera size={14} />
+                </label>
+              </div>
+
+              {/* Photo Action Buttons & Info */}
+              <div style={{ flex: 1, minWidth: 220 }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.25rem 0' }}>Profile Photo</h4>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0 0 0.75rem 0' }}>
+                  Upload a custom photo or avatar for your workspace profile. Supports JPG, PNG or WebP (max 5MB).
+                </p>
+
+                <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input
+                    type="file"
+                    id="avatar-file-input"
+                    accept="image/png, image/jpeg, image/webp, image/gif"
+                    style={{ display: 'none' }}
+                    onChange={handleAvatarUpload}
+                  />
+                  <label
+                    htmlFor="avatar-file-input"
+                    className="btn btn-primary"
+                    style={{ padding: '0.4rem 0.85rem', fontSize: '0.78rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                  >
+                    <Upload size={14} />
+                    <span>{avatar ? 'Change Photo' : 'Upload Photo'}</span>
+                  </label>
+
+                  {avatar && (
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={handleRemoveAvatar}
+                      style={{ padding: '0.4rem 0.85rem', fontSize: '0.78rem', color: 'var(--accent-rose)', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                    >
+                      <Trash2 size={14} />
+                      <span>Remove</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
               <div className="form-group">
                 <label className="form-label">First Name</label>
