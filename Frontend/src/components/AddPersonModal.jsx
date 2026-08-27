@@ -164,11 +164,11 @@ export const AddPersonModal = ({ isOpen, onClose, onPersonAdded }) => {
               <div style={{ display: 'flex', gap: '0.4rem' }}>
                 <select
                   className="form-select"
-                  style={{ width: '100px', flexShrink: 0, paddingLeft: '0.5rem', paddingRight: '1.25rem', fontSize: '0.78rem' }}
+                  style={{ width: '130px', flexShrink: 0, paddingLeft: '0.5rem', paddingRight: '1.25rem', fontSize: '0.78rem' }}
                   value={countryCode}
                   onChange={handleCountryCodeChange}
                 >
-                  {COUNTRY_PHONE_CONFIG.map(c => (
+                  {GLOBAL_COUNTRY_PHONE_CONFIG.map(c => (
                     <option key={c.country + c.code} value={c.code}>
                       {c.label}
                     </option>
