@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Search, Plus, Phone, Mail, Tag, ArrowUpRight, Archive, CheckCircle2 } from 'lucide-react';
+import { Users, Search, Plus, Phone, Mail, Tag, ArrowUpRight, Archive, CheckCircle2, Building } from 'lucide-react';
 import { getDefaultCurrency, getCurrencySymbol } from '../utils/currency';
 
 export const PeopleView = ({ people = [], onOpenAddPerson, onLendToPerson, onArchivePerson, onOpenPersonDetails, isMasked = false }) => {
