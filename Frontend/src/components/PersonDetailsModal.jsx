@@ -46,6 +46,7 @@ export const PersonDetailsModal = ({
   // Identify distinct currencies used by this contact
   const distinctCurrencies = Array.from(new Set(personLoans.map(l => l.currency || 'INR')));
   const hasMultipleCurrencies = distinctCurrencies.length > 1;
+  const isMultiCurrency = hasMultipleCurrencies;
   const primaryCurrency = distinctCurrencies[0] || (personLoans[0]?.currency) || 'INR';
   const primarySymbol = getCurrencySymbol(primaryCurrency);
 
