@@ -110,6 +110,17 @@ export const CurrencyTicker = () => {
     return () => clearInterval(interval);
   }, [selectedCurrency]);
 
+  useEffect(() => {
+    const handleGlobalChange = (e) => {
+      if (e.detail?.currency && e.detail.currency !== selectedCurrency) {
+        setSelectedCurrency(e.detail.currency);
+        fetchRates(e.detail.currency);
+      }
+    };
+    window.addEventListener('lendguard_currency_changed', handleGlobalChange);
+    return () => window.removeEventListener('lendguard_currency_changed', handleGlobalChange);
+  }, [selectedCurrency]);
+
   // Click outside listener for inspector popover
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -125,12 +136,7 @@ export const CurrencyTicker = () => {
 
   const handleSelectCurrency = (curr) => {
     setSelectedCurrency(curr);
-    fetchRates(curr);
-  };
-
-  const handleSetAsDefault = (curr) => {
-    setSelectedCurrency(curr);
-    localStorage.setItem('lendguard_currency', curr);
+    setDefaultCurrency(curr);
     fetchRates(curr);
   };
 
