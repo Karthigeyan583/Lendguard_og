@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertTriangle, Clock, Calendar, ArrowDownLeft, FileText, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, Clock, Calendar, ArrowDownToLine, Send, FileCheck2, CheckCircle2, Hourglass, HandCoins, Landmark } from 'lucide-react';
 import { getDefaultCurrency, getCurrencySymbol, maskValue } from '../utils/currency';
 
 export const ReportsAgingView = ({ agingData, loans = [], onRecordPayment, onGenerateStatement, isMasked = false }) => {
