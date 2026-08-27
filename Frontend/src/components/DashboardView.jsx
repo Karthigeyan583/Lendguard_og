@@ -22,6 +22,7 @@ import {
   Check
 } from 'lucide-react';
 import { getCurrencySymbol, getDefaultCurrency, convertCurrency } from '../utils/currency';
+import { CurrencySelector } from './CurrencySelector';
 
 export const DashboardView = ({ 
   summary, 
