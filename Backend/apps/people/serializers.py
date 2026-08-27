@@ -63,6 +63,15 @@ class PersonSerializer(serializers.ModelSerializer):
 
     def _get_reporting_currency(self, obj) -> str:
         request = self.context.get('request')
+        if request and hasattr(request, 'query_params'):
+            param = request.query_params.get('reporting_currency')
+            if param:
+                return param.upper().strip()
+        # If all contact loans are in a single currency, preserve that native currency
+        if hasattr(obj, 'loans'):
+            active_currs = list(obj.loans.exclude(status='CANCELLED').values_list('currency', flat=True).distinct())
+            if len(active_currs) == 1 and active_currs[0]:
+                return active_currs[0]
         user = request.user if (request and hasattr(request, 'user')) else obj.created_by
         if user and hasattr(user, 'profile') and user.profile.base_currency:
             return user.profile.base_currency
